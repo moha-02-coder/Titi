@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1">
+      <stop offset="0" stop-color="#111" />
+      <stop offset="1" stop-color="#333" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="600" fill="url(#g)" />
+  <g fill="#D4AF37" font-family="Montserrat, sans-serif" font-size="48" text-anchor="middle">
+    <text x="600" y="300">Titi Golden Taste</text>
+  </g>
+</svg>

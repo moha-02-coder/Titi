@@ -1,0 +1,197 @@
+[2026-01-19 01:15:04] === NOUVELLE REQUÊTE D'INSCRIPTION ===
+[2026-01-19 01:15:04] Méthode: POST
+[2026-01-19 01:15:04] Content-Type: multipart/form-data; boundary=----WebKitFormBoundary5dKhAaPL8NqqsA8R
+[2026-01-19 01:15:04] Début du traitement de la requête
+[2026-01-19 01:15:04] Données brutes reçues (premiers 500 caractères): 
+[2026-01-19 01:15:04] Mode multipart/form-data détecté
+[2026-01-19 01:15:04] Données POST: Array
+(
+    [first_name] => Moha
+    [last_name] => Guindo
+    [email] => mohametguindo@gmail.com
+    [phone] => 78527389
+    [birth_date] => 
+    [address] => bamako-mali rue 12
+    [city] => Bamako
+    [quarter] => Nafadji
+    [password] => AzertyMomo9414
+    [password_confirm] => AzertyMomo9414
+    [vehicle_type] => moto
+    [vehicle_brand] => TVS
+    [vehicle_model] => Sanili
+    [vehicle_year] => 2020
+    [vehicle_plate] => AZ-4725A
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => livreur
+)
+
+[2026-01-19 01:15:04] Fichiers reçus: Array
+(
+    [0] => avatar
+    [1] => id_document
+)
+
+[2026-01-19 01:15:04] Données après nettoyage: Array
+(
+    [first_name] => Moha
+    [last_name] => Guindo
+    [email] => mohametguindo@gmail.com
+    [phone] => 78527389
+    [birth_date] => 
+    [address] => bamako-mali rue 12
+    [city] => Bamako
+    [quarter] => Nafadji
+    [password] => AzertyMomo9414
+    [password_confirm] => AzertyMomo9414
+    [vehicle_type] => moto
+    [vehicle_brand] => TVS
+    [vehicle_model] => Sanili
+    [vehicle_year] => 2020
+    [vehicle_plate] => AZ-4725A
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => livreur
+)
+
+[2026-01-19 01:15:04] Validation téléphone:
+[2026-01-19 01:15:04]   Original: '78527389'
+[2026-01-19 01:15:04]   Nettoyé: '78527389'
+[2026-01-19 01:15:04]   Longueur: 8
+[2026-01-19 01:15:04]   Préfixe: 78
+[2026-01-19 01:15:04]   Préfixe valide: OUI
+[2026-01-19 01:15:04] Rôle sélectionné: livreur
+[2026-01-19 01:15:04] Validation réussie, connexion à la base de données...
+[2026-01-19 01:15:05] Connexion BD réussie
+[2026-01-19 01:15:05] Vérification unicité email...
+[2026-01-19 01:15:05] Vérification unicité téléphone...
+[2026-01-19 01:15:05] Vérifications unicité OK
+[2026-01-19 01:15:05] Début transaction BD
+[2026-01-19 01:15:05] Aucun avatar uploadé ou erreur: 4
+[2026-01-19 01:15:05] ERREUR dans la transaction, rollback: SQLSTATE[42S22]: Column not found: 1054 Champ 'city' inconnu dans field list
+[2026-01-19 01:15:05] ERREUR PDO: SQLSTATE[42S22]: Column not found: 1054 Champ 'city' inconnu dans field list - Code: 42S22
+[2026-01-19 01:21:23] === NOUVELLE REQUÊTE D'INSCRIPTION ===
+[2026-01-19 01:21:23] Méthode: POST
+[2026-01-19 01:21:23] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryoZpoRCZNDz8QUwLw
+[2026-01-19 01:21:23] Début du traitement de la requête
+[2026-01-19 01:21:23] Données brutes reçues (premiers 500 caractères): 
+[2026-01-19 01:21:23] Mode multipart/form-data détecté
+[2026-01-19 01:21:23] Données POST: Array
+(
+    [first_name] => Moha
+    [last_name] => Guindo
+    [email] => mohametguindo@gmail.com
+    [phone] => 78527389
+    [birth_date] => 
+    [address] => bamako-mali rue 12
+    [city] => Bamako
+    [quarter] => Nafadji
+    [password] => AzertyMomo9414
+    [password_confirm] => AzertyMomo9414
+    [vehicle_type] => moto
+    [vehicle_brand] => TVS
+    [vehicle_model] => Sanili
+    [vehicle_year] => 2020
+    [vehicle_plate] => AZ-4725A
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => livreur
+)
+
+[2026-01-19 01:21:23] Fichiers reçus: Array
+(
+    [0] => avatar
+    [1] => id_document
+)
+
+[2026-01-19 01:21:23] Données après nettoyage: Array
+(
+    [first_name] => Moha
+    [last_name] => Guindo
+    [email] => mohametguindo@gmail.com
+    [phone] => 78527389
+    [birth_date] => 
+    [address] => bamako-mali rue 12
+    [city] => Bamako
+    [quarter] => Nafadji
+    [password] => AzertyMomo9414
+    [password_confirm] => AzertyMomo9414
+    [vehicle_type] => moto
+    [vehicle_brand] => TVS
+    [vehicle_model] => Sanili
+    [vehicle_year] => 2020
+    [vehicle_plate] => AZ-4725A
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => livreur
+)
+
+[2026-01-19 01:21:23] Validation téléphone:
+[2026-01-19 01:21:23]   Original: '78527389'
+[2026-01-19 01:21:23]   Nettoyé: '78527389'
+[2026-01-19 01:21:23]   Longueur: 8
+[2026-01-19 01:21:23]   Préfixe: 78
+[2026-01-19 01:21:23]   Préfixe valide: OUI
+[2026-01-19 01:21:23] Rôle sélectionné: livreur
+[2026-01-19 01:21:23] Validation réussie, connexion à la base de données...
+[2026-01-19 01:21:23] Connexion BD réussie
+[2026-01-19 01:21:23] Vérification unicité email...
+[2026-01-19 01:21:23] Vérification unicité téléphone...
+[2026-01-19 01:21:23] Vérifications unicité OK
+[2026-01-19 01:21:23] Début transaction BD
+[2026-01-19 01:21:23] Upload avatar détecté
+[2026-01-19 01:21:23] Traitement fichier avatar:
+[2026-01-19 01:21:23]   Nom: 937.png
+[2026-01-19 01:21:23]   Taille: 183455 bytes
+[2026-01-19 01:21:23]   Type: image/png
+[2026-01-19 01:21:23]   Erreur: 0
+[2026-01-19 01:21:23]   Fichier uploadé avec succès: C:\wamp64\www\titi-golden-taste\backend\api\auth/../../../assets/uploads/avatars/upload_696d8713b1f0d1.39364609_ac5b4f7faf0a6b6c.png
+[2026-01-19 01:21:23] Avatar uploadé: /assets/uploads/avatars/upload_696d8713b1f0d1.39364609_ac5b4f7faf0a6b6c.png
+[2026-01-19 01:21:23] Insertion utilisateur avec données: Array
+(
+    [first_name] => Moha
+    [last_name] => Guindo
+    [email] => mohametguindo@gmail.com
+    [phone] => 78527389
+    [address] => bamako-mali rue 12
+    [city] => Bamako
+    [quarter] => Nafadji
+    [birth_date] => 
+    [avatar] => /assets/uploads/avatars/upload_696d8713b1f0d1.39364609_ac5b4f7faf0a6b6c.png
+    [newsletter] => 1
+    [sms_notifications] => 1
+    [role] => livreur
+    [verified] => 0
+    [active] => 1
+)
+
+[2026-01-19 01:21:23] Utilisateur créé avec ID: 3
+[2026-01-19 01:21:23] Panier créé pour l'utilisateur 3
+[2026-01-19 01:21:23] Traitement inscription livreur
+[2026-01-19 01:21:23] Table drivers vérifiée/créée
+[2026-01-19 01:21:23] Upload document d'identité détecté
+[2026-01-19 01:21:23] Traitement fichier id_document:
+[2026-01-19 01:21:23]   Nom: 937.png
+[2026-01-19 01:21:23]   Taille: 183455 bytes
+[2026-01-19 01:21:23]   Type: image/png
+[2026-01-19 01:21:23]   Erreur: 0
+[2026-01-19 01:21:23]   Fichier uploadé avec succès: C:\wamp64\www\titi-golden-taste\backend\api\auth/../../../assets/uploads/documents/upload_696d8713dbfcb2.56378015_4ff688b636d466f1.png
+[2026-01-19 01:21:23] Document d'identité uploadé: /assets/uploads/documents/upload_696d8713dbfcb2.56378015_4ff688b636d466f1.png
+[2026-01-19 01:21:23] Insertion livreur avec données: Array
+(
+    [user_id] => 3
+    [id_document] => /assets/uploads/documents/upload_696d8713dbfcb2.56378015_4ff688b636d466f1.png
+    [vehicle_type] => moto
+    [vehicle_brand] => TVS
+    [vehicle_model] => Sanili
+    [vehicle_year] => 2020
+    [vehicle_plate] => AZ-4725A
+)
+
+[2026-01-19 01:21:23] Livreur créé avec ID: 1
+[2026-01-19 01:21:23] Notification administrateur créée
+[2026-01-19 01:21:23] ERREUR PDO: There is no active transaction - Code: 0

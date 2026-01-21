@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Titi Golden Taste</title>
+    <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-wrapper">
+            <!-- Sidebar avec branding -->
+            <aside class="auth-sidebar">
+                <div class="brand-section">
+                    <h1 class="brand-logo">Titi Golden Taste</h1>
+                    <p class="brand-tagline">L'excellence culinaire africaine</p>
+                    <div class="login-badge">
+                        <span><i class="fas fa-sign-in-alt"></i> Connexion</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-features">
+                    <div class="feature-item">
+                        <i class="fas fa-bolt"></i>
+                        <div class="feature-text">
+                            <h4>Connexion Rapide</h4>
+                            <p>Accédez à votre compte en quelques secondes</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-history"></i>
+                        <div class="feature-text">
+                            <h4>Historique Accéléré</h4>
+                            <p>Retrouvez vos dernières commandes</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-heart"></i>
+                        <div class="feature-text">
+                            <h4>Favoris Personnalisés</h4>
+                            <p>Vos plats préférés vous attendent</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-gem"></i>
+                        <div class="feature-text">
+                            <h4>Avantages Exclusifs</h4>
+                            <p>Offres réservées aux membres connectés</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-footer">
+                    <div class="login-stats">
+                        <h4>Notre Communauté Grandit</h4>
+                        <div class="stats-grid">
+                            <div class="stat">
+                                <i class="fas fa-users"></i>
+                                <div>
+                                    <strong>1,000+</strong>
+                                    <span>Membres actifs</span>
+                                </div>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-star"></i>
+                                <div>
+                                    <strong>4.8/5</strong>
+                                    <span>Satisfaction clients</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="register.html" class="back-link">
+                        <i class="fas fa-user-plus"></i> Pas encore inscrit ? Créez un compte
+                    </a>
+                </div>
+            </aside>
+
+            <!-- Main Login Form -->
+            <main class="auth-main">
+                <div class="auth-header">
+                    <h1>Bienvenue de retour</h1>
+                    <p>Connectez-vous à votre compte</p>
+                </div>
+
+                <!-- Sélection du type de compte -->
+                <div class="account-type">
+                    <div class="type-selector">
+                        <button type="button" class="type-btn active" data-type="client">
+                            <i class="fas fa-user"></i>
+                            <span>Client</span>
+                        </button>
+                        <button type="button" class="type-btn" data-type="livreur">
+                            <i class="fas fa-motorcycle"></i>
+                            <span>Livreur</span>
+                        </button>
+                        <button type="button" class="type-btn" data-type="restaurant">
+                            <i class="fas fa-store"></i>
+                            <span>Restaurant</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="auth-form">
+                    <!-- Champs de connexion principaux -->
+                    <div class="form-section">
+                        <div class="form-group">
+                            <label for="login_email" class="form-label">
+                                Email ou Téléphone <span class="required">*</span>
+                            </label>
+                            <input type="text" name="login_identifier" id="login_email" class="form-input" required
+                                   placeholder="exemple@email.com ou 76 01 23 45" autocomplete="email">
+                            <div class="form-error" id="emailError" role="alert" aria-live="polite"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="login_password" class="form-label">
+                                Mot de passe <span class="required">*</span>
+                            </label>
+                            <div class="password-wrapper">
+                                <input type="password" name="password" id="login_password" class="form-input" required
+                                       placeholder="Votre mot de passe" autocomplete="current-password" minlength="8">
+                                <button type="button" class="password-toggle" aria-label="Afficher/masquer le mot de passe">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-error" id="passwordError" role="alert" aria-live="polite"></div>
+                        </div>
+                    </div>
+
+                    <!-- Options et liens rapides -->
+                    <div class="login-options">
+                        <label class="checkbox remember-me">
+                            <input type="checkbox" name="remember" id="remember" checked>
+                            <span>Se souvenir de moi</span>
+                        </label>
+                        
+                        <a href="forgot-password.html" class="forgot-password">
+                            <i class="fas fa-key"></i> Mot de passe oublié ?
+                        </a>
+                    </div>
+
+                    <!-- Bouton de connexion -->
+                    <div class="auth-submit">
+                        <button type="submit" class="btn btn-primary btn-block" aria-label="Se connecter">
+                            <i class="fas fa-sign-in-alt"></i> Se connecter
+                        </button>
+                    </div>
+
+                    <!-- Séparateur -->
+                    <div class="separator">
+                        <span>ou</span>
+                    </div>
+
+                    <!-- Connexion rapide -->
+                    <div class="quick-login">
+                        <h4>Connexion rapide</h4>
+                        <div class="social-login">
+                            <button type="button" class="social-btn google" aria-label="Se connecter avec Google">
+                                <i class="fab fa-google"></i>
+                                <span>Google</span>
+                            </button>
+                            <button type="button" class="social-btn facebook" aria-label="Se connecter avec Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                                <span>Facebook</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Instructions sécurité -->
+                    <div class="security-note">
+                        <div class="security-alert">
+                            <i class="fas fa-shield-alt"></i>
+                            <div class="security-text">
+                                <h5>Conseils de sécurité</h5>
+                                <p>Ne partagez jamais vos identifiants. Vérifiez toujours l'URL du site.</p>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Liens d'inscription -->
+                <div class="registration-promo">
+                    <div class="promo-card">
+                        <div class="promo-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="promo-content">
+                            <h4>Nouveau chez Titi Golden Taste ?</h4>
+                            <p>Créez un compte pour profiter de tous nos services</p>
+                            <ul class="promo-benefits">
+                                <li><i class="fas fa-check"></i> Commandes rapides</li>
+                                <li><i class="fas fa-check"></i> Suivi en direct</li>
+                                <li><i class="fas fa-check"></i> Offres exclusives</li>
+                                <li><i class="fas fa-check"></i> Historique de commandes</li>
+                            </ul>
+                            <a href="register.html" class="btn btn-secondary btn-block">
+                                <i class="fas fa-user-plus"></i> S'inscrire gratuitement
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="promo-card driver-card">
+                        <div class="promo-icon">
+                            <i class="fas fa-motorcycle"></i>
+                        </div>
+                        <div class="promo-content">
+                            <h4>Devenir Livreur Partenaire</h4>
+                            <p>Rejoignez notre équipe et gagnez avec nous</p>
+                            <ul class="promo-benefits">
+                                <li><i class="fas fa-check"></i> Revenus flexibles</li>
+                                <li><i class="fas fa-check"></i> Horaires libres</li>
+                                <li><i class="fas fa-check"></i> Prime de performance</li>
+                                <li><i class="fas fa-check"></i> Formation offerte</li>
+                            </ul>
+                            <a href="register.html?role=livreur" class="btn btn-outline btn-block">
+                                <i class="fas fa-bolt"></i> Postuler comme livreur
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="auth-footer">
+                    <div class="footer-links">
+                        <a href="index.html"><i class="fas fa-home"></i> Accueil</a>
+                        <a href="contact.html"><i class="fas fa-envelope"></i> Contact</a>
+                        <a href="faq.html"><i class="fas fa-question-circle"></i> FAQ</a>
+                        <a href="privacy.html"><i class="fas fa-shield-alt"></i> Confidentialité</a>
+                        <a href="terms.html"><i class="fas fa-file-contract"></i> Conditions</a>
+                    </div>
+                    <p class="copyright">
+                        © 2024 Titi Golden Taste. Tous droits réservés.
+                    </p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" role="alert" aria-live="assertive">
+        <div class="spinner"></div>
+        <p>Connexion en cours...</p>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/auth.js"></script>
+</body>
+</html>

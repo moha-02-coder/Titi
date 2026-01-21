@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boutique - Titi Golden Taste</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .boutique-hero {
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            color: white;
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+        .boutique-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            font-family: 'Playfair Display', serif;
+        }
+        .boutique-hero p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+        .menu-of-week {
+            background: #f8f9fa;
+            padding: 40px 0;
+            margin: 30px 0;
+        }
+        .menu-of-week-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .menu-of-week-card h3 {
+            color: #d4af37;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .quick-nav {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .quick-nav-btn {
+            padding: 12px 24px;
+            background: white;
+            border: 2px solid #d4af37;
+            color: #d4af37;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .quick-nav-btn:hover {
+            background: #d4af37;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .quick-nav-btn.active {
+            background: #d4af37;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header avec navigation -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <h1 class="logo">Titi Golden Taste</h1>
+                    <p class="slogan">L'excellence culinaire malienne</p>
+                </div>
+                
+                <!-- Navigation principale -->
+                <nav class="nav">
+                    <ul>
+                        <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i> Accueil</a></li>
+                        <li><a href="index.html#menu" class="nav-link"><i class="fas fa-utensils"></i> Menu</a></li>
+                        <li><a href="boutique.html" class="nav-link active"><i class="fas fa-store"></i> Boutique</a></li>
+                        <li><a href="index.html#order" class="nav-link"><i class="fas fa-shopping-cart"></i> Commander</a></li>
+                        <li><a href="index.html#location" class="nav-link"><i class="fas fa-map-marker-alt"></i> Nous trouver</a></li>
+                        <li><a href="index.html#contact" class="nav-link"><i class="fas fa-phone"></i> Contact</a></li>
+                        <li class="nav-auth">
+                            <a href="login.html" class="btn-login"><i class="fas fa-user"></i> Connexion</a>
+                            <a href="register.html" class="btn-register">Inscription</a>
+                        </li>
+                    </ul>
+                </nav>
+                
+                <!-- Menu mobile -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-header">
+            <h3>Navigation</h3>
+            <button class="mobile-nav-close" id="mobileNavClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="mobile-nav-links">
+            <a href="index.html" class="mobile-nav-link"><i class="fas fa-home"></i> Accueil</a>
+            <a href="index.html#menu" class="mobile-nav-link"><i class="fas fa-utensils"></i> Menu</a>
+            <a href="boutique.html" class="mobile-nav-link active"><i class="fas fa-store"></i> Boutique</a>
+            <a href="index.html#order" class="mobile-nav-link"><i class="fas fa-shopping-cart"></i> Commander</a>
+            <a href="index.html#location" class="mobile-nav-link"><i class="fas fa-map-marker-alt"></i> Nous trouver</a>
+            <a href="index.html#contact" class="mobile-nav-link"><i class="fas fa-phone"></i> Contact</a>
+            <div class="mobile-auth">
+                <a href="login.html" class="btn-login"><i class="fas fa-user"></i> Connexion</a>
+                <a href="register.html" class="btn-register">Inscription</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Hero Section Boutique -->
+    <section class="boutique-hero">
+        <div class="container">
+            <h1><i class="fas fa-store"></i> Notre Boutique</h1>
+            <p>Découvrez nos produits africains authentiques et notre menu du jour</p>
+        </div>
+    </section>
+
+    <!-- Quick Navigation -->
+    <div class="container">
+        <div class="quick-nav">
+            <a href="index.html" class="quick-nav-btn">
+                <i class="fas fa-utensils"></i> Voir le Restaurant
+            </a>
+            <a href="index.html#menu" class="quick-nav-btn">
+                <i class="fas fa-book-open"></i> Notre Carte
+            </a>
+            <a href="index.html#order" class="quick-nav-btn">
+                <i class="fas fa-shopping-cart"></i> Commander
+            </a>
+        </div>
+    </div>
+
+    <!-- Menu du jour de la semaine -->
+    <section class="menu-of-week">
+        <div class="container">
+            <div class="menu-of-week-card">
+                <h3><i class="fas fa-calendar-week"></i> Menu du jour</h3>
+                <div id="menuOfTheDayContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Chargement du menu du jour...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Boutique Section -->
+        <section class="section" id="shop">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-store"></i> Notre Boutique</h2>
+                <div class="section-subtitle">Découvrez nos produits africains authentiques</div>
+            </div>
+
+            <div class="shop-categories">
+                <button class="category-filter-btn active" data-category="all">Tous les produits</button>
+                <button class="category-filter-btn" data-category="robes">Robes</button>
+                <button class="category-filter-btn" data-category="jeans">Jeans</button>
+                <button class="category-filter-btn" data-category="chaussures">Chaussures</button>
+                <button class="category-filter-btn" data-category="sacs">Sacs à main</button>
+                <button class="category-filter-btn" data-category="accessoires">Accessoires</button>
+            </div>
+
+            <div class="products-grid" id="productsContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Chargement des produits...</p>
+                </div>
+            </div>
+
+            <div class="shop-features">
+                <div class="feature-card">
+                    <i class="fas fa-shipping-fast"></i>
+                    <h4>Livraison rapide</h4>
+                    <p>Colis expédié sous 24h</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-leaf"></i>
+                    <h4>Produits naturels</h4>
+                    <p>100% naturels et authentiques</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-award"></i>
+                    <h4>Qualité garantie</h4>
+                    <p>Sélection rigoureuse</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-headset"></i>
+                    <h4>Support client</h4>
+                    <p>À votre écoute</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3><i class="fas fa-shopping-cart"></i> Votre Panier</h3>
+            <button class="cart-close" id="cartClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="cart-content" id="cartContent">
+            <div class="cart-empty" id="cartEmpty">
+                <i class="fas fa-shopping-basket"></i>
+                <p>Votre panier est vide</p>
+                <a href="#shop" class="btn">Voir les produits</a>
+            </div>
+            <div class="cart-items" id="cartItems" style="display: none;"></div>
+        </div>
+        <div class="cart-footer" id="cartFooter" style="display: none;">
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>Sous-total</span>
+                    <span id="cartSubtotal">0 FCFA</span>
+                </div>
+                <div class="summary-row">
+                    <span>Frais de livraison</span>
+                    <span id="cartDelivery">1000 FCFA</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span id="cartTotal">1000 FCFA</span>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-block" id="checkoutBtn">
+                <i class="fas fa-lock"></i> Procéder au paiement
+            </button>
+            <button class="btn btn-outline btn-block" id="continueShopping">
+                Continuer mes achats
+            </button>
+        </div>
+    </div>
+    <div class="cart-overlay" id="cartOverlay"></div>
+
+    <!-- Cart Floating Button -->
+    <button class="cart-floating-btn" id="cartFloatingBtn">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-count" id="cartCount">0</span>
+    </button>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Titi Golden Taste</h3>
+                    <p class="footer-description">
+                        Restaurant premium et boutique spécialisés dans la cuisine et les produits maliennes authentiques.
+                    </p>
+                </div>
+                <div class="footer-col">
+                    <h4>Liens rapides</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Accueil</a></li>
+                        <li><a href="index.html#menu">Notre menu</a></li>
+                        <li><a href="boutique.html">Boutique</a></li>
+                        <li><a href="index.html#order">Commander</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p class="copyright">
+                        &copy; 2024 Titi Golden Taste, Bamako - Mali. Tous droits réservés.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/cart.js"></script>
+    <script src="assets/js/frontend.js"></script>
+    
+    <script>
+    // Initialisation spécifique à la page boutique
+    document.addEventListener('DOMContentLoaded', function() {
+        // Charger le menu du jour dans le conteneur spécifique
+        const menuContainer = document.getElementById('menuOfTheDayContainer');
+        if (menuContainer && typeof loadMenuOfTheDay === 'function') {
+            // Créer une version qui charge dans le bon conteneur
+            async function loadMenuOfDayForBoutique() {
+                menuContainer.innerHTML = '<div class="loading"><div class="spinner"></div><p>Chargement du menu...</p></div>';
+                
+                try {
+                    const res = await fetch(`${API_BASE_URL}/menu/menu-du-jour.php`);
+                    const json = await res.json();
+                    
+                    let menu = null;
+                    if (json && json.success && json.data) {
+                        menu = json.data;
+                    } else if (json && json.menu) {
+                        menu = Array.isArray(json.menu) ? json.menu[0] : json.menu;
+                    }
+                    
+                    if (!menu) {
+                        menuContainer.innerHTML = '<p style="text-align: center; color: #666;">Aucun menu du jour disponible.</p>';
+                        return;
+                    }
+                    
+                    // Créer une carte de menu simplifiée
+                    const menuCard = document.createElement('div');
+                    menuCard.style.cssText = 'text-align: center; padding: 20px;';
+                    menuCard.innerHTML = `
+                        <h4 style="color: #d4af37; margin-bottom: 10px;">${menu.name || 'Menu du jour'}</h4>
+                        <p style="color: #666; margin-bottom: 15px;">${menu.description || ''}</p>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #333; margin-bottom: 20px;">
+                            ${menu.price || 0} FCFA
+                        </div>
+                        <a href="index.html#menu" class="btn" style="display: inline-block;">
+                            <i class="fas fa-utensils"></i> Voir le menu complet
+                        </a>
+                    `;
+                    menuContainer.innerHTML = '';
+                    menuContainer.appendChild(menuCard);
+                } catch (err) {
+                    console.error('Erreur chargement menu du jour:', err);
+                    menuContainer.innerHTML = '<p style="text-align: center; color: #666;">Impossible de charger le menu du jour.</p>';
+                }
+            }
+            
+            loadMenuOfDayForBoutique();
+        }
+        
+        // Charger les produits boutique
+        if (typeof loadBoutiqueProducts === 'function') {
+            loadBoutiqueProducts();
+        }
+        
+        // Initialiser le menu mobile
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileNav = document.getElementById('mobileNav');
+        const mobileNavClose = document.getElementById('mobileNavClose');
+        
+        if (mobileMenuBtn && mobileNav) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileNav.classList.add('open');
+            });
+        }
+        
+        if (mobileNavClose) {
+            mobileNavClose.addEventListener('click', () => {
+                mobileNav.classList.remove('open');
+            });
+        }
+    });
+    </script>
+</body>
+</html>

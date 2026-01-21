@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - Titi Golden Taste</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Admin Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-crown"></i> Administration</h2>
+                <div class="admin-info">
+                    <span id="adminName">Admin</span>
+                    <button class="logout-btn" id="adminLogoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3><i class="fas fa-chart-line"></i> Tableau de bord</h3>
+                    <ul>
+                        <li class="active">
+                            <a href="#dashboard" data-section="dashboard">
+                                <i class="fas fa-tachometer-alt"></i> Vue d'ensemble
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3><i class="fas fa-shopping-bag"></i> Commandes</h3>
+                    <ul>
+                        <li>
+                            <a href="#orders" data-section="orders">
+                                <i class="fas fa-list"></i> Toutes les commandes
+                                <span class="badge" id="pendingOrders">0</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#orders-pending" data-section="orders-pending">
+                                <i class="fas fa-clock"></i> En attente
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#orders-preparing" data-section="orders-preparing">
+                                <i class="fas fa-utensils"></i> En préparation
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#orders-delivery" data-section="orders-delivery">
+                                <i class="fas fa-truck"></i> En livraison
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3><i class="fas fa-utensils"></i> Menu</h3>
+                    <ul>
+                        <li>
+                            <a href="#menu" data-section="menu">
+                                <i class="fas fa-book"></i> Gestion du menu
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#menu-today" data-section="menu-today">
+                                <i class="fas fa-star"></i> Menu du jour
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3><i class="fas fa-store"></i> Boutique</h3>
+                    <ul>
+                        <li>
+                            <a href="#products" data-section="products">
+                                <i class="fas fa-box"></i> Produits
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#stock" data-section="stock">
+                                <i class="fas fa-chart-bar"></i> Gestion des stocks
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3><i class="fas fa-users"></i> Clients</h3>
+                    <ul>
+                        <li>
+                            <a href="#customers" data-section="customers">
+                                <i class="fas fa-user-friends"></i> Liste des clients
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3><i class="fas fa-cog"></i> Paramètres</h3>
+                    <ul>
+                        <li>
+                            <a href="#settings" data-section="settings">
+                                <i class="fas fa-sliders-h"></i> Configuration
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#live-status" data-section="live-status">
+                                <i class="fas fa-broadcast-tower"></i> Statut Live
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="index.html" class="back-to-site">
+                    <i class="fas fa-external-link-alt"></i> Voir le site
+                </a>
+            </div>
+        </aside>
+
+        <!-- Admin Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <div class="header-left">
+                    <h1 id="adminTitle">Tableau de bord</h1>
+                    <div class="breadcrumb" id="breadcrumb">
+                        <a href="#dashboard">Admin</a> / <span>Tableau de bord</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="admin-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-shopping-bag"></i>
+                            <div>
+                                <span class="stat-value" id="todayOrders">0</span>
+                                <span class="stat-label">Commandes aujourd'hui</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-users"></i>
+                            <div>
+                                <span class="stat-value" id="todayRevenue">0</span>
+                                <span class="stat-label">Recettes du jour</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <div>
+                                <span class="stat-value" id="lowStock">0</span>
+                                <span class="stat-label">Stocks bas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="admin-section active">
+                <div class="dashboard-grid">
+                    <!-- Revenue Chart -->
+                    <div class="dashboard-card full-width">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> Revenus des 7 derniers jours</h3>
+                            <select id="chartPeriod">
+                                <option value="7">7 jours</option>
+                                <option value="30">30 jours</option>
+                                <option value="90">90 jours</option>
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bolt"></i> Actions rapides</h3>
+                        </div>
+                        <div class="quick-actions">
+                            <button class="quick-action" id="addMenuBtn">
+                                <i class="fas fa-plus"></i>
+                                <span>Ajouter un plat</span>
+                            </button>
+                            <button class="quick-action" id="addProductBtn">
+                                <i class="fas fa-box"></i>
+                                <span>Ajouter un produit</span>
+                            </button>
+                            <button class="quick-action" id="updateStatusBtn">
+                                <i class="fas fa-broadcast-tower"></i>
+                                <span>Changer statut</span>
+                            </button>
+                            <button class="quick-action" id="viewReportsBtn">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Voir rapports</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Recent Orders -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-clock"></i> Commandes récentes</h3>
+                            <a href="#orders" class="view-all">Voir tout</a>
+                        </div>
+                        <div class="recent-orders" id="recentOrders">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <p>Chargement...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stock Alerts -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-exclamation-triangle"></i> Alertes stock</h3>
+                        </div>
+                        <div class="stock-alerts" id="stockAlerts">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <p>Chargement...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Orders Management -->
+            <section id="orders" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-list"></i> Toutes les commandes</h2>
+                    <div class="section-actions">
+                        <button class="btn" id="exportOrdersBtn">
+                            <i class="fas fa-download"></i> Exporter
+                        </button>
+                        <div class="filter-group">
+                            <select id="orderFilter">
+                                <option value="all">Toutes</option>
+                                <option value="pending">En attente</option>
+                                <option value="preparing">En préparation</option>
+                                <option value="delivery">En livraison</option>
+                                <option value="completed">Terminées</option>
+                                <option value="cancelled">Annulées</option>
+                            </select>
+                            <input type="date" id="orderDateFilter">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <table id="ordersTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Client</th>
+                                <th>Total</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Données chargées via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Menu Management -->
+            <section id="menu" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-book"></i> Gestion du menu</h2>
+                    <button class="btn" id="addMenuItemBtn">
+                        <i class="fas fa-plus"></i> Ajouter un plat
+                    </button>
+                </div>
+
+                <div class="menu-items-grid" id="menuItemsGrid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Chargement du menu...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Products Management -->
+            <section id="products" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-box"></i> Gestion des produits</h2>
+                    <button class="btn" id="addProductItemBtn">
+                        <i class="fas fa-plus"></i> Ajouter un produit
+                    </button>
+                </div>
+
+                <div class="data-table-container">
+                    <table id="productsTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nom</th>
+                                <th>Catégorie</th>
+                                <th>Prix</th>
+                                <th>Stock</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Données chargées via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Customers Management -->
+            <section id="customers" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-user-friends"></i> Liste des clients</h2>
+                    <div class="section-actions">
+                        <input type="text" placeholder="Rechercher un client..." id="customerSearch">
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <table id="customersTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Téléphone</th>
+                                <th>Commandes</th>
+                                <th>Dernière commande</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Données chargées via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Live Status Management -->
+            <section id="live-status" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-broadcast-tower"></i> Gestion du statut Live</h2>
+                </div>
+
+                <div class="status-management">
+                    <div class="status-card current-status">
+                        <h3>Statut actuel</h3>
+                        <div class="status-display" id="currentStatusDisplay">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="status-card status-control">
+                        <h3>Changer le statut</h3>
+                        <div class="status-options">
+                            <div class="status-option">
+                                <input type="radio" name="status" value="open" id="statusOpen">
+                                <label for="statusOpen" class="status-label open">
+                                    <i class="fas fa-door-open"></i>
+                                    <span>Ouvert</span>
+                                    <p>Le restaurant est ouvert aux commandes</p>
+                                </label>
+                            </div>
+
+                            <div class="status-option">
+                                <input type="radio" name="status" value="closed" id="statusClosed">
+                                <label for="statusClosed" class="status-label closed">
+                                    <i class="fas fa-door-closed"></i>
+                                    <span>Fermé</span>
+                                    <p>Le restaurant est fermé</p>
+                                </label>
+                            </div>
+
+                            <div class="status-option">
+                                <input type="radio" name="status" value="busy" id="statusBusy">
+                                <label for="statusBusy" class="status-label busy">
+                                    <i class="fas fa-users"></i>
+                                    <span>Occupé</span>
+                                    <p>Le restaurant est ouvert mais très occupé</p>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="status-message-input">
+                            <label for="statusMessage">Message personnalisé</label>
+                            <textarea id="statusMessage" rows="3" 
+                                      placeholder="Ex: Ouverture à 18h, service rapide seulement"></textarea>
+                        </div>
+
+                        <button class="btn btn-block" id="updateStatusBtn">
+                            <i class="fas fa-sync"></i> Mettre à jour le statut
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings -->
+            <section id="settings" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-sliders-h"></i> Paramètres du restaurant</h2>
+                </div>
+
+                <form id="settingsForm" class="settings-form">
+                    <div class="settings-group">
+                        <h3><i class="fas fa-clock"></i> Horaires d'ouverture</h3>
+                        <div class="hours-grid">
+                            <div class="day-hours">
+                                <label>Lundi - Vendredi</label>
+                                <div class="time-inputs">
+                                    <input type="time" name="weekday_open" value="10:00">
+                                    <span>à</span>
+                                    <input type="time" name="weekday_close" value="22:00">
+                                </div>
+                            </div>
+                            <div class="day-hours">
+                                <label>Samedi</label>
+                                <div class="time-inputs">
+                                    <input type="time" name="saturday_open" value="10:00">
+                                    <span>à</span>
+                                    <input type="time" name="saturday_close" value="23:00">
+                                </div>
+                            </div>
+                            <div class="day-hours">
+                                <label>Dimanche</label>
+                                <div class="time-inputs">
+                                    <input type="time" name="sunday_open" value="12:00">
+                                    <span>à</span>
+                                    <input type="time" name="sunday_close" value="20:00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><i class="fas fa-truck"></i> Livraison</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Frais de livraison (FCFA)</label>
+                                <input type="number" name="delivery_fee" value="1000">
+                            </div>
+                            <div class="form-group">
+                                <label>Minimum pour livraison (FCFA)</label>
+                                <input type="number" name="delivery_min" value="5000">
+                            </div>
+                            <div class="form-group">
+                                <label>Zone de livraison (km)</label>
+                                <input type="number" name="delivery_zone" value="10">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><i class="fas fa-euro-sign"></i> Taxes et frais</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>TVA (%)</label>
+                                <input type="number" name="tax_rate" value="18" step="0.1">
+                            </div>
+                            <div class="form-group">
+                                <label>Service (%)</label>
+                                <input type="number" name="service_fee" value="10" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-actions">
+                        <button type="submit" class="btn">
+                            <i class="fas fa-save"></i> Enregistrer les paramètres
+                        </button>
+                        <button type="button" class="btn btn-outline" id="resetSettingsBtn">
+                            <i class="fas fa-undo"></i> Réinitialiser
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="addMenuModal" class="modal">
+        <!-- Contenu du modal pour ajouter un plat -->
+    </div>
+
+    <div id="addProductModal" class="modal">
+        <!-- Contenu du modal pour ajouter un produit -->
+    </div>
+
+    <div id="orderDetailsModal" class="modal">
+        <!-- Contenu du modal pour voir les détails d'une commande -->
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/admin.js"></script>
+</body>
+</html>

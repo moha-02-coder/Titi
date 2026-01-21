@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titi Golden Taste - Restaurant Premium Bamako</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/order.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet map CSS (OpenStreetMap) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* Styles temporaires pour éléments manquants */
+        .restaurant-map { height: 400px; width: 100%; border-radius: 10px; }
+        .location-content { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; margin-top: 30px; }
+        @media (max-width: 768px) { .location-content { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <!-- Header avec navigation -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <h1 class="logo">Titi Golden Taste</h1>
+                    <p class="slogan">L'excellence culinaire malienne</p>
+                </div>
+                
+                <!-- Live Status -->
+                <div class="status-container">
+                    <div id="live-status" class="status loading">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">Chargement...</span>
+                    </div>
+                    <p class="status-message" id="status-message">Vérification de l'ouverture...</p>
+                </div>
+                
+                <!-- Navigation principale -->
+                <nav class="nav">
+                    <ul>
+                        <li><a href="#home" class="nav-link active"><i class="fas fa-home"></i> Accueil</a></li>
+                        <li><a href="#menu" class="nav-link"><i class="fas fa-utensils"></i> Menu</a></li>
+                        <li><a href="boutique.html" class="nav-link"><i class="fas fa-store"></i> Boutique</a></li>
+                        <li><a href="#order" class="nav-link"><i class="fas fa-shopping-cart"></i> Commander</a></li>
+                        <li><a href="#location" class="nav-link"><i class="fas fa-map-marker-alt"></i> Nous trouver</a></li>
+                        <li><a href="#contact" class="nav-link"><i class="fas fa-phone"></i> Contact</a></li>
+                        <li class="nav-auth">
+                            <a href="login.html" class="btn-login"><i class="fas fa-user"></i> Connexion</a>
+                            <a href="register.html" class="btn-register">Inscription</a>
+                        </li>
+                    </ul>
+                </nav>
+                
+                <!-- Menu mobile -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-header">
+            <h3>Navigation</h3>
+            <button class="mobile-nav-close" id="mobileNavClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="mobile-nav-links">
+            <a href="#home" class="mobile-nav-link active"><i class="fas fa-home"></i> Accueil</a>
+            <a href="#menu" class="mobile-nav-link"><i class="fas fa-utensils"></i> Menu</a>
+            <a href="boutique.html" class="mobile-nav-link"><i class="fas fa-store"></i> Boutique</a>
+            <a href="#order" class="mobile-nav-link"><i class="fas fa-shopping-cart"></i> Commander</a>
+            <a href="#location" class="mobile-nav-link"><i class="fas fa-map-marker-alt"></i> Nous trouver</a>
+            <a href="#contact" class="mobile-nav-link"><i class="fas fa-phone"></i> Contact</a>
+            <div class="mobile-auth">
+                <a href="login.html" class="btn-login"><i class="fas fa-user"></i> Connexion</a>
+                <a href="register.html" class="btn-register">Inscription</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h2>Bienvenue chez <span class="highlight">Titi Golden Taste</span></h2>
+                    <p class="hero-subtitle">Découvrez une expérience gastronomique unique mêlant tradition et modernité</p>
+                    <div class="hero-features">
+                        <div class="feature">
+                            <i class="fas fa-clock"></i>
+                            <span>Livraison en 30-45 min</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-leaf"></i>
+                            <span>Produits frais</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-award"></i>
+                            <span>Qualité premium</span>
+                        </div>
+                    </div>
+                    <div class="hero-actions">
+                        <a href="#order" class="btn btn-primary">
+                            <i class="fas fa-bolt"></i> Commander maintenant
+                        </a>
+                        <a href="#menu" class="btn btn-outline">
+                            <i class="fas fa-utensils"></i> Voir le menu
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="image-placeholder">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3><i class="fas fa-shopping-cart"></i> Votre Panier</h3>
+            <button class="cart-close" id="cartClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="cart-content" id="cartContent">
+            <div class="cart-empty" id="cartEmpty">
+                <i class="fas fa-shopping-basket"></i>
+                <p>Votre panier est vide</p>
+                <a href="#menu" class="btn">Voir le menu</a>
+            </div>
+            <div class="cart-items" id="cartItems" style="display: none;"></div>
+        </div>
+        <div class="cart-footer" id="cartFooter" style="display: none;">
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>Sous-total</span>
+                    <span id="cartSubtotal">0 FCFA</span>
+                </div>
+                <div class="summary-row">
+                    <span>Frais de livraison</span>
+                    <span id="cartDelivery">1000 FCFA</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span id="cartTotal">1000 FCFA</span>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-block" id="checkoutBtn">
+                <i class="fas fa-lock"></i> Procéder au paiement
+            </button>
+            <button class="btn btn-outline btn-block" id="continueShopping">
+                Continuer mes achats
+            </button>
+        </div>
+    </div>
+    <div class="cart-overlay" id="cartOverlay"></div>
+
+    <!-- Cart Floating Button -->
+    <button class="cart-floating-btn" id="cartFloatingBtn">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-count" id="cartCount">0</span>
+    </button>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Menu du jour Section -->
+        <section class="section" id="menu">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-utensils"></i> Menu du jour</h2>
+                <div class="section-subtitle">Découvrez notre spécialité du jour préparée avec soin</div>
+            </div>
+            
+            <div class="menu-of-the-day" id="menuContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Chargement du menu...</p>
+                </div>
+            </div>
+
+            <!-- Tous les plats -->
+            <div class="section-header">
+                <h3 class="section-subtitle">Notre carte complète</h3>
+                <div class="category-filter">
+                    <button class="category-btn active" data-category="all">Tous</button>
+                    <button class="category-btn" data-category="plats">Plats principaux</button>
+                    <button class="category-btn" data-category="entrees">Entrées</button>
+                    <button class="category-btn" data-category="desserts">Desserts</button>
+                    <button class="category-btn" data-category="boissons">Boissons</button>
+                </div>
+            </div>
+
+            <div class="all-menu-items" id="allMenuContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Chargement de la carte...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Produits en vedette (Boutique) Section -->
+        <section class="section" id="featured-products">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-star"></i> Produits en vedette</h2>
+                <div class="section-subtitle">Découvrez nos produits africains authentiques</div>
+            </div>
+
+            <div class="featured-products-grid" id="featuredProductsContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Chargement des produits...</p>
+                </div>
+            </div>
+
+            <div class="section-footer" style="text-align: center; margin-top: 30px;">
+                <a href="boutique.html" class="btn btn-primary">
+                    <i class="fas fa-store"></i> Voir toute la boutique
+                </a>
+            </div>
+        </section>
+
+        <!-- Location / Map Section -->
+        <section class="section" id="location">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-map-marker-alt"></i> Nous trouver</h2>
+                <div class="section-subtitle">Retrouvez notre restaurant et horaires d'ouverture</div>
+            </div>
+            
+            <div class="location-content">
+                <div class="location-info">
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Horaires d'ouverture</h3>
+                            <p><strong>Lundi - Samedi</strong></p>
+                            <p>10h00 - 22h00</p>
+                            <p><strong>Dimanche</strong></p>
+                            <p>12h00 - 20h00</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Notre adresse</h3>
+                            <p>Avenue de l'Indépendance</p>
+                            <p>Badalabougou, Bamako</p>
+                            <p>Mali</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Téléphone</h3>
+                            <p>+223 20 21 22 23</p>
+                            <p>+223 76 01 23 45</p>
+                            <p class="info-note">Service client 7j/7</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="map-wrapper">
+                    <div id="restaurantMap" class="restaurant-map"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Système de Commande -->
+        <section class="section order-section" id="order">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-shopping-cart"></i> Commander en ligne</h2>
+                <div class="section-subtitle">Commandez vos plats préférés en quelques clics</div>
+            </div>
+
+            <!-- Order Steps -->
+            <div class="order-steps">
+                <div class="step active" id="step1">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Choix du plat</h3>
+                        <p>Sélectionnez votre menu ou plat</p>
+                    </div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Personnalisation</h3>
+                        <p>Ajoutez des options</p>
+                    </div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Livraison</h3>
+                        <p>Choisissez le mode</p>
+                    </div>
+                </div>
+                <div class="step" id="step4">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Paiement</h3>
+                        <p>Finalisez la commande</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Wizard -->
+            <div class="order-wizard">
+                <!-- Step 1: Menu Selection -->
+                <div class="wizard-step active" id="wizardStep1">
+                    <h3><i class="fas fa-utensils"></i> Choisissez votre repas</h3>
+                    <div class="menu-selection-grid" id="menuSelectionGrid">
+                        <!-- Chargé dynamiquement -->
+                    </div>
+                    <div class="wizard-actions">
+                        <button class="btn btn-next" onclick="nextStep(2)">
+                            Suivant <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Customization -->
+                <div class="wizard-step" id="wizardStep2">
+                    <h3><i class="fas fa-cogs"></i> Personnalisez votre commande</h3>
+                    
+                    <div class="customization-section">
+                        <h4>Accompagnements</h4>
+                        <div class="options-grid" id="sideDishesOptions">
+                            <!-- Options chargées dynamiquement -->
+                        </div>
+                    </div>
+
+                    <div class="customization-section">
+                        <h4>Sauces</h4>
+                        <div class="options-grid" id="saucesOptions">
+                            <!-- Options chargées dynamiquement -->
+                        </div>
+                    </div>
+
+                    <div class="customization-section">
+                        <h4>Instructions spéciales</h4>
+                        <textarea id="specialInstructions" rows="3" placeholder="Ajoutez des instructions spéciales pour votre commande..."></textarea>
+                    </div>
+
+                    <div class="wizard-actions">
+                        <button class="btn btn-prev" onclick="prevStep(1)">
+                            <i class="fas fa-arrow-left"></i> Précédent
+                        </button>
+                        <button class="btn btn-next" onclick="nextStep(3)">
+                            Suivant <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Delivery Options -->
+                <div class="wizard-step" id="wizardStep3">
+                    <h3><i class="fas fa-truck"></i> Options de livraison</h3>
+                    
+                    <div class="delivery-options">
+                        <div class="delivery-option selected" data-type="delivery">
+                            <div class="option-icon">
+                                <i class="fas fa-motorcycle"></i>
+                            </div>
+                            <div class="option-content">
+                                <h4>Livraison à domicile</h4>
+                                <p>Commandez et recevez chez vous</p>
+                                <div class="option-details">
+                                    <span><i class="fas fa-clock"></i> 30-45 min</span>
+                                    <span><i class="fas fa-money-bill"></i> 1500 FCFA</span>
+                                </div>
+                            </div>
+                            <div class="option-select">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+
+                        <div class="delivery-option" data-type="pickup">
+                            <div class="option-icon">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <div class="option-content">
+                                <h4>Retrait sur place</h4>
+                                <p>Venez chercher votre commande</p>
+                                <div class="option-details">
+                                    <span><i class="fas fa-clock"></i> 15-25 min</span>
+                                    <span><i class="fas fa-money-bill"></i> Gratuit</span>
+                                </div>
+                            </div>
+                            <div class="option-select">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Address -->
+                    <div class="delivery-address" id="deliveryAddressSection">
+                        <h4><i class="fas fa-map-marker-alt"></i> Adresse de livraison</h4>
+                        <div class="address-form">
+                            <div class="form-group">
+                                <input type="text" id="deliveryStreet" placeholder="Rue et numéro" required>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="text" id="deliveryCity" placeholder="Ville" required value="Bamako">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" id="deliveryQuarter" placeholder="Quartier" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <textarea id="deliveryNotes" rows="2" placeholder="Instructions pour le livreur..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pickup Info -->
+                    <div class="pickup-info" id="pickupInfoSection" style="display: none;">
+                        <h4><i class="fas fa-info-circle"></i> Informations de retrait</h4>
+                        <div class="pickup-details">
+                            <p><i class="fas fa-map-marker-alt"></i> Avenue de l'Indépendance, Badalabougou, Bamako</p>
+                            <p><i class="fas fa-clock"></i> Prêt dans 15-25 minutes</p>
+                            <p><i class="fas fa-phone"></i> Présentez votre numéro de commande</p>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Time -->
+                    <div class="delivery-time">
+                        <h4><i class="fas fa-calendar-alt"></i> Quand souhaitez-vous recevoir ?</h4>
+                        <div class="time-options">
+                            <div class="time-option selected" data-time="asap">
+                                <i class="fas fa-bolt"></i>
+                                <span>Dès que possible</span>
+                            </div>
+                            <div class="time-option" data-time="later">
+                                <i class="fas fa-clock"></i>
+                                <span>Planifier</span>
+                            </div>
+                        </div>
+                        
+                        <div class="schedule-time" id="scheduleTime" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Date</label>
+                                    <input type="date" id="scheduleDate">
+                                </div>
+                                <div class="form-group">
+                                    <label>Heure</label>
+                                    <input type="time" id="scheduleHour" min="10:00" max="22:00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wizard-actions">
+                        <button class="btn btn-prev" onclick="prevStep(2)">
+                            <i class="fas fa-arrow-left"></i> Précédent
+                        </button>
+                        <button class="btn btn-next" onclick="nextStep(4)">
+                            Suivant <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Payment & Summary -->
+                <div class="wizard-step" id="wizardStep4">
+                    <h3><i class="fas fa-clipboard-check"></i> Récapitulatif & Paiement</h3>
+                    
+                    <div class="order-summary-container">
+                        <div class="summary-section">
+                            <h4>Votre commande</h4>
+                            <div class="order-items" id="orderSummaryItems">
+                                <!-- Items chargés dynamiquement -->
+                            </div>
+                            <div class="order-totals" id="orderTotals">
+                                <!-- Totals chargés dynamiquement -->
+                            </div>
+                        </div>
+
+                        <div class="summary-section">
+                            <h4>Informations de livraison</h4>
+                            <div class="delivery-info" id="deliveryInfoSummary">
+                                <!-- Info chargée dynamiquement -->
+                            </div>
+                        </div>
+
+                        <div class="summary-section">
+                            <h4>Méthode de paiement</h4>
+                            <div class="payment-methods">
+                                <div class="payment-method selected" data-method="cash">
+                                    <div class="method-icon">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                    <div class="method-content">
+                                        <h5>Paiement à la livraison</h5>
+                                        <p>Espèces ou mobile money</p>
+                                    </div>
+                                    <div class="method-select">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                </div>
+
+                                <div class="payment-method" data-method="card">
+                                    <div class="method-icon">
+                                        <i class="fas fa-credit-card"></i>
+                                    </div>
+                                    <div class="method-content">
+                                        <h5>Carte bancaire</h5>
+                                        <p>Paiement sécurisé en ligne</p>
+                                    </div>
+                                    <div class="method-select">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                </div>
+
+                                <div class="payment-method" data-method="orange">
+                                    <div class="method-icon">
+                                        <i class="fas fa-mobile-alt"></i>
+                                    </div>
+                                    <div class="method-content">
+                                        <h5>Orange Money Mali</h5>
+                                        <p>Paiement mobile</p>
+                                    </div>
+                                    <div class="method-select">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                </div>
+
+                                <div class="payment-method" data-method="mtn">
+                                    <div class="method-icon">
+                                        <i class="fas fa-mobile-alt"></i>
+                                    </div>
+                                    <div class="method-content">
+                                        <h5>MTN Mobile Money</h5>
+                                        <p>Paiement mobile</p>
+                                    </div>
+                                    <div class="method-select">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Info for Guests -->
+                        <div class="summary-section" id="guestInfoSection">
+                            <h4>Vos informations</h4>
+                            <div class="guest-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <input type="text" id="guestFirstName" placeholder="Prénom" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" id="guestLastName" placeholder="Nom" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <input type="tel" id="guestPhone" placeholder="Téléphone (ex: 76 01 23 45)" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="email" id="guestEmail" placeholder="Email">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Terms -->
+                        <div class="terms-section">
+                            <label class="checkbox">
+                                <input type="checkbox" id="acceptTerms" required>
+                                <span>J'accepte les <a href="#">conditions générales</a> et la <a href="#">politique de confidentialité</a></span>
+                            </label>
+                            <label class="checkbox">
+                                <input type="checkbox" id="newsletterOptin">
+                                <span>Je souhaite recevoir les offres spéciales par email</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="wizard-actions">
+                        <button class="btn btn-prev" onclick="prevStep(3)">
+                            <i class="fas fa-arrow-left"></i> Précédent
+                        </button>
+                        <button class="btn btn-primary" id="placeOrderBtn">
+                            <i class="fas fa-check"></i> Confirmer la commande
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 5: Confirmation -->
+                <div class="wizard-step" id="wizardStep5">
+                    <div class="order-confirmation">
+                        <div class="confirmation-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3>Commande confirmée !</h3>
+                        <p class="confirmation-text">
+                            Merci pour votre commande. Nous avons bien reçu votre demande et commençons la préparation.
+                        </p>
+                        
+                        <div class="order-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Numéro de commande</span>
+                                <span class="detail-value" id="confirmationOrderId">#0000</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Statut</span>
+                                <span class="detail-value status-pending">En préparation</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Temps estimé</span>
+                                <span class="detail-value" id="confirmationTime">30-45 minutes</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Total</span>
+                                <span class="detail-value" id="confirmationTotal">0 FCFA</span>
+                            </div>
+                        </div>
+
+                        <div class="confirmation-actions">
+                            <button class="btn" onclick="window.location.href='dashboard.html'">
+                                <i class="fas fa-user"></i> Suivre ma commande
+                            </button>
+                            <button class="btn btn-outline" onclick="startNewOrder()">
+                                <i class="fas fa-plus"></i> Nouvelle commande
+                            </button>
+                        </div>
+
+                        <div class="confirmation-note">
+                            <p><i class="fas fa-info-circle"></i> Vous recevrez un SMS de confirmation sous peu.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Boutique Section -->
+        <section class="section" id="shop">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-store"></i> Notre Boutique</h2>
+                <div class="section-subtitle">Découvrez nos produits africains authentiques</div>
+            </div>
+
+            <div class="shop-categories">
+                <button class="category-filter-btn active" data-category="all">Tous les produits</button>
+                <button class="category-filter-btn" data-category="robes">Robes</button>
+                <button class="category-filter-btn" data-category="jeans">Jeans</button>
+                <button class="category-filter-btn" data-category="chaussures">Chaussures</button>
+                <button class="category-filter-btn" data-category="sacs">Sacs à main</button>
+                <button class="category-filter-btn" data-category="accessoires">Accessoires</button>
+            </div>
+
+            <div class="products-grid" id="productsContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Chargement des produits...</p>
+                </div>
+            </div>
+
+            <div class="shop-features">
+                <div class="feature-card">
+                    <i class="fas fa-shipping-fast"></i>
+                    <h4>Livraison rapide</h4>
+                    <p>Colis expédié sous 24h</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-leaf"></i>
+                    <h4>Produits naturels</h4>
+                    <p>100% naturels et authentiques</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-award"></i>
+                    <h4>Qualité garantie</h4>
+                    <p>Sélection rigoureuse</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-headset"></i>
+                    <h4>Support client</h4>
+                    <p>À votre écoute</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="section" id="contact">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-phone-alt"></i> Contactez-nous</h2>
+                <div class="section-subtitle">Nous sommes à votre écoute</div>
+            </div>
+
+            <div class="contact-container">
+                <div class="contact-info">
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Notre adresse</h3>
+                            <p>Avenue de l'Indépendance</p>
+                            <p>Badalabougou, Bamako</p>
+                            <p>Mali</p>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Téléphone</h3>
+                            <p>+223 20 21 22 23</p>
+                            <p>+223 76 01 23 45</p>
+                            <p class="info-note">Service client 7j/7</p>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Horaires d'ouverture</h3>
+                            <p><strong>Lundi - Samedi</strong></p>
+                            <p>10h00 - 22h00</p>
+                            <p><strong>Dimanche</strong></p>
+                            <p>12h00 - 20h00</p>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Email</h3>
+                            <p>contact@titigoldentaste.ml</p>
+                            <p>reservation@titigoldentaste.ml</p>
+                            <p class="info-note">Réponse sous 24h</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-form-container">
+                    <h3><i class="fas fa-paper-plane"></i> Envoyez-nous un message</h3>
+                    <form id="contactForm" class="contact-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="text" id="contactName" placeholder="Votre nom" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" id="contactEmail" placeholder="Votre email" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="contactSubject" placeholder="Sujet" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="contactMessage" rows="5" placeholder="Votre message..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Envoyer le message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Titi Golden Taste</h3>
+                    <p class="footer-description">
+                        Restaurant premium spécialisé dans la cuisine malienne authentique. 
+                        Qualité, tradition et innovation depuis 2024.
+                    </p>
+                    <div class="footer-social">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-tiktok"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Liens rapides</h4>
+                    <ul class="footer-links">
+                        <li><a href="#home">Accueil</a></li>
+                        <li><a href="#menu">Notre menu</a></li>
+                        <li><a href="boutique.html">Boutique</a></li>
+                        <li><a href="#order">Commander</a></li>
+                        <li><a href="#location">Nous trouver</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Informations</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">À propos de nous</a></li>
+                        <li><a href="#">Nos valeurs</a></li>
+                        <li><a href="#">Carrières</a></li>
+                        <li><a href="#">Blog culinaire</a></li>
+                        <li><a href="#">Recettes</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Newsletter</h4>
+                    <p class="newsletter-text">
+                        Inscrivez-vous pour recevoir nos offres exclusives et nouveautés.
+                    </p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Votre email" required>
+                        <button type="submit" class="btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                    <div class="payment-methods">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <i class="fas fa-mobile-alt"></i>
+                        <i class="fab fa-cc-visa"></i>
+                        <i class="fab fa-cc-mastercard"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p class="copyright">
+                        &copy; 2024 Titi Golden Taste, Bamako - Mali. Tous droits réservés.
+                    </p>
+                    <div class="footer-legal">
+                        <a href="#">Mentions légales</a>
+                        <a href="#">Politique de confidentialité</a>
+                        <a href="#">Conditions d'utilisation</a>
+                        <a href="#">Cookies</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-sign-in-alt"></i> Connexion</h3>
+                <button class="modal-close" id="loginModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="quickLoginForm">
+                    <div class="form-group">
+                        <input type="email" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" placeholder="Mot de passe" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-sign-in-alt"></i> Se connecter
+                    </button>
+                </form>
+                <div class="modal-footer">
+                    <p>Pas encore de compte ? <a href="register.html">S'inscrire</a></p>
+                    <p><a href="#">Mot de passe oublié ?</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript: load config first to avoid duplicate base URL declarations -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/order.js"></script>
+    <script src="assets/js/cart.js"></script>
+    <!-- Leaflet JS (maps) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Front-end glue: products renderer, map init, mobile menu -->
+    <script src="assets/js/frontend.js"></script>
+
+    <script>
+    // Initialisation supplémentaire si nécessaire (tolérant aux différents IDs)
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page index.html chargée');
+        // Accept multiple possible IDs used across templates
+        const menuContainer = document.getElementById('menu-container') || document.getElementById('menuContainer') || document.getElementById('menu-of-the-day') || document.getElementById('menuContainer');
+        const productsContainer = document.getElementById('products-container') || document.getElementById('productsContainer') || document.getElementById('products-container');
+        console.log('Menu container exists:', !!menuContainer);
+        console.log('Products container exists:', !!productsContainer);
+
+        if (typeof loadMenu === 'function' && menuContainer) {
+            try { loadMenu(); } catch (e) { console.error(e); }
+        }
+
+        if (typeof loadProducts === 'function' && productsContainer) {
+            try { loadProducts(); } catch (e) { console.error(e); }
+        }
+
+        if (typeof updateLiveStatus === 'function') {
+            console.log('updateLiveStatus function exists');
+        }
+        
+        // Initialisation de la carte
+        if (typeof initMap === 'function') {
+            try { initMap(); } catch (e) { console.error(e); }
+        } else {
+            // Fallback simple pour la carte
+            const mapContainer = document.getElementById('restaurantMap');
+            if (mapContainer) {
+                try {
+                    const map = L.map('restaurantMap').setView([12.6392, -8.0029], 15); // Coordonnées de Bamako
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+                    L.marker([12.6392, -8.0029]).addTo(map)
+                        .bindPopup('Titi Golden Taste<br>Avenue de l\'Indépendance, Badalabougou')
+                        .openPopup();
+                } catch (e) {
+                    console.error('Erreur lors de l\'initialisation de la carte:', e);
+                }
+            }
+        }
+    });
+    </script>
+</body>
+</html>

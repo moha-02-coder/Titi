@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - Titi Golden Taste</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="admin-body">
+    <!-- Navigation d'administration -->
+    <nav class="admin-navbar">
+        <div class="navbar-brand">
+            <div class="brand-logo">
+                <i class="fas fa-crown"></i>
+                <span>Titi Golden Taste <strong>Admin</strong></span>
+            </div>
+        </div>
+        
+        <div class="navbar-user">
+            <div class="user-dropdown" id="userDropdown">
+                <div class="user-info">
+                    <span class="user-name" id="adminName">Administrateur</span>
+                    <span class="user-role"><i class="fas fa-user-shield"></i> Super Admin</span>
+                </div>
+                <div class="dropdown-menu">
+                    <a href="#" class="dropdown-item" id="profileBtn">
+                        <i class="fas fa-user-cog"></i> Mon compte
+                    </a>
+                    <a href="#" class="dropdown-item" id="settingsBtn">
+                        <i class="fas fa-cog"></i> Paramètres
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" class="dropdown-item text-danger" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <!-- Sidebar d'administration -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-tachometer-alt"></i> Tableau de bord</h3>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <!-- Gestion des menus -->
+                <li class="menu-section">
+                    <div class="section-title">
+                        <i class="fas fa-utensils"></i> Gestion des menus
+                    </div>
+                    <ul>
+                        <li>
+                            <a href="#menus" data-section="menus" class="menu-item active">
+                                <i class="fas fa-list"></i> Tous les menus
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#add-menu" data-section="add-menu" class="menu-item">
+                                <i class="fas fa-plus-circle"></i> Ajouter un menu
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#menu-du-jour" data-section="menu-du-jour" class="menu-item">
+                                <i class="fas fa-star"></i> Menu du jour
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Gestion des produits -->
+                <li class="menu-section">
+                    <div class="section-title">
+                        <i class="fas fa-store"></i> Boutique
+                    </div>
+                    <ul>
+                        <li>
+                            <a href="#products" data-section="products" class="menu-item">
+                                <i class="fas fa-box"></i> Tous les produits
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#add-product" data-section="add-product" class="menu-item">
+                                <i class="fas fa-plus"></i> Ajouter un produit
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#categories" data-section="categories" class="menu-item">
+                                <i class="fas fa-tags"></i> Catégories
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Gestion des utilisateurs -->
+                <li class="menu-section">
+                    <div class="section-title">
+                        <i class="fas fa-users"></i> Utilisateurs
+                    </div>
+                    <ul>
+                        <li>
+                            <a href="#users" data-section="users" class="menu-item">
+                                <i class="fas fa-user-friends"></i> Tous les utilisateurs
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#livreurs" data-section="livreurs" class="menu-item">
+                                <i class="fas fa-motorcycle"></i> Livreurs
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#add-user" data-section="add-user" class="menu-item">
+                                <i class="fas fa-user-plus"></i> Ajouter un utilisateur
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Commandes et statistiques -->
+                <li class="menu-section">
+                    <div class="section-title">
+                        <i class="fas fa-chart-line"></i> Commandes & Stats
+                    </div>
+                    <ul>
+                        <li>
+                            <a href="#orders" data-section="orders" class="menu-item">
+                                <i class="fas fa-shopping-bag"></i> Commandes
+                                <span class="badge badge-warning" id="pendingOrdersCount">0</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#analytics" data-section="analytics" class="menu-item">
+                                <i class="fas fa-chart-bar"></i> Statistiques
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Paramètres -->
+                <li class="menu-section">
+                    <div class="section-title">
+                        <i class="fas fa-cogs"></i> Configuration
+                    </div>
+                    <ul>
+                        <li>
+                            <a href="#settings" data-section="settings" class="menu-item">
+                                <i class="fas fa-sliders-h"></i> Paramètres
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#backup" data-section="backup" class="menu-item">
+                                <i class="fas fa-database"></i> Sauvegarde
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <a href="index.html" class="btn btn-sm btn-outline" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> Voir le site
+                </a>
+            </div>
+        </aside>
+
+        <!-- Contenu principal -->
+        <main class="admin-main">
+            <!-- En-tête avec statistiques rapides -->
+            <div class="admin-header">
+                <h1 id="pageTitle">Tableau de bord</h1>
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="todayOrders">0</span>
+                            <span class="stat-label">Commandes aujourd'hui</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="totalUsers">0</span>
+                            <span class="stat-label">Utilisateurs</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-warning">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="totalMenus">0</span>
+                            <span class="stat-label">Menus</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-info">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="totalProducts">0</span>
+                            <span class="stat-label">Produits</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sections du dashboard -->
+
+            <!-- Section: Tous les menus -->
+            <section id="menus" class="admin-section active">
+                <div class="section-header">
+                    <h2><i class="fas fa-list"></i> Tous les menus</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-primary" id="addNewMenuBtn">
+                            <i class="fas fa-plus"></i> Nouveau menu
+                        </button>
+                        <button class="btn btn-outline" id="refreshMenusBtn">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="section-content">
+                    <div class="table-responsive">
+                        <table class="data-table" id="menusTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Image</th>
+                                    <th>Nom</th>
+                                    <th>Description</th>
+                                    <th>Prix</th>
+                                    <th>Catégorie</th>
+                                    <th>Disponible</th>
+                                    <th>Menu du jour</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Données chargées via JavaScript -->
+                                <tr>
+                                    <td colspan="9" class="text-center">
+                                        <div class="loading">
+                                            <div class="spinner"></div>
+                                            <p>Chargement des menus...</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Ajouter un menu -->
+            <section id="add-menu" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-plus-circle"></i> Ajouter un nouveau menu</h2>
+                </div>
+                <div class="section-content">
+                    <form id="addMenuForm" class="admin-form" enctype="multipart/form-data">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="menuName">Nom du menu *</label>
+                                <input type="text" id="menuName" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="menuPrice">Prix (FCFA) *</label>
+                                <input type="number" id="menuPrice" name="price" min="0" step="100" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="menuCategory">Catégorie *</label>
+                                <select id="menuCategory" name="category_id" required>
+                                    <option value="">Sélectionner une catégorie</option>
+                                    <!-- Options chargées via JS -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="menuPrepTime">Temps de préparation (min)</label>
+                                <input type="number" id="menuPrepTime" name="preparation_time" min="5" max="120">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="menuDescription">Description</label>
+                            <textarea id="menuDescription" name="description" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="menuIngredients">Ingrédients (un par ligne)</label>
+                            <textarea id="menuIngredients" name="ingredients" rows="4" 
+                                      placeholder="Exemple:&#10;Riz&#10;Poulet&#10;Légumes"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Image du menu</label>
+                            <div class="file-upload" id="menuImageUpload">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <p>Glissez-déposez l'image ici</p>
+                                <p class="small">ou cliquez pour sélectionner</p>
+                                <p class="small">JPG, PNG jusqu'à 5MB</p>
+                                <input type="file" name="image" accept="image/*">
+                            </div>
+                            <div class="file-preview" id="menuImagePreview" style="display: none;">
+                                <img id="menuPreviewImage" class="preview-image" src="" alt="Aperçu">
+                                <button type="button" class="btn btn-sm btn-danger remove-file">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="available" checked>
+                                    <span>Disponible à la vente</span>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="is_daily_menu">
+                                    <span>Définir comme menu du jour</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Enregistrer le menu
+                            </button>
+                            <button type="reset" class="btn btn-outline">
+                                <i class="fas fa-times"></i> Annuler
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Section: Menu du jour -->
+            <section id="menu-du-jour" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-star"></i> Menu du jour</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-warning" id="editDailyMenuBtn">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                    </div>
+                </div>
+                <div class="section-content">
+                    <div class="daily-menu-card" id="dailyMenuCard">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Chargement du menu du jour...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Tous les produits -->
+            <section id="products" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-box"></i> Tous les produits</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-primary" id="addNewProductBtn">
+                            <i class="fas fa-plus"></i> Nouveau produit
+                        </button>
+                        <div class="search-box">
+                            <input type="text" placeholder="Rechercher un produit..." id="productSearch">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-content">
+                    <div class="products-grid" id="productsGrid">
+                        <!-- Produits chargés via JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Ajouter un produit -->
+            <section id="add-product" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-plus"></i> Ajouter un produit</h2>
+                </div>
+                <div class="section-content">
+                    <form id="addProductForm" class="admin-form" enctype="multipart/form-data">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productName">Nom du produit *</label>
+                                <input type="text" id="productName" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="productSku">Code SKU</label>
+                                <input type="text" id="productSku" name="sku" placeholder="ex: PROD-001">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productCategory">Catégorie *</label>
+                                <select id="productCategory" name="category_id" required>
+                                    <option value="">Sélectionner une catégorie</option>
+                                    <!-- Options chargées via JS -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="productType">Type de produit</label>
+                                <select id="productType" name="type">
+                                    <option value="physical">Produit physique</option>
+                                    <option value="digital">Produit digital</option>
+                                    <option value="service">Service</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productPrice">Prix (FCFA) *</label>
+                                <input type="number" id="productPrice" name="price" min="0" step="50" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="productStock">Stock initial</label>
+                                <input type="number" id="productStock" name="stock" min="0" value="0">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="productDescription">Description</label>
+                            <textarea id="productDescription" name="description" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Images du produit</label>
+                            <div class="multi-upload" id="productImagesUpload">
+                                <div class="upload-area">
+                                    <i class="fas fa-images"></i>
+                                    <p>Glissez-déposez jusqu'à 5 images</p>
+                                    <p class="small">JPG, PNG jusqu'à 5MB par image</p>
+                                </div>
+                                <input type="file" name="images[]" multiple accept="image/*">
+                            </div>
+                            <div class="images-preview" id="productImagesPreview"></div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Enregistrer le produit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Section: Catégories -->
+            <section id="categories" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-tags"></i> Gestion des catégories</h2>
+                    <button class="btn btn-primary" id="addCategoryBtn">
+                        <i class="fas fa-plus"></i> Nouvelle catégorie
+                    </button>
+                </div>
+                <div class="section-content">
+                    <div class="categories-container">
+                        <!-- Catégories chargées via JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Tous les utilisateurs -->
+            <section id="users" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-user-friends"></i> Gestion des utilisateurs</h2>
+                    <div class="section-actions">
+                        <div class="user-filter">
+                            <select id="userRoleFilter">
+                                <option value="">Tous les rôles</option>
+                                <option value="client">Clients</option>
+                                <option value="livreur">Livreurs</option>
+                                <option value="admin">Administrateurs</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-content">
+                    <div class="table-responsive">
+                        <table class="data-table" id="usersTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nom</th>
+                                    <th>Email</th>
+                                    <th>Téléphone</th>
+                                    <th>Rôle</th>
+                                    <th>Inscrit le</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Données chargées via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Livreurs -->
+            <section id="livreurs" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-motorcycle"></i> Gestion des livreurs</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-primary" id="addDriverBtn">
+                            <i class="fas fa-user-plus"></i> Ajouter un livreur
+                        </button>
+                    </div>
+                </div>
+                <div class="section-content">
+                    <div class="drivers-container">
+                        <!-- Livreurs chargés via JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Ajouter un utilisateur -->
+            <section id="add-user" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-user-plus"></i> Ajouter un utilisateur</h2>
+                </div>
+                <div class="section-content">
+                    <form id="addUserForm" class="admin-form">
+                        <!-- Formulaire similaire à register.php mais côté admin -->
+                    </form>
+                </div>
+            </section>
+
+            <!-- Section: Commandes -->
+            <section id="orders" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-shopping-bag"></i> Commandes</h2>
+                    <div class="section-actions">
+                        <div class="order-filter">
+                            <select id="orderStatusFilter">
+                                <option value="">Tous les statuts</option>
+                                <option value="pending">En attente</option>
+                                <option value="confirmed">Confirmée</option>
+                                <option value="preparing">En préparation</option>
+                                <option value="ready">Prête</option>
+                                <option value="delivering">En livraison</option>
+                                <option value="delivered">Livrée</option>
+                                <option value="cancelled">Annulée</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-content">
+                    <div class="orders-list" id="ordersList">
+                        <!-- Commandes chargées via JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Statistiques -->
+            <section id="analytics" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-bar"></i> Statistiques</h2>
+                    <div class="section-actions">
+                        <select id="statsPeriod">
+                            <option value="today">Aujourd'hui</option>
+                            <option value="week">Cette semaine</option>
+                            <option value="month" selected>Ce mois</option>
+                            <option value="year">Cette année</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="section-content">
+                    <div class="stats-grid">
+                        <div class="chart-container">
+                            <h3>Ventes par jour</h3>
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3>Menus les plus populaires</h3>
+                            <canvas id="popularMenusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Paramètres -->
+            <section id="settings" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-sliders-h"></i> Paramètres du restaurant</h2>
+                </div>
+                <div class="section-content">
+                    <form id="settingsForm" class="admin-form">
+                        <!-- Formulaire de paramètres -->
+                    </form>
+                </div>
+            </section>
+
+            <!-- Section: Sauvegarde -->
+            <section id="backup" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-database"></i> Sauvegarde des données</h2>
+                </div>
+                <div class="section-content">
+                    <div class="backup-actions">
+                        <button class="btn btn-primary" id="createBackupBtn">
+                            <i class="fas fa-save"></i> Créer une sauvegarde
+                        </button>
+                        <button class="btn btn-outline" id="restoreBackupBtn">
+                            <i class="fas fa-undo"></i> Restaurer
+                        </button>
+                    </div>
+                    <div class="backup-list" id="backupList">
+                        <!-- Liste des sauvegardes -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="confirmationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Confirmation</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">Êtes-vous sûr de vouloir effectuer cette action ?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="modalCancelBtn">Annuler</button>
+                <button class="btn btn-danger" id="modalConfirmBtn">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="editModal">
+        <div class="modal-content large">
+            <!-- Contenu chargé dynamiquement -->
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Chargement...</p>
+    </div>
+
+    <!-- Toast container -->
+    <div class="toast-container"></div>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/admin.js"></script>
+</body>
+</html>

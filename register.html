@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - Titi Golden Taste</title>
+    <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-wrapper">
+            <!-- Sidebar avec branding -->
+            <aside class="auth-sidebar">
+                <div class="brand-section">
+                    <h1 class="brand-logo">Titi Golden Taste</h1>
+                    <p class="brand-tagline">L'excellence culinaire africaine</p>
+                    <div class="registration-badge">
+                        <span><i class="fas fa-user-plus"></i> Inscription</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-features">
+                    <div class="feature-item">
+                        <i class="fas fa-gem"></i>
+                        <div class="feature-text">
+                            <h4>Avantages Premium</h4>
+                            <p>Commandes prioritaires et offres exclusives</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-history"></i>
+                        <div class="feature-text">
+                            <h4>Historique de commandes</h4>
+                            <p>Suivez toutes vos commandes en un clic</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-heart"></i>
+                        <div class="feature-text">
+                            <h4>Favoris</h4>
+                            <p>Sauvegardez vos plats préférés</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-bolt"></i>
+                        <div class="feature-text">
+                            <h4>Commande rapide</h4>
+                            <p>Recommandations personnalisées</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-footer">
+                    <div class="registration-stats">
+                        <h4>Rejoignez notre communauté</h4>
+                        <div class="stats-grid">
+                            <div class="stat">
+                                <i class="fas fa-users"></i>
+                                <div>
+                                    <strong>1,000+</strong>
+                                    <span>Clients satisfaits</span>
+                                </div>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-motorcycle"></i>
+                                <div>
+                                    <strong>50+</strong>
+                                    <span>Livreurs actifs</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="login.html" class="back-link">
+                        <i class="fas fa-sign-in-alt"></i> Déjà inscrit ? Connectez-vous
+                    </a>
+                </div>
+            </aside>
+
+            <!-- Main Registration Form -->
+            <main class="auth-main">
+                <div class="auth-header">
+                    <h1>Créez votre compte</h1>
+                    <p>Rejoignez notre communauté culinaire</p>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="registration-progress">
+                    <div class="progress-step active">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Informations</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Vérification</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Confirmation</div>
+                    </div>
+                </div>
+
+                <!-- Role Selection -->
+                <div class="role-selection">
+                    <div class="role-option active" data-role="client">
+                        <div class="role-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h3>Client</h3>
+                        <p>Commandez vos plats préférés</p>
+                        <ul class="role-benefits">
+                            <li><i class="fas fa-check"></i> Livraison rapide</li>
+                            <li><i class="fas fa-check"></i> Suivi en temps réel</li>
+                            <li><i class="fas fa-check"></i> Offres exclusives</li>
+                        </ul>
+                    </div>
+                    <div class="role-option" data-role="livreur">
+                        <div class="role-icon">
+                            <i class="fas fa-motorcycle"></i>
+                        </div>
+                        <h3>Livreur Partenaire</h3>
+                        <p>Rejoignez notre équipe de livraison</p>
+                        <ul class="role-benefits">
+                            <li><i class="fas fa-check"></i> Revenus flexibles</li>
+                            <li><i class="fas fa-check"></i> Horaires libres</li>
+                            <li><i class="fas fa-check"></i> Prime de performance</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Registration Form -->
+                <form id="registerForm" class="auth-form" enctype="multipart/form-data">
+                    <!-- Informations personnelles -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-user-circle"></i> Informations personnelles</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="first_name" class="form-label">
+                                    Prénom <span class="required">*</span>
+                                </label>
+                                <input type="text" name="first_name" id="first_name" class="form-input" required
+                                       placeholder="Votre prénom" autocomplete="given-name" aria-describedby="firstNameError">
+                                <div class="form-error" id="firstNameError" role="alert" aria-live="polite"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="last_name" class="form-label">
+                                    Nom <span class="required">*</span>
+                                </label>
+                                <input type="text" name="last_name" id="last_name" class="form-input" required
+                                       placeholder="Votre nom" autocomplete="family-name" aria-describedby="lastNameError">
+                                <div class="form-error" id="lastNameError" role="alert" aria-live="polite"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email" class="form-label">
+                                Email <span class="required">*</span>
+                            </label>
+                            <input type="email" name="email" id="email" class="form-input" required
+                                   placeholder="exemple@email.com" autocomplete="email" aria-describedby="emailError">
+                            <div class="form-error" id="emailError" role="alert" aria-live="polite"></div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="phone" class="form-label">
+                                    Téléphone <span class="required">*</span>
+                                </label>
+                                <input type="tel" name="phone" id="phone" class="form-input" required
+                                       placeholder="Ex: 76 01 23 45" autocomplete="tel" pattern="[0-9\s]{8,15}" aria-describedby="phoneError">
+                                <div class="form-error" id="phoneError" role="alert" aria-live="polite"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="birth_date" class="form-label">
+                                    Date de naissance
+                                </label>
+                                <input type="date" name="birth_date" id="birth_date" class="form-input"
+                                       max="<?php echo date('Y-m-d', strtotime('-18 years')); ?>" aria-label="Date de naissance">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Adresse -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-map-marker-alt"></i> Adresse de livraison</h3>
+                        
+                        <div class="form-group full-width">
+                            <label for="address" class="form-label">
+                                Adresse complète <span class="required">*</span>
+                            </label>
+                            <textarea name="address" id="address" class="form-input address-input" rows="2" required
+                                      placeholder="Rue, numéro, quartier, ville" autocomplete="street-address" aria-describedby="addressError"></textarea>
+                            <div class="form-error" id="addressError" role="alert" aria-live="polite"></div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="city" class="form-label">
+                                    Ville <span class="required">*</span>
+                                </label>
+                                <input type="text" name="city" id="city" class="form-input" required
+                                       value="Bamako" readonly aria-label="Ville">
+                            </div>
+                            <div class="form-group">
+                                <label for="quarter" class="form-label">
+                                    Quartier <span class="required">*</span>
+                                </label>
+                                <input type="text" name="quarter" id="quarter" class="form-input" required
+                                       placeholder="Votre quartier" autocomplete="address-level2">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sécurité -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-shield-alt"></i> Sécurité du compte</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="password" class="form-label">
+                                    Mot de passe <span class="required">*</span>
+                                </label>
+                                <div class="password-wrapper">
+                                    <input type="password" name="password" id="password" class="form-input" required
+                                           placeholder="Minimum 8 caractères" autocomplete="new-password" minlength="8" aria-describedby="passwordRequirements">
+                                    <button type="button" class="password-toggle" aria-label="Afficher/masquer le mot de passe">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="password-strength" aria-live="polite">
+                                    <div class="strength-meter">
+                                        <div class="strength-fill"></div>
+                                    </div>
+                                    <div class="strength-text"></div>
+                                </div>
+                                
+                                <div class="requirements-list" id="passwordRequirements">
+                                    <h5>Exigences de sécurité :</h5>
+                                    <ul>
+                                        <li id="req-length" class="requirement-item">✓ Au moins 8 caractères</li>
+                                        <li id="req-uppercase" class="requirement-item">✓ Une lettre majuscule</li>
+                                        <li id="req-lowercase" class="requirement-item">✓ Une lettre minuscule</li>
+                                        <li id="req-number" class="requirement-item">✓ Un chiffre</li>
+                                        <li id="req-special" class="requirement-item">✓ Un caractère spécial</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="password_confirm" class="form-label">
+                                    Confirmer le mot de passe <span class="required">*</span>
+                                </label>
+                                <div class="password-wrapper">
+                                    <input type="password" name="password_confirm" id="password_confirm" class="form-input" required
+                                           placeholder="Retapez votre mot de passe" autocomplete="new-password" aria-describedby="passwordConfirmError">
+                                    <button type="button" class="password-toggle" aria-label="Afficher/masquer le mot de passe">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="form-error" id="passwordConfirmError" role="alert" aria-live="polite"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Photo de profil -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-camera"></i> Photo de profil</h3>
+                        
+                        <div class="form-group full-width">
+                            <label class="form-label">Photo (optionnelle)</label>
+                            <div class="file-upload" id="avatarUpload" role="button" tabindex="0" aria-label="Zone de dépôt pour photo de profil">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <p>Glissez-déposez votre photo ici</p>
+                                <p class="small">ou cliquez pour sélectionner</p>
+                                <p class="small">PNG, JPG jusqu'à 5MB</p>
+                                <input type="file" name="avatar" id="avatar" accept="image/*" capture="user" aria-label="Sélectionner une photo de profil">
+                            </div>
+                            
+                            <div class="file-upload-note">
+                                <i class="fas fa-info-circle"></i>
+                                La photo de profil est optionnelle mais recommandée pour une meilleure expérience.
+                            </div>
+                            
+                            <div class="file-preview" id="avatarPreview" style="display: none;" role="region" aria-label="Aperçu de la photo de profil">
+                                <img id="avatarImage" class="preview-image" src="" alt="Aperçu de la photo de profil">
+                                <div class="file-info">
+                                    <h4 id="avatarName"></h4>
+                                    <p id="avatarSize"></p>
+                                    <button type="button" class="btn btn-sm remove-file" aria-label="Supprimer la photo">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Champs spécifiques aux livreurs -->
+                    <div id="driverFields" class="form-section" style="display: none;">
+                        <h3><i class="fas fa-id-card"></i> Informations livreur</h3>
+                        
+                        <!-- Pièce d'identité -->
+                        <div class="form-group full-width">
+                            <label for="id_document" class="form-label">
+                                Pièce d'identité <span class="required">*</span>
+                            </label>
+                            <div class="file-upload" id="id_documentUpload" role="button" tabindex="0" aria-label="Zone de dépôt pour pièce d'identité">
+                                <div class="upload-icon">
+                                    <i class="fas fa-file-upload"></i>
+                                </div>
+                                <p>Pièce d'identité recto/verso</p>
+                                <p class="small">PNG, JPG, PDF jusqu'à 5MB</p>
+                                <input type="file" name="id_document" id="id_document" accept="image/*,.pdf" required aria-label="Sélectionner une pièce d'identité">
+                            </div>
+                            
+                            <div class="file-upload-note">
+                                <i class="fas fa-shield-alt"></i>
+                                Votre pièce d'identité est traitée de manière sécurisée et n'est partagée avec personne.
+                            </div>
+                            
+                            <div class="file-preview" id="id_documentPreview" style="display: none;" role="region" aria-label="Aperçu de la pièce d'identité">
+                                <div id="id_documentPreviewContent"></div>
+                                <div class="file-info">
+                                    <h4 id="id_documentName"></h4>
+                                    <p id="id_documentSize"></p>
+                                    <button type="button" class="btn btn-sm remove-file" aria-label="Supprimer la pièce d'identité">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Informations du véhicule -->
+                        <h4 class="vehicle-title">Informations du véhicule</h4>
+                        <div class="vehicle-details form-grid">
+                            <div class="form-group">
+                                <label for="vehicle_type" class="form-label">Type de véhicule</label>
+                                <select name="vehicle_type" id="vehicle_type" class="form-input" required>
+                                    <option value="">Sélectionner</option>
+                                    <option value="moto">Moto</option>
+                                    <option value="velo">Vélo</option>
+                                    <option value="voiture">Voiture</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="vehicle_brand" class="form-label">Marque</label>
+                                <input type="text" name="vehicle_brand" id="vehicle_brand" class="form-input"
+                                       placeholder="Ex: Yamaha" autocomplete="organization">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="vehicle_model" class="form-label">Modèle</label>
+                                <input type="text" name="vehicle_model" id="vehicle_model" class="form-input"
+                                       placeholder="Ex: Crypton">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="vehicle_year" class="form-label">Année</label>
+                                <input type="number" name="vehicle_year" id="vehicle_year" class="form-input"
+                                       placeholder="Ex: 2020" min="2000" max="2024">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="vehicle_plate" class="form-label">Plaque d'immatriculation</label>
+                                <input type="text" name="vehicle_plate" id="vehicle_plate" class="form-input"
+                                       placeholder="Ex: ML-1234-AB">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Consentements -->
+                    <div class="consent-section">
+                        <h4><i class="fas fa-file-contract"></i> Conditions d'utilisation</h4>
+                        
+                        <div class="registration-terms">
+                            <p><strong>Conditions Générales d'Utilisation</strong></p>
+                            <p>En créant un compte sur Titi Golden Taste, vous acceptez :</p>
+                            <ol>
+                                <li>De fournir des informations exactes et à jour</li>
+                                <li>De maintenir la confidentialité de votre compte</li>
+                                <li>De respecter les règles de la communauté</li>
+                                <li>D'accepter nos politiques de confidentialité</li>
+                                <li>Pour les livreurs : de respecter les standards de service</li>
+                            </ol>
+                            <p>Nous nous réservons le droit de suspendre tout compte ne respectant pas ces conditions.</p>
+                        </div>
+                        
+                        <div class="form-options">
+                            <label class="checkbox">
+                                <input type="checkbox" name="accept_terms" id="accept_terms" required aria-describedby="termsError">
+                                <span>J'accepte les <a href="#" target="_blank">conditions générales d'utilisation</a> 
+                                et la <a href="#" target="_blank">politique de confidentialité</a> <span class="required">*</span></span>
+                            </label>
+                            
+                            <label class="checkbox">
+                                <input type="checkbox" name="newsletter" id="newsletter" checked>
+                                <span>Je souhaite recevoir les offres spéciales et nouveautés par email</span>
+                            </label>
+                            
+                            <label class="checkbox">
+                                <input type="checkbox" name="sms_notifications" id="sms_notifications" checked>
+                                <span>Je souhaite recevoir des notifications SMS pour le suivi de mes commandes</span>
+                            </label>
+                        </div>
+                        <div class="form-error" id="termsError" role="alert" aria-live="polite"></div>
+                    </div>
+
+                    <!-- Soumission -->
+                    <div class="auth-submit">
+                        <button type="submit" class="btn btn-primary" aria-label="Créer mon compte">
+                            <i class="fas fa-user-plus"></i> Créer mon compte
+                        </button>
+                        <p class="small" style="margin-top: 15px; text-align: center; color: #666;">
+                            <i class="fas fa-lock" aria-hidden="true"></i> Vos données sont sécurisées et cryptées
+                        </p>
+                    </div>
+                </form>
+
+                <div class="auth-footer">
+                    <p>Déjà inscrit ? <a href="login.html">Connectez-vous ici</a></p>
+                    <p><a href="index.html"><i class="fas fa-home"></i> Retour à la page d'accueil</a></p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" role="alert" aria-live="assertive">
+        <div class="spinner"></div>
+        <p>Création de votre compte...</p>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/auth.js"></script>
+</body>
+</html>

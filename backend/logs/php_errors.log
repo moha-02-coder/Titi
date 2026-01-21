@@ -1,0 +1,589 @@
+[19-Jan-2026 01:27:12 UTC] === DÉBUT INSCRIPTION ===
+[19-Jan-2026 01:27:12 UTC] Méthode: POST
+[19-Jan-2026 01:27:12 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundarykjHP5fe71kLvzXgm
+[19-Jan-2026 01:27:12 UTC] Données POST: Array
+(
+    [first_name] => Moha
+    [last_name] => Guindo
+    [email] => mohametguindo@gmail.com
+    [phone] => 78527389
+    [birth_date] => 2003-05-06
+    [address] => bamako-mali rue 12
+    [city] => Bamako
+    [quarter] => Nafadji
+    [password] => AzertyMomo9414
+    [password_confirm] => AzertyMomo9414
+    [vehicle_type] => 
+    [vehicle_brand] => 
+    [vehicle_model] => 
+    [vehicle_year] => 
+    [vehicle_plate] => 
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => client
+)
+
+[19-Jan-2026 01:27:12 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[19-Jan-2026 01:27:12 UTC] PHP Fatal error:  Uncaught Error: Class "Database" not found in C:\wamp64\www\titi-golden-taste\backend\api\auth\register.php:270
+Stack trace:
+#0 {main}
+  thrown in C:\wamp64\www\titi-golden-taste\backend\api\auth\register.php on line 270
+[19-Jan-2026 13:26:49 UTC] === DÉBUT INSCRIPTION ===
+[19-Jan-2026 13:26:49 UTC] Méthode: POST
+[19-Jan-2026 13:26:49 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryupQOtKAH749yT8lX
+[19-Jan-2026 13:26:49 UTC] Données POST: Array
+(
+    [first_name] => John
+    [last_name] => Doe
+    [email] => johndoe@gmail.com
+    [phone] => 78909876
+    [birth_date] => 
+    [address] => Bamako Mali
+    [city] => Bamako
+    [quarter] => xpertproinformatique3@gmail.com
+    [password] => W23MjmJgaK*T
+    [password_confirm] => W23MjmJgaK*T
+    [vehicle_type] => 
+    [vehicle_brand] => 
+    [vehicle_model] => 
+    [vehicle_year] => 
+    [vehicle_plate] => 
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => client
+)
+
+[19-Jan-2026 13:26:49 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[19-Jan-2026 13:26:49 UTC] PHP Fatal error:  Uncaught Error: Class "Database" not found in C:\wamp64\www\titi-golden-taste\backend\api\auth\register.php:271
+Stack trace:
+#0 {main}
+  thrown in C:\wamp64\www\titi-golden-taste\backend\api\auth\register.php on line 271
+[19-Jan-2026 13:32:03 UTC] === DÉBUT INSCRIPTION ===
+[19-Jan-2026 13:32:03 UTC] Méthode: POST
+[19-Jan-2026 13:32:03 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryjsAJ1sBMvoAF4jwK
+[19-Jan-2026 13:32:03 UTC] Données POST: Array
+(
+    [first_name] => Moha
+    [last_name] => Guindo
+    [email] => xpertproinformarique3@gmail.com
+    [phone] => 78909876
+    [birth_date] => 
+    [address] => Bamako Doumanzana Mali
+    [city] => Bamako
+    [quarter] => xpertproinformatique3@gmail.com
+    [password] => W23MjmJgaK*T
+    [password_confirm] => W23MjmJgaK*T
+    [vehicle_type] => 
+    [vehicle_brand] => 
+    [vehicle_model] => 
+    [vehicle_year] => 
+    [vehicle_plate] => 
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => client
+)
+
+[19-Jan-2026 13:32:03 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[19-Jan-2026 13:32:03 UTC] PHP Fatal error:  Uncaught Error: Class "Database" not found in C:\wamp64\www\titi-golden-taste\backend\api\auth\register.php:271
+Stack trace:
+#0 {main}
+  thrown in C:\wamp64\www\titi-golden-taste\backend\api\auth\register.php on line 271
+[20-Jan-2026 00:13:11 UTC] === DÉBUT INSCRIPTION ===
+[20-Jan-2026 00:13:11 UTC] Méthode: POST
+[20-Jan-2026 00:13:11 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundarytW5kYOxo35xoD4Bd
+[20-Jan-2026 00:13:11 UTC] Données POST: Array
+(
+    [first_name] => John
+    [last_name] => Doe
+    [email] => johndoe@gmail.com
+    [phone] => 78909876
+    [birth_date] => 
+    [address] => Bamako Mali
+    [city] => Bamako
+    [quarter] => xpertproinformatique3@gmail.com
+    [password] => W23MjmJgaK*T
+    [password_confirm] => W23MjmJgaK*T
+    [vehicle_type] => 
+    [vehicle_brand] => 
+    [vehicle_model] => 
+    [vehicle_year] => 
+    [vehicle_plate] => 
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => client
+)
+
+[20-Jan-2026 00:13:11 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[20-Jan-2026 00:13:11 UTC] PHP Fatal error:  Uncaught Error: Class "Database" not found in C:\wamp64\www\titi-golden-taste\backend\api\auth\register.php:270
+Stack trace:
+#0 {main}
+  thrown in C:\wamp64\www\titi-golden-taste\backend\api\auth\register.php on line 270
+[20-Jan-2026 00:24:47 UTC] === DÉBUT INSCRIPTION ===
+[20-Jan-2026 00:24:47 UTC] Méthode: POST
+[20-Jan-2026 00:24:47 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryrBhBuHnHQuW4Ax6E
+[20-Jan-2026 00:24:47 UTC] Données POST: Array
+(
+    [first_name] => John
+    [last_name] => Doe
+    [email] => johndoe@gmail.com
+    [phone] => 78909876
+    [birth_date] => 
+    [address] => Bamako Mali
+    [city] => Bamako
+    [quarter] => xpertproinformatique3@gmail.com
+    [password] => W23MjmJgaK*T
+    [password_confirm] => W23MjmJgaK*T
+    [vehicle_type] => 
+    [vehicle_brand] => 
+    [vehicle_model] => 
+    [vehicle_year] => 
+    [vehicle_plate] => 
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => client
+)
+
+[20-Jan-2026 00:24:47 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[20-Jan-2026 00:24:47 UTC] PHP Fatal error:  Uncaught Error: Class "Database" not found in C:\wamp64\www\titi-golden-taste\backend\api\auth\register.php:302
+Stack trace:
+#0 {main}
+  thrown in C:\wamp64\www\titi-golden-taste\backend\api\auth\register.php on line 302
+[20-Jan-2026 00:25:17 UTC] === DÉBUT INSCRIPTION ===
+[20-Jan-2026 00:25:17 UTC] Méthode: POST
+[20-Jan-2026 00:25:17 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryjgOlo1IICAvKvjAC
+[20-Jan-2026 00:25:17 UTC] Données POST: Array
+(
+    [first_name] => John
+    [last_name] => Doe
+    [email] => johndoe@gmail.com
+    [phone] => 78909876
+    [birth_date] => 
+    [address] => Bamako Mali
+    [city] => Bamako
+    [quarter] => xpertproinformatique3@gmail.com
+    [password] => W23MjmJgaK*T
+    [password_confirm] => W23MjmJgaK*T
+    [vehicle_type] => 
+    [vehicle_brand] => 
+    [vehicle_model] => 
+    [vehicle_year] => 
+    [vehicle_plate] => 
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => client
+)
+
+[20-Jan-2026 00:25:17 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[20-Jan-2026 00:25:17 UTC] PHP Fatal error:  Uncaught Error: Class "Database" not found in C:\wamp64\www\titi-golden-taste\backend\api\auth\register.php:302
+Stack trace:
+#0 {main}
+  thrown in C:\wamp64\www\titi-golden-taste\backend\api\auth\register.php on line 302
+[20-Jan-2026 15:33:27 UTC] === DÉBUT INSCRIPTION ===
+[20-Jan-2026 15:33:27 UTC] Méthode: POST
+[20-Jan-2026 15:33:27 UTC] Données POST reçues
+[20-Jan-2026 16:01:54 UTC] === DÉBUT INSCRIPTION ===
+[20-Jan-2026 16:01:54 UTC] Méthode: POST
+[20-Jan-2026 16:01:54 UTC] Données POST reçues
+[20-Jan-2026 16:03:24 UTC] === DÉBUT INSCRIPTION ===
+[20-Jan-2026 16:03:24 UTC] Méthode: POST
+[20-Jan-2026 16:03:24 UTC] Données POST reçues
+[20-Jan-2026 16:05:04 UTC] === DÉBUT CONNEXION ===
+[20-Jan-2026 16:05:04 UTC] Méthode: POST
+[20-Jan-2026 16:05:04 UTC] Tentative de connexion pour: xpertproinformatique3@gmail.com
+[20-Jan-2026 16:05:34 UTC] === DÉBUT CONNEXION ===
+[20-Jan-2026 16:05:34 UTC] Méthode: POST
+[20-Jan-2026 16:05:34 UTC] Tentative de connexion pour: xpertproinformatique3@gmail.com
+[20-Jan-2026 16:14:47 UTC] === DÉBUT INSCRIPTION ===
+[20-Jan-2026 16:14:47 UTC] Méthode: POST
+[20-Jan-2026 16:14:47 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundary8F7blWfAoYx0QklJ
+[20-Jan-2026 16:14:47 UTC] Données POST: Array
+(
+    [first_name] => John
+    [last_name] => Doe
+    [email] => johndoe@gmail.com
+    [phone] => 75909876
+    [birth_date] => 
+    [address] => Bamako Mali
+    [city] => Bamako
+    [quarter] => xpertproinformatique3@gmail.com
+    [password] => W23MjmJgaK*T
+    [password_confirm] => W23MjmJgaK*T
+    [vehicle_type] => moto
+    [vehicle_brand] => Yamaha
+    [vehicle_model] => TVS
+    [vehicle_year] => 2021
+    [vehicle_plate] => AE-D456
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => livreur
+)
+
+[20-Jan-2026 16:14:47 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 937.png
+            [full_path] => 937.png
+            [type] => image/png
+            [tmp_name] => C:\wamp64\tmp\phpF833.tmp
+            [error] => 0
+            [size] => 183455
+        )
+
+)
+
+[21-Jan-2026 19:22:39 UTC] === DÉBUT INSCRIPTION ===
+[21-Jan-2026 19:22:39 UTC] Méthode: POST
+[21-Jan-2026 19:22:39 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryULEhUIOK0E03RQNg
+[21-Jan-2026 19:22:39 UTC] Données POST: Array
+(
+    [first_name] => John
+    [last_name] => Doe
+    [email] => johndoe@gmail.com
+    [phone] => 75909876
+    [birth_date] => 
+    [address] => Bamako Mali
+    [city] => Bamako
+    [quarter] => xpertproinformatique3@gmail.com
+    [password] => W23MjmJgaK*T
+    [password_confirm] => W23MjmJgaK*T
+    [vehicle_type] => moto
+    [vehicle_brand] => Yamaha
+    [vehicle_model] => TVS
+    [vehicle_year] => 2021
+    [vehicle_plate] => AE-D456
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => livreur
+)
+
+[21-Jan-2026 19:22:39 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 937.png
+            [full_path] => 937.png
+            [type] => image/png
+            [tmp_name] => C:\wamp64\tmp\php524C.tmp
+            [error] => 0
+            [size] => 183455
+        )
+
+)
+
+[21-Jan-2026 19:22:50 UTC] === DÉBUT INSCRIPTION ===
+[21-Jan-2026 19:22:50 UTC] Méthode: POST
+[21-Jan-2026 19:22:50 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryF7VxFAdRE5efBXS2
+[21-Jan-2026 19:22:50 UTC] Données POST: Array
+(
+    [first_name] => John
+    [last_name] => Doe
+    [email] => johndoe@gmail.com
+    [phone] => 75909876
+    [birth_date] => 
+    [address] => Bamako Mali
+    [city] => Bamako
+    [quarter] => xpertproinformatique3@gmail.com
+    [password] => W23MjmJgaK*T
+    [password_confirm] => W23MjmJgaK*T
+    [vehicle_type] => moto
+    [vehicle_brand] => Yamaha
+    [vehicle_model] => TVS
+    [vehicle_year] => 2021
+    [vehicle_plate] => AE-D456
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => livreur
+)
+
+[21-Jan-2026 19:22:50 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 937.png
+            [full_path] => 937.png
+            [type] => image/png
+            [tmp_name] => C:\wamp64\tmp\php7E9E.tmp
+            [error] => 0
+            [size] => 183455
+        )
+
+)
+
+[21-Jan-2026 19:22:54 UTC] === DÉBUT INSCRIPTION ===
+[21-Jan-2026 19:22:54 UTC] Méthode: POST
+[21-Jan-2026 19:22:54 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundary1e7EB0voPZ51YwwW
+[21-Jan-2026 19:22:54 UTC] Données POST: Array
+(
+    [first_name] => John
+    [last_name] => Doe
+    [email] => johndoe@gmail.com
+    [phone] => 75909876
+    [birth_date] => 
+    [address] => Bamako Mali
+    [city] => Bamako
+    [quarter] => xpertproinformatique3@gmail.com
+    [password] => W23MjmJgaK*T
+    [password_confirm] => W23MjmJgaK*T
+    [vehicle_type] => moto
+    [vehicle_brand] => Yamaha
+    [vehicle_model] => TVS
+    [vehicle_year] => 2021
+    [vehicle_plate] => AE-D456
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => livreur
+)
+
+[21-Jan-2026 19:22:54 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 937.png
+            [full_path] => 937.png
+            [type] => image/png
+            [tmp_name] => C:\wamp64\tmp\php8B52.tmp
+            [error] => 0
+            [size] => 183455
+        )
+
+)
+
+[21-Jan-2026 19:32:06 UTC] === DÉBUT INSCRIPTION ===
+[21-Jan-2026 19:32:06 UTC] Méthode: POST
+[21-Jan-2026 19:32:06 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryG6AN1f1Aw7wwiiM2
+[21-Jan-2026 19:32:06 UTC] Données POST: Array
+(
+    [first_name] => Moha
+    [last_name] => Guindo
+    [email] => xpertproinformarique3@gmail.com
+    [phone] => 76548204
+    [birth_date] => 
+    [address] => Bamako Doumanzana Mali
+    [city] => Bamako
+    [quarter] => xpertproinformatique3@gmail.com
+    [password] => W23MjmJgaK*T
+    [password_confirm] => W23MjmJgaK*T
+    [vehicle_type] => 
+    [vehicle_brand] => 
+    [vehicle_model] => 
+    [vehicle_year] => 
+    [vehicle_plate] => 
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => client
+)
+
+[21-Jan-2026 19:32:06 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+

@@ -1,0 +1,76 @@
+# Activer le module de réécriture
+RewriteEngine On
+RewriteBase /titi-golden-taste/
+
+# -------------------------------
+# Redirection des fichiers et dossiers existants
+# -------------------------------
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# -------------------------------
+# Routes API Auth
+# -------------------------------
+RewriteRule ^api/auth/login/?$ api/auth/login.php [L,QSA]
+RewriteRule ^api/auth/register/?$ api/auth/register.php [L,QSA]
+RewriteRule ^api/auth/logout/?$ api/auth/logout.php [L,QSA]
+RewriteRule ^api/auth/check-auth/?$ api/auth/check-auth.php [L,QSA]
+
+# -------------------------------
+# Routes API Menu
+# -------------------------------
+RewriteRule ^api/menu/du-jour/?$ api/menu/menu-du-jour.php [L,QSA]
+RewriteRule ^api/menu/([0-9]+)/?$ api/menu/details.php?id=$1 [L,QSA]
+
+# -------------------------------
+# Routes API Shop
+# -------------------------------
+RewriteRule ^api/shop/products/?$ api/shop/index.php [L,QSA]
+RewriteRule ^api/shop/products/([0-9]+)/?$ api/shop/details.php?id=$1 [L,QSA]
+
+# -------------------------------
+# Routes API Orders
+# -------------------------------
+RewriteRule ^api/orders/?$ api/orders/create.php [L,QSA]
+RewriteRule ^api/orders/my/?$ api/orders/user-orders.php [L,QSA]
+RewriteRule ^api/orders/all/?$ api/orders/all-orders.php [L,QSA]
+RewriteRule ^api/orders/([0-9]+)/?$ api/orders/order-details.php?id=$1 [L,QSA]
+RewriteRule ^api/orders/([0-9]+)/status/?$ api/orders/update-status.php [L,QSA]
+RewriteRule ^api/orders/track/?$ api/orders/track.php [L,QSA]
+RewriteRule ^api/orders/stats/?$ api/orders/stats.php [L,QSA]
+RewriteRule ^api/orders/search/?$ api/orders/search.php [L,QSA]
+
+# -------------------------------
+# Routes API Admin
+# -------------------------------
+RewriteRule ^api/admin/orders/?$ api/admin/orders.php [L,QSA]
+RewriteRule ^api/admin/products/?$ api/admin/products.php [L,QSA]
+RewriteRule ^api/admin/menu/?$ api/admin/menu.php [L,QSA]
+RewriteRule ^api/admin/customers/?$ api/admin/customers.php [L,QSA]
+RewriteRule ^api/admin/stats/?$ api/admin/stats.php [L,QSA]
+RewriteRule ^api/admin/settings/?$ api/admin/settings.php [L,QSA]
+
+# -------------------------------
+# Route API Live
+# -------------------------------
+RewriteRule ^api/live/?$ api/live.php [L,QSA]
+
+# -------------------------------
+# Headers CORS pour développement
+# -------------------------------
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+</IfModule>
+
+# Gestion des requêtes OPTIONS (preflight CORS)
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+# -------------------------------
+# PHP - désactiver l'affichage des erreurs en production
+# -------------------------------
+php_flag display_errors off
+php_value error_reporting 0
