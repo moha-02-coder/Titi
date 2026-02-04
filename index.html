@@ -16,8 +16,76 @@
         .location-content { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; margin-top: 30px; }
         @media (max-width: 768px) { .location-content { grid-template-columns: 1fr; } }
     </style>
+    <script>
+        // Correcteur léger des chemins d'images (sans override global)
+        (function() {
+            function inferBasePath() {
+                // Si le projet est servi depuis /titi-golden-taste/...
+                const p = (window.location && window.location.pathname) ? window.location.pathname : '/';
+                const m = p.match(/^(\/[^\/]+)(?:\/|$)/);
+                // On garde /titi-golden-taste si présent, sinon on ne force rien.
+                if (m && m[1] && m[1].toLowerCase().includes('titi-golden-taste')) return m[1];
+                return '';
+            }
+
+            const basePath = inferBasePath();
+            const defaultImage = (basePath || '') + '/assets/images/default.jpg';
+
+            function normalizeSrc(src) {
+                if (!src) return src;
+                // Ne pas toucher aux URLs absolues
+                if (/^https?:\/\//i.test(src) || src.startsWith('data:')) return src;
+                // Déjà préfixé
+                if (basePath && src.startsWith(basePath + '/')) return src;
+                // Normaliser /assets/... et assets/...
+                if (basePath && src.startsWith('/assets/')) return basePath + src;
+                if (basePath && src.startsWith('assets/')) return basePath + '/' + src;
+                return src;
+            }
+
+            // Corrige les images déjà présentes
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('img[src]').forEach(function(img) {
+                    const src = img.getAttribute('src');
+                    const fixed = normalizeSrc(src);
+                    if (fixed && fixed !== src) img.setAttribute('src', fixed);
+                });
+            });
+
+            // Fallback images manquantes (capture)
+            document.addEventListener('error', function(e) {
+                const t = e.target;
+                if (t && t.tagName === 'IMG') {
+                    const current = t.getAttribute('src') || '';
+                    const fixed = normalizeSrc(current);
+                    if (fixed && fixed !== current) {
+                        t.setAttribute('src', fixed);
+                        return;
+                    }
+                    if (t.src !== defaultImage) {
+                        t.src = defaultImage;
+                        t.classList.add('image-fallback');
+                        t.alt = 'Image non disponible';
+                    }
+                }
+            }, true);
+        })();
+    </script>
+        
+        <style>
+        .image-fallback {
+            opacity: 0.7;
+            filter: grayscale(50%);
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 5px;
+            background: #f9f9f9;
+        }
+        </style>
 </head>
 <body>
+    <!-- Recipes & Live script -->
+    <script src="assets/js/recipes-live.js"></script>
     <!-- Header avec navigation -->
     <header class="header">
         <div class="container">
@@ -46,7 +114,7 @@
                         <li><a href="#location" class="nav-link"><i class="fas fa-map-marker-alt"></i> Nous trouver</a></li>
                         <li><a href="#contact" class="nav-link"><i class="fas fa-phone"></i> Contact</a></li>
                         <li class="nav-auth">
-                            <a href="login.html" class="btn-login"><i class="fas fa-user"></i> Connexion</a>
+                            <a href="login.html" class="btn-login" data-login-modal="true"><i class="fas fa-user"></i> Connexion</a>
                             <a href="register.html" class="btn-register">Inscription</a>
                         </li>
                     </ul>
@@ -76,7 +144,7 @@
             <a href="#location" class="mobile-nav-link"><i class="fas fa-map-marker-alt"></i> Nous trouver</a>
             <a href="#contact" class="mobile-nav-link"><i class="fas fa-phone"></i> Contact</a>
             <div class="mobile-auth">
-                <a href="login.html" class="btn-login"><i class="fas fa-user"></i> Connexion</a>
+                <a href="login.html" class="btn-login" data-login-modal="true"><i class="fas fa-user"></i> Connexion</a>
                 <a href="register.html" class="btn-register">Inscription</a>
             </div>
         </nav>
@@ -325,8 +393,11 @@
                     <div class="menu-selection-grid" id="menuSelectionGrid">
                         <!-- Chargé dynamiquement -->
                     </div>
+                    <div id="selectedItemsList" class="selected-items" style="margin-top:18px">
+                        <!-- Mini-liste des plats sélectionnés -->
+                    </div>
                     <div class="wizard-actions">
-                        <button class="btn btn-next" onclick="nextStep(2)">
+                        <button class="btn btn-next" type="button" onclick="nextStep(2)">
                             Suivant <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
@@ -335,31 +406,45 @@
                 <!-- Step 2: Customization -->
                 <div class="wizard-step" id="wizardStep2">
                     <h3><i class="fas fa-cogs"></i> Personnalisez votre commande</h3>
-                    
-                    <div class="customization-section">
-                        <h4>Accompagnements</h4>
-                        <div class="options-grid" id="sideDishesOptions">
-                            <!-- Options chargées dynamiquement -->
-                        </div>
-                    </div>
 
-                    <div class="customization-section">
-                        <h4>Sauces</h4>
-                        <div class="options-grid" id="saucesOptions">
-                            <!-- Options chargées dynamiquement -->
-                        </div>
-                    </div>
+                    <div class="customize-layout">
+                        <div class="customize-left">
+                            <div class="customization-section">
+                                <h4>Accompagnements</h4>
+                                <div class="options-grid" id="sideDishesOptions">
+                                    <!-- Options chargées dynamiquement -->
+                                </div>
+                            </div>
 
-                    <div class="customization-section">
-                        <h4>Instructions spéciales</h4>
-                        <textarea id="specialInstructions" rows="3" placeholder="Ajoutez des instructions spéciales pour votre commande..."></textarea>
+                            <div class="customization-section">
+                                <h4>Sauces</h4>
+                                <div class="options-grid" id="saucesOptions">
+                                    <!-- Options chargées dynamiquement -->
+                                </div>
+                            </div>
+
+                            <div class="customization-section">
+                                <h4>Instructions spéciales</h4>
+                                <textarea id="specialInstructions" rows="3" placeholder="Ajoutez des instructions spéciales pour votre commande..."></textarea>
+                            </div>
+                        </div>
+
+                        <aside class="customize-right">
+                            <div class="customize-summary">
+                                <div class="customize-summary-title">Votre sélection</div>
+                                <div class="customize-summary-sub">Plats sélectionnés (étape 1)</div>
+                                <div id="customizeSelectedItems" class="customize-selected-items"></div>
+                                <div class="customize-summary-sub" style="margin-top:12px">Options choisies</div>
+                                <div id="customizeSelectedOptions" class="customize-selected-options"></div>
+                            </div>
+                        </aside>
                     </div>
 
                     <div class="wizard-actions">
-                        <button class="btn btn-prev" onclick="prevStep(1)">
+                        <button class="btn btn-prev" type="button" onclick="prevStep(1)">
                             <i class="fas fa-arrow-left"></i> Précédent
                         </button>
-                        <button class="btn btn-next" onclick="nextStep(3)">
+                        <button class="btn btn-next" type="button" onclick="nextStep(3)">
                             Suivant <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
@@ -465,10 +550,10 @@
                     </div>
 
                     <div class="wizard-actions">
-                        <button class="btn btn-prev" onclick="prevStep(2)">
+                        <button class="btn btn-prev" type="button" onclick="prevStep(2)">
                             <i class="fas fa-arrow-left"></i> Précédent
                         </button>
-                        <button class="btn btn-next" onclick="nextStep(4)">
+                        <button class="btn btn-next" type="button" onclick="nextStep(4)">
                             Suivant <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
@@ -590,10 +675,10 @@
                     </div>
 
                     <div class="wizard-actions">
-                        <button class="btn btn-prev" onclick="prevStep(3)">
+                        <button class="btn btn-prev" type="button" onclick="prevStep(3)">
                             <i class="fas fa-arrow-left"></i> Précédent
                         </button>
-                        <button class="btn btn-primary" id="placeOrderBtn">
+                        <button class="btn btn-primary" id="placeOrderBtn" type="button">
                             <i class="fas fa-check"></i> Confirmer la commande
                         </button>
                     </div>
@@ -630,7 +715,7 @@
                         </div>
 
                         <div class="confirmation-actions">
-                            <button class="btn" onclick="window.location.href='dashboard.html'">
+                            <button class="btn" onclick="window.location.href='admin/dashboard.html'">
                                 <i class="fas fa-user"></i> Suivre ma commande
                             </button>
                             <button class="btn btn-outline" onclick="startNewOrder()">
@@ -895,6 +980,38 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Front-end glue: products renderer, map init, mobile menu -->
     <script src="assets/js/frontend.js"></script>
+    <link rel="stylesheet" href="assets/css/customize-order.css">
+    <script src="assets/js/customize-order.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function(){
+        // Render menu customization in the menu selection grid
+        try{
+            if (window.TGTCustomize && typeof window.TGTCustomize.render === 'function'){
+                window.TGTCustomize.render('#menuSelectionGrid', {
+                    source: 'all',
+                    addText: 'Ajouter au panier',
+                    onDone: function(items){
+                        // update mini list
+                        renderSelectedItems(items);
+                        // dispatch to cart flow
+                        window.dispatchEvent(new CustomEvent('tgt:add-items-to-cart', { detail: { items } }));
+                    }
+                }).catch(console.error);
+            }
+        }catch(e){console.error(e)}
+
+        // also listen to global event
+        window.addEventListener('tgt:customization:done', function(e){ renderSelectedItems(e.detail.items || []); });
+
+        function renderSelectedItems(items){
+            const list = document.getElementById('selectedItemsList');
+            if (!list) return;
+            if (!items || items.length === 0){ list.innerHTML = '<em>Aucun plat sélectionné</em>'; return; }
+            list.innerHTML = items.map(it=>`<div class="item"><div><div class="name">${it.name}</div><div class="meta">Quantité: ${it.qty} • Prix unité: ${it.unit_price} FCFA</div></div><div class="price">${(it.qty*it.unit_price)||0} FCFA</div></div>`).join('');
+        }
+    });
+    </script>
 
     <script>
     // Initialisation supplémentaire si nécessaire (tolérant aux différents IDs)

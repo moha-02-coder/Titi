@@ -125,7 +125,7 @@ function createAuthToken($userId, $email, $role) {
         'role' => $role,
         'iat' => time(),
         'exp' => time() + (7 * 24 * 60 * 60), // 7 jours
-        'iss' => 'titi-golden-taste'
+        'iss' => 'titi_golden_taste'
     ]);
     
     $base64UrlHeader = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
@@ -330,10 +330,26 @@ try {
     $updateStmt->execute(['id' => $user['id']]);
     
     // === CRÉATION DE LA SESSION/TOKEN ===
+    // NOTE: users.role peut être un ENUM limité (ex: client/admin). Pour les livreurs,
+    // on détecte via l'existence d'un profil dans la table drivers.
     $role = $user['role'] ?? 'client';
+    $effectiveRole = $role;
+
+    // Detect driver profile (role logique)
+    $driverInfo = null;
+    try {
+        $driverStmt = $pdo->prepare("SELECT status, id_document, vehicle_type, vehicle_brand, vehicle_model, vehicle_plate, rating, total_deliveries FROM drivers WHERE user_id = :user_id LIMIT 1");
+        $driverStmt->execute(['user_id' => $user['id']]);
+        $driverInfo = $driverStmt->fetch(PDO::FETCH_ASSOC);
+        if ($driverInfo) {
+            $effectiveRole = 'delivery';
+        }
+    } catch (Exception $e) {
+        $driverInfo = null;
+    }
     
     // Token JWT pour l'API
-    $authToken = createAuthToken($user['id'], $user['email'], $role);
+    $authToken = createAuthToken($user['id'], $user['email'], $effectiveRole);
     
     // Session classique (cookies)
     if (session_status() === PHP_SESSION_NONE) {
@@ -351,7 +367,7 @@ try {
     $_SESSION = [
         'user_id' => $user['id'],
         'user_email' => $user['email'],
-        'user_role' => $role,
+        'user_role' => $effectiveRole,
         'user_name' => $user['first_name'] . ' ' . $user['last_name'],
         'user_avatar' => $user['avatar'] ?? null,
         'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
@@ -391,7 +407,7 @@ try {
             'user' => [
                 'id' => $user['id'],
                 'email' => $user['email'],
-                'role' => $role
+                'role' => $effectiveRole
             ],
             'permissions' => [],
             'metadata' => [
@@ -426,7 +442,8 @@ try {
         'last_name' => $user['last_name'],
         'email' => $user['email'],
         'phone' => $user['phone'],
-        'role' => $role,
+        // role logique côté client
+        'role' => $effectiveRole,
         'avatar' => $user['avatar'] ?? null,
         'verified' => (bool)($user['verified'] ?? false),
         'last_login' => $user['last_login'],
@@ -434,20 +451,9 @@ try {
                                      strtotime($user['password_changed_at']) < strtotime('-90 days')
     ];
     
-    // Ajouter des informations spécifiques au rôle
-    if (in_array($role, ['livreur', 'delivery'])) {
-        $driverStmt = $pdo->prepare("
-            SELECT status, vehicle_type, vehicle_brand, vehicle_model, 
-                   rating, total_deliveries
-            FROM drivers 
-            WHERE user_id = :user_id
-        ");
-        $driverStmt->execute(['user_id' => $user['id']]);
-        $driverInfo = $driverStmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($driverInfo) {
-            $userData['driver_info'] = $driverInfo;
-        }
+    // Ajouter des informations spécifiques au livreur si profil drivers présent
+    if ($driverInfo) {
+        $userData['driver_info'] = $driverInfo;
     }
     
     // === RÉPONSE DE SUCCÈS ===

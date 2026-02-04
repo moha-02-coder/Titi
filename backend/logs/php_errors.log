@@ -587,3 +587,296 @@ Stack trace:
 
 )
 
+[27-Jan-2026 21:19:32 UTC] === DÉBUT INSCRIPTION ===
+[27-Jan-2026 21:19:32 UTC] Méthode: POST
+[27-Jan-2026 21:19:32 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryvKobNSbZ4p1c8mOI
+[27-Jan-2026 21:19:32 UTC] Données POST: Array
+(
+    [first_name] => Youssouf 
+    [last_name] => Foré
+    [email] => foreyouss@gmail.com
+    [phone] => 78909876
+    [birth_date] => 2002-01-27
+    [address] => Bamako Mali
+    [city] => Bamako
+    [quarter] => Doumanzana
+    [password] => @4wjnNe6@dngQ2U
+    [password_confirm] => @4wjnNe6@dngQ2U
+    [vehicle_type] => moto
+    [vehicle_brand] => TVS
+    [vehicle_model] => Rato
+    [vehicle_year] => 2024
+    [vehicle_plate] => ML-1234AC
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => livreur
+)
+
+[27-Jan-2026 21:19:32 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 937.png
+            [full_path] => 937.png
+            [type] => image/png
+            [tmp_name] => C:\wamp64\tmp\phpF77F.tmp
+            [error] => 0
+            [size] => 183455
+        )
+
+)
+
+[27-Jan-2026 23:16:41 UTC] === DÉBUT INSCRIPTION ===
+[27-Jan-2026 23:16:41 UTC] Méthode: POST
+[27-Jan-2026 23:16:41 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryKmmFp1Acw6ghUPht
+[27-Jan-2026 23:16:41 UTC] Données POST: Array
+(
+    [first_name] => Youssouf
+    [last_name] => Foré
+    [email] => foreyouss@gmail.com
+    [phone] => 78909876
+    [birth_date] => 
+    [address] => Bamako Mali
+    [city] => Bamako
+    [quarter] => foreyouss@gmail.com
+    [password] => @4wjnNe6@dngQ2U
+    [password_confirm] => @4wjnNe6@dngQ2U
+    [vehicle_type] => moto
+    [vehicle_brand] => TVS
+    [vehicle_model] => Rato
+    [vehicle_year] => 2021
+    [vehicle_plate] => ML-1234AC
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => livreur
+)
+
+[27-Jan-2026 23:16:41 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 937.png
+            [full_path] => 937.png
+            [type] => image/png
+            [tmp_name] => C:\wamp64\tmp\php39C2.tmp
+            [error] => 0
+            [size] => 183455
+        )
+
+)
+
+[27-Jan-2026 23:16:41 UTC] Connexion BD réussie
+[27-Jan-2026 23:16:57 UTC] === DÉBUT INSCRIPTION ===
+[27-Jan-2026 23:16:57 UTC] Méthode: POST
+[27-Jan-2026 23:16:57 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryxAj15IlJM1Bp8OZk
+[27-Jan-2026 23:16:57 UTC] Données POST: Array
+(
+    [first_name] => Youssouf
+    [last_name] => Foré
+    [email] => foreyouss@gmail.com
+    [phone] => 78909876
+    [birth_date] => 
+    [address] => Bamako Mali
+    [city] => Bamako
+    [quarter] => youssfore@gmail.com
+    [password] => @4wjnNe6@dngQ2U
+    [password_confirm] => @4wjnNe6@dngQ2U
+    [vehicle_type] => moto
+    [vehicle_brand] => TVS
+    [vehicle_model] => Rato
+    [vehicle_year] => 2021
+    [vehicle_plate] => ML-1234AC
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => livreur
+)
+
+[27-Jan-2026 23:16:57 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 937.png
+            [full_path] => 937.png
+            [type] => image/png
+            [tmp_name] => C:\wamp64\tmp\php78B2.tmp
+            [error] => 0
+            [size] => 183455
+        )
+
+)
+
+[27-Jan-2026 23:16:57 UTC] Connexion BD réussie
+[27-Jan-2026 23:17:12 UTC] === DÉBUT INSCRIPTION ===
+[27-Jan-2026 23:17:12 UTC] Méthode: POST
+[27-Jan-2026 23:17:12 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundary5fQRxJVXfXjuPz9y
+[27-Jan-2026 23:17:12 UTC] Données POST: Array
+(
+    [first_name] => Youssouf
+    [last_name] => Foré
+    [email] => contact@tchak-immobilier.com
+    [phone] => 78909876
+    [birth_date] => 
+    [address] => Bamako Mali
+    [city] => Bamako
+    [quarter] => youssfore@gmail.com
+    [password] => @4wjnNe6@dngQ2U
+    [password_confirm] => @4wjnNe6@dngQ2U
+    [vehicle_type] => moto
+    [vehicle_brand] => TVS
+    [vehicle_model] => Rato
+    [vehicle_year] => 2021
+    [vehicle_plate] => ML-1234AC
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => livreur
+)
+
+[27-Jan-2026 23:17:12 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 937.png
+            [full_path] => 937.png
+            [type] => image/png
+            [tmp_name] => C:\wamp64\tmp\phpB417.tmp
+            [error] => 0
+            [size] => 183455
+        )
+
+)
+
+[27-Jan-2026 23:17:12 UTC] Connexion BD réussie
+[27-Jan-2026 23:17:43 UTC] === DÉBUT INSCRIPTION ===
+[27-Jan-2026 23:17:43 UTC] Méthode: POST
+[27-Jan-2026 23:17:43 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundarydcQKmIAcsBuDQmxV
+[27-Jan-2026 23:17:43 UTC] Données POST: Array
+(
+    [first_name] => Youssouf
+    [last_name] => Foré
+    [email] => contact@tchak-immobilier.com
+    [phone] => 78919876
+    [birth_date] => 
+    [address] => Bamako Mali
+    [city] => Bamako
+    [quarter] => youssfore@gmail.com
+    [password] => @4wjnNe6@dngQ2U
+    [password_confirm] => @4wjnNe6@dngQ2U
+    [vehicle_type] => moto
+    [vehicle_brand] => TVS
+    [vehicle_model] => Rato
+    [vehicle_year] => 2021
+    [vehicle_plate] => ML-1234AC
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => livreur
+)
+
+[27-Jan-2026 23:17:43 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 937.png
+            [full_path] => 937.png
+            [type] => image/png
+            [tmp_name] => C:\wamp64\tmp\php2D02.tmp
+            [error] => 0
+            [size] => 183455
+        )
+
+)
+
+[27-Jan-2026 23:17:43 UTC] Connexion BD réussie
+[27-Jan-2026 23:17:43 UTC] Transaction démarrée
+[27-Jan-2026 23:17:44 UTC] Insertion utilisateur SQL: INSERT INTO users (first_name, last_name, email, password, phone, address, city, quarter, avatar, newsletter, role, verified, active, created_at) VALUES (:first_name, :last_name, :email, :password, :phone, :address, :city, :quarter, :avatar, :newsletter, :role, :verified, :active, NOW())
+[27-Jan-2026 23:17:44 UTC] Données utilisateur: Array
+(
+    [first_name] => Youssouf
+    [last_name] => Foré
+    [email] => contact@tchak-immobilier.com
+    [password] => $2y$10$uauRCG9FS7fKQy2MCTthderx2VF7H2z31nM5SHJ0F.IFZpKzV8M8e
+    [phone] => 78919876
+    [address] => Bamako Mali
+    [city] => Bamako
+    [quarter] => youssfore@gmail.com
+    [avatar] => 
+    [newsletter] => 1
+    [role] => livreur
+    [verified] => 0
+    [active] => 1
+)
+
+[27-Jan-2026 23:17:44 UTC] Utilisateur créé avec ID: 7
+[27-Jan-2026 23:17:44 UTC] Panier créé
+[27-Jan-2026 23:17:44 UTC] Traitement inscription livreur
+[27-Jan-2026 23:17:44 UTC] Document d'identité uploadé: /assets/uploads/documents/697947980cb15.png
+[27-Jan-2026 23:17:44 UTC] Insertion livreur SQL: INSERT INTO drivers (user_id, id_document, vehicle_type, vehicle_brand, vehicle_model, vehicle_year, vehicle_plate, status, created_at) VALUES (:user_id, :id_document, :vehicle_type, :vehicle_brand, :vehicle_model, :vehicle_year, :vehicle_plate, :status, NOW())
+[27-Jan-2026 23:17:44 UTC] Données livreur: Array
+(
+    [user_id] => 7
+    [id_document] => /assets/uploads/documents/697947980cb15.png
+    [vehicle_type] => moto
+    [vehicle_brand] => TVS
+    [vehicle_model] => Rato
+    [vehicle_year] => 2021
+    [vehicle_plate] => ML-1234AC
+    [status] => pending
+)
+
+[27-Jan-2026 23:17:44 UTC] Livreur créé avec ID: 2
+[27-Jan-2026 23:17:44 UTC] Transaction validée
+[27-Jan-2026 23:17:44 UTC] INSCRIPTION RÉUSSIE: Inscription réussie ! Votre compte livreur est en attente de validation.

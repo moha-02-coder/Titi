@@ -109,65 +109,12 @@ class ToastSystem {
 /**
  * Système de chargement amélioré
  */
-class LoadingSystem {
-    static show(message = 'Chargement...', options = {}) {
-        let overlay = document.getElementById('loadingOverlay');
-        
-        if (!overlay) {
-            overlay = this.createOverlay();
-        }
-        
-        const messageEl = overlay.querySelector('p');
-        if (messageEl) {
-            messageEl.textContent = message;
-        }
-        
-        overlay.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        
-        // Ajouter une classe pour personnalisation
-        if (options.type) {
-            overlay.dataset.type = options.type;
-        }
-        
-        return overlay;
-    }
-    
-    static hide() {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            overlay.style.display = 'none';
-            document.body.style.overflow = '';
-            delete overlay.dataset.type;
-        }
-    }
-    
-    static createOverlay() {
-        const overlay = document.createElement('div');
-        overlay.id = 'loadingOverlay';
-        overlay.className = 'loading-overlay';
-        overlay.setAttribute('aria-live', 'polite');
-        overlay.setAttribute('aria-busy', 'true');
-        overlay.innerHTML = `
-            <div class="loading-content">
-                <div class="spinner"></div>
-                <p>Chargement...</p>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-        return overlay;
-    }
-    
-    static updateMessage(message) {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            const messageEl = overlay.querySelector('p');
-            if (messageEl) {
-                messageEl.textContent = message;
-            }
-        }
-    }
-}
+// LoadingSystem alias: use global `window.LoadingSystem` when available
+var _TGT_LS = (typeof window !== 'undefined' && window.LoadingSystem) ? window.LoadingSystem : {
+    show: (msg) => {},
+    hide: () => {},
+    updateMessage: () => {}
+};
 
 /**
  * Service API avec gestion d'erreurs améliorée
@@ -951,7 +898,7 @@ class AuthController {
             return;
         }
         
-        LoadingSystem.show('Création de votre compte...');
+        _TGT_LS.show('Création de votre compte...');
         
         try {
             const formData = new FormData(form);
@@ -970,7 +917,7 @@ class AuthController {
             const result = await APIService.register(formData);
             
             if (result.ok && result.data.success) {
-                await this.handleRegistrationSuccess(result.data, formData);
+                await this.handleRegistrationSuccess(result.data.data, formData);
             } else {
                 throw new Error(result.data?.message || `Erreur d'inscription (${result.status})`);
             }
@@ -980,7 +927,7 @@ class AuthController {
             this.handleAPIError(error, 'inscription');
         } finally {
             this.isSubmitting = false;
-            LoadingSystem.hide();
+            _TGT_LS.hide();
         }
     }
     
@@ -1027,7 +974,7 @@ class AuthController {
             
             if (result.ok && result.data.success) {
                 loadingToast.dismiss();
-                await this.handleLoginSuccess(result.data);
+                await this.handleLoginSuccess(result.data.data);
             } else {
                 throw new Error(result.data?.message || 'Auto-login échoué');
             }
@@ -1078,7 +1025,7 @@ class AuthController {
             return;
         }
         
-        LoadingSystem.show('Connexion en cours...');
+        _TGT_LS.show('Connexion en cours...');
         
         try {
             console.log('Attempting login for:', credentials.email.substring(0, 3) + '***');
@@ -1086,7 +1033,7 @@ class AuthController {
             const result = await APIService.login(credentials);
             
             if (result.ok && result.data.success) {
-                await this.handleLoginSuccess(result.data);
+                await this.handleLoginSuccess(result.data.data);
             } else {
                 throw new Error(result.data?.message || `Échec de la connexion (${result.status})`);
             }
@@ -1096,7 +1043,7 @@ class AuthController {
             this.handleAPIError(error, 'connexion');
         } finally {
             this.isSubmitting = false;
-            LoadingSystem.hide();
+            _TGT_LS.hide();
         }
     }
     
@@ -1116,10 +1063,34 @@ class AuthController {
         // Afficher le message de bienvenue
         this.showWelcomeMessage(data.user);
         
-        // Redirection
+        // Redirection ou rafraîchissement de la page pour mettre à jour l'UI
         setTimeout(() => {
-            this.redirectToDashboard(data.user.role);
-        }, 1500);
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const returnPath = params.get('return');
+                if (returnPath) {
+                    // Redirect back to the original page (avoid cache)
+                    const timestamp = Date.now();
+                    const url = returnPath + (returnPath.includes('?') ? '&' : '?') + '_t=' + timestamp;
+                    window.location.href = url;
+                    return;
+                }
+
+                const path = window.location.pathname || '';
+                const role = (data?.user?.role || '').toString().toLowerCase();
+                if (role && role !== 'client') {
+                    this.redirectToDashboard(role);
+                    return;
+                }
+                if (path.includes('login') || path === '/' || path.endsWith('index.html')) {
+                    window.location.reload();
+                } else {
+                    this.redirectToDashboard(data.user.role);
+                }
+            } catch (e) {
+                this.redirectToDashboard(data.user.role);
+            }
+        }, 1200);
     }
     
     validateSessionData(data) {

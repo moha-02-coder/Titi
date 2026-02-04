@@ -7,7 +7,7 @@ window.App = window.App || {};
 
 // Fonction utilitaire pour faire des requêtes API
 async function fetchAPI(endpoint) {
-    const base = window.API_BASE_URL || 'titi-golden-taste/backend/api';
+    const base = window.API_BASE_URL || 'backend/api';
     try {
         console.log(`Fetching: ${base}/${endpoint}`);
         const response = await fetch(`${base}/${endpoint}`);
@@ -307,11 +307,98 @@ App.updateCartCount = function() {
     const cartCount = window.$find(window.DOM_SELECTORS.cartCount) || document.getElementById('cartCount');
     if (cartCount) {
         const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        const count = cart.length;
+        const count = (Array.isArray(cart) ? cart : []).reduce((sum, it) => sum + (parseInt(it.quantity ?? 1, 10) || 1), 0);
         cartCount.textContent = count;
         cartCount.style.display = count > 0 ? 'flex' : 'none';
     }
 };
+
+App.renderAuthProfile = function() {
+    try {
+        const token = localStorage.getItem('auth_token');
+        const raw = localStorage.getItem('user_data');
+        const user = raw ? JSON.parse(raw) : null;
+        const roleRaw = (user && (user.role || user.role_name)) ? String(user.role || user.role_name) : '';
+        const role = roleRaw.toLowerCase();
+        const isLoggedIn = !!token && !!user;
+
+        const name = isLoggedIn ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : '';
+        const display = name || user?.email || 'Compte';
+        const initials = ((user?.first_name || ' ').trim().slice(0, 1) + (user?.last_name || ' ').trim().slice(0, 1)).toUpperCase().trim() || 'U';
+        const dash = (role === 'admin' || role === 'super_admin') ? 'admin/dashboard.html' : ((role === 'livreur' || role === 'delivery') ? 'delivery/dashboard.html' : 'profile.html');
+
+        document.querySelectorAll('.nav-auth').forEach(container => {
+            if (!isLoggedIn) {
+                container.style.display = '';
+                return;
+            }
+            container.innerHTML = `
+                <a href="#" class="btn-login" id="tgtProfileBtn" style="display:inline-flex;align-items:center;gap:10px;">
+                    <span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:999px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.25);font-weight:800;">${initials}</span>
+                    <span style="display:flex;flex-direction:column;line-height:1.1;">
+                        <span style="font-weight:700;">${escapeHtml(display)}</span>
+                        <span style="font-size:12px;opacity:0.9;">${escapeHtml(roleRaw || 'client')}</span>
+                    </span>
+                </a>
+                <a href="${dash}" class="btn-admin" id="tgtDashboardLink"><i class="fas fa-gauge"></i> Dashboard</a>
+                <a href="#" class="btn-register" id="tgtLogoutBtn"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+            `;
+            const logoutBtn = container.querySelector('#tgtLogoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    try { localStorage.clear(); } catch (err) {}
+                    window.location.href = 'index.html';
+                });
+            }
+            const profileBtn = container.querySelector('#tgtProfileBtn');
+            if (profileBtn) {
+                profileBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    try {
+                        if (typeof window.openProfileModal === 'function') window.openProfileModal();
+                        else window.location.href = dash;
+                    } catch (err) {
+                        window.location.href = dash;
+                    }
+                });
+            }
+        });
+
+        document.querySelectorAll('.mobile-auth').forEach(container => {
+            if (!isLoggedIn) {
+                container.style.display = '';
+                return;
+            }
+            container.innerHTML = `
+                <a href="${dash}" class="btn-login" style="display:flex;gap:10px;align-items:center;">
+                    <i class="fas fa-user"></i>
+                    <span>${escapeHtml(display)} (${escapeHtml(roleRaw || 'client')})</span>
+                </a>
+                <a href="#" class="btn-register" id="tgtMobileLogout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+            `;
+            const logoutBtn = container.querySelector('#tgtMobileLogout');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    try { localStorage.clear(); } catch (err) {}
+                    window.location.href = 'index.html';
+                });
+            }
+        });
+    } catch (e) {
+        console.error('renderAuthProfile error', e);
+    }
+};
+
+function escapeHtml(str) {
+    return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
 
 // Créer l'icône du panier si elle n'existe pas
 App.createCartIcon = function() {
@@ -355,6 +442,7 @@ App.init = function() {
     // Header / cart
     App.createCartIcon();
     if (typeof App.updateCartCount === 'function') App.updateCartCount();
+    if (typeof App.renderAuthProfile === 'function') App.renderAuthProfile();
 
     // Handle pending cart item after login redirect
     try {
@@ -419,17 +507,531 @@ window.updateCartCount = function() { if (typeof App.updateCartCount === 'functi
 // Simple wizard navigation helpers used by inline buttons
 window.nextStep = function(step) {
     try {
+        // If advancing to step 2 and user is not authenticated, persist pending wizard
+        const token = localStorage.getItem('auth_token');
+        if (Number(step) === 2 && !token) {
+            try { localStorage.setItem('tgt_pending_wizard', JSON.stringify({ step: 2, path: window.location.pathname + window.location.search })); } catch (e) {}
+            const ret = encodeURIComponent(window.location.pathname + window.location.search);
+            window.location.href = `login.html?resume_wizard=1&return=${ret}`;
+            return;
+        }
+
+        // Basic validation before certain steps
+        if (Number(step) === 4) {
+            const deliveryMethod = localStorage.getItem('tgt_delivery_method') || document.querySelector('.delivery-option.selected')?.dataset.type || 'delivery';
+            if (deliveryMethod === 'delivery') {
+                const street = document.getElementById('deliveryStreet')?.value?.trim();
+                const city = document.getElementById('deliveryCity')?.value?.trim();
+                const quarter = document.getElementById('deliveryQuarter')?.value?.trim();
+                const phone = (localStorage.getItem('user_data') ? JSON.parse(localStorage.getItem('user_data')).phone : null) || document.getElementById('guestPhone')?.value?.trim();
+                const name = (localStorage.getItem('user_data') ? (JSON.parse(localStorage.getItem('user_data')).first_name || '') : '') || document.getElementById('guestFirstName')?.value?.trim();
+                if (!name || !phone || !street || !city || !quarter) {
+                    try {
+                        if (window.ToastSystem && typeof ToastSystem.show === 'function') ToastSystem.show('error', 'Informations manquantes', 'Veuillez remplir votre nom, téléphone et adresse pour la livraison');
+                        else alert('Veuillez remplir votre nom, téléphone et adresse pour la livraison');
+                    } catch(e){ alert('Veuillez remplir votre nom, téléphone et adresse pour la livraison'); }
+                    return;
+                }
+            }
+
+            const timeMode = document.querySelector('.time-option.selected')?.dataset.time || (localStorage.getItem('tgt_time_mode') || 'asap');
+            if (timeMode === 'later') {
+                const date = document.getElementById('scheduleDate')?.value;
+                const hour = document.getElementById('scheduleHour')?.value;
+                if (!date || !hour) {
+                    try {
+                        if (window.ToastSystem && typeof ToastSystem.show === 'function') ToastSystem.show('error', 'Horaire manquant', 'Veuillez choisir la date et l\'heure de livraison');
+                        else alert('Veuillez choisir la date et l\'heure de livraison');
+                    } catch(e){ alert('Veuillez choisir la date et l\'heure de livraison'); }
+                    return;
+                }
+                try { localStorage.setItem('tgt_delivery_time', JSON.stringify({ date, hour })); } catch(e){}
+            }
+        }
+
+        // Activate wizard step
         document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
         const target = document.getElementById('wizardStep' + step);
         if (target) target.classList.add('active');
+
+        // Step 2: load customization options + sync summary
+        try {
+            if (Number(step) === 2) {
+                App.loadCustomizationOptions();
+                App.updateCustomizationSummary();
+            }
+        } catch (e) {}
+
+        // Step 4: render recap + payment
+        try {
+            if (Number(step) === 4) {
+                App.updateOrderRecap();
+                App.bindPaymentMethods();
+            }
+        } catch (e) {}
+
+        // Sync top step indicator
+        try {
+            document.querySelectorAll('.order-steps .step').forEach(s => s.classList.remove('active'));
+            const topo = document.getElementById('step' + step);
+            if (topo) topo.classList.add('active');
+        } catch(e) {}
+
+        try {
+            const order = document.getElementById('order');
+            if (order) {
+                if (window.location.hash !== '#order') {
+                    try { window.history.replaceState(null, '', '#order'); } catch (e) { window.location.hash = 'order'; }
+                }
+                order.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        } catch (e) {}
     } catch (e) { console.error('nextStep error', e); }
 };
+
+// Step 4: recap & payment
+App.getSelectedMenus = function() {
+    try {
+        const rawSel = localStorage.getItem('tgt_selected_menus');
+        if (!rawSel) return [];
+        const parsedSel = JSON.parse(rawSel);
+        return Array.isArray(parsedSel) ? parsedSel : [];
+    } catch (e) {
+        return [];
+    }
+};
+
+App.formatMoney = function(v) {
+    const n = parseInt(v ?? 0, 10) || 0;
+    return `${n.toLocaleString('fr-FR')} FCFA`;
+};
+
+App.getDeliverySnapshot = function() {
+    try {
+        const method = localStorage.getItem('tgt_delivery_method') || document.querySelector('.delivery-option.selected')?.dataset.type || 'delivery';
+        const street = document.getElementById('deliveryStreet')?.value?.trim() || '';
+        const city = document.getElementById('deliveryCity')?.value?.trim() || '';
+        const quarter = document.getElementById('deliveryQuarter')?.value?.trim() || '';
+        const notes = document.getElementById('deliveryNotes')?.value?.trim() || '';
+        const address = [street, quarter, city].filter(Boolean).join(', ');
+
+        try { localStorage.setItem('tgt_delivery_address', address); } catch (e) {}
+
+        const timeMode = document.querySelector('.time-option.selected')?.dataset.time || (localStorage.getItem('tgt_time_mode') || 'asap');
+        let scheduled = null;
+        if (timeMode === 'later') {
+            const date = document.getElementById('scheduleDate')?.value || '';
+            const hour = document.getElementById('scheduleHour')?.value || '';
+            if (date && hour) scheduled = { date, hour };
+        }
+
+        return { method, address, notes, timeMode, scheduled };
+    } catch (e) {
+        return { method: 'delivery', address: '', notes: '', timeMode: 'asap', scheduled: null };
+    }
+};
+
+App.updateOrderRecap = function() {
+    try {
+        const itemsWrap = document.getElementById('orderSummaryItems');
+        const totalsWrap = document.getElementById('orderTotals');
+        const deliveryWrap = document.getElementById('deliveryInfoSummary');
+        if (!itemsWrap || !totalsWrap || !deliveryWrap) return;
+
+        const items = App.getSelectedMenus();
+        const customization = App.getSelectedCustomization ? App.getSelectedCustomization() : { sides: [], sauces: [], instructions: '' };
+        const delivery = App.getDeliverySnapshot();
+
+        // Resolve labels for selected options from chips
+        const sideWrap = document.getElementById('sideDishesOptions');
+        const sauceWrap = document.getElementById('saucesOptions');
+        const optionLabels = [];
+        if (sideWrap) {
+            (customization.sides || []).forEach(id => {
+                const el = sideWrap.querySelector(`.opt-chip[data-kind="side"][data-id="${id}"] .opt-chip-name`);
+                if (el) optionLabels.push(el.textContent.trim());
+            });
+        }
+        if (sauceWrap) {
+            (customization.sauces || []).forEach(id => {
+                const el = sauceWrap.querySelector(`.opt-chip[data-kind="sauce"][data-id="${id}"] .opt-chip-name`);
+                if (el) optionLabels.push(el.textContent.trim());
+            });
+        }
+
+        const itemRows = (items || []).length
+            ? (items || []).map(it => {
+                const name = escapeHtml(it.name || 'Plat');
+                const qty = parseInt(it.qty ?? it.quantity ?? 1, 10) || 1;
+                const unit = parseInt(it.unit_price ?? it.price ?? 0, 10) || 0;
+                const lineTotal = unit * qty;
+                return `
+                    <div class="recap-row">
+                        <div class="recap-main">
+                            <div class="recap-title">${name}</div>
+                            <div class="recap-sub">Quantité: <strong>${qty}</strong> • Prix: ${App.formatMoney(unit)}</div>
+                        </div>
+                        <div class="recap-amount">${App.formatMoney(lineTotal)}</div>
+                    </div>
+                `;
+            }).join('')
+            : '<div class="muted">Aucun article sélectionné</div>';
+
+        const optionsBlock = optionLabels.length
+            ? `<div class="recap-block">
+                    <div class="recap-block-title">Options choisies</div>
+                    <div class="recap-tags">${optionLabels.map(o => `<span class="recap-tag">${escapeHtml(o)}</span>`).join('')}</div>
+               </div>`
+            : '';
+
+        const instr = (customization.instructions || '').trim();
+        const instrBlock = instr
+            ? `<div class="recap-block">
+                    <div class="recap-block-title">Instructions</div>
+                    <div class="recap-notes">${escapeHtml(instr)}</div>
+               </div>`
+            : '';
+
+        itemsWrap.innerHTML = `<div class="recap-card">${itemRows}${optionsBlock}${instrBlock}</div>`;
+
+        const subtotal = (items || []).reduce((sum, it) => {
+            const qty = parseInt(it.qty ?? it.quantity ?? 1, 10) || 1;
+            const unit = parseInt(it.unit_price ?? it.price ?? 0, 10) || 0;
+            return sum + (qty * unit);
+        }, 0);
+        const deliveryFee = delivery.method === 'pickup' ? 0 : 1500;
+        const total = subtotal + deliveryFee;
+
+        totalsWrap.innerHTML = `
+            <div class="totals-card">
+                <div class="totals-row"><span>Sous-total</span><strong>${App.formatMoney(subtotal)}</strong></div>
+                <div class="totals-row"><span>Frais de livraison</span><strong>${App.formatMoney(deliveryFee)}</strong></div>
+                <div class="totals-row totals-row-total"><span>Total</span><strong>${App.formatMoney(total)}</strong></div>
+            </div>
+        `;
+
+        const when = delivery.timeMode === 'later' && delivery.scheduled
+            ? `${escapeHtml(delivery.scheduled.date)} à ${escapeHtml(delivery.scheduled.hour)}`
+            : 'Dès que possible';
+
+        deliveryWrap.innerHTML = `
+            <div class="recap-info">
+                <div class="info-line"><span class="info-label">Mode</span><span class="info-value">${delivery.method === 'pickup' ? 'Retrait sur place' : 'Livraison'}</span></div>
+                ${delivery.method === 'pickup'
+                    ? `<div class="info-line"><span class="info-label">Adresse</span><span class="info-value">Avenue de l'Indépendance, Badalabougou, Bamako</span></div>`
+                    : `<div class="info-line"><span class="info-label">Adresse</span><span class="info-value">${escapeHtml(delivery.address || '—')}</span></div>`
+                }
+                <div class="info-line"><span class="info-label">Quand</span><span class="info-value">${when}</span></div>
+                ${delivery.notes ? `<div class="info-line"><span class="info-label">Note</span><span class="info-value">${escapeHtml(delivery.notes)}</span></div>` : ''}
+            </div>
+        `;
+
+        try { localStorage.setItem('tgt_order_total', String(total)); } catch (e) {}
+    } catch (e) {
+        console.error('updateOrderRecap error', e);
+    }
+};
+
+App.bindPaymentMethods = function() {
+    try {
+        const methodsWrap = document.querySelector('#wizardStep4 .payment-methods');
+        if (!methodsWrap) return;
+        if (methodsWrap.dataset.bound === '1') return;
+        methodsWrap.dataset.bound = '1';
+
+        const stored = localStorage.getItem('tgt_payment_method') || 'cash';
+        document.querySelectorAll('#wizardStep4 .payment-method').forEach(el => {
+            el.classList.toggle('selected', (el.dataset.method || '') === stored);
+        });
+
+        methodsWrap.addEventListener('click', function(e) {
+            const card = e.target && e.target.closest ? e.target.closest('.payment-method') : null;
+            if (!card) return;
+            const method = card.dataset.method || 'cash';
+            document.querySelectorAll('#wizardStep4 .payment-method').forEach(el => el.classList.remove('selected'));
+            card.classList.add('selected');
+            try { localStorage.setItem('tgt_payment_method', method); } catch (err) {}
+        });
+    } catch (e) {
+        console.error('bindPaymentMethods error', e);
+    }
+};
+
+// Auto-refresh recap if step 4 is already visible or when selection changes
+document.addEventListener('DOMContentLoaded', function () {
+    try {
+        if (document.getElementById('wizardStep4')?.classList.contains('active')) {
+            try { App.updateOrderRecap(); App.bindPaymentMethods(); } catch (e) {}
+        }
+        window.addEventListener('tgt:customization:changed', function(){
+            if (document.getElementById('wizardStep4')?.classList.contains('active')) {
+                try { App.updateOrderRecap(); } catch (e) {}
+            }
+        });
+    } catch (e) {}
+});
+
+App.getSelectedCustomization = function() {
+    try {
+        const raw = localStorage.getItem('tgt_customization');
+        const v = raw ? JSON.parse(raw) : null;
+        const out = {
+            sides: Array.isArray(v?.sides) ? v.sides : [],
+            sauces: Array.isArray(v?.sauces) ? v.sauces : [],
+            instructions: (v?.instructions || '').toString()
+        };
+        return out;
+    } catch (e) {
+        return { sides: [], sauces: [], instructions: '' };
+    }
+};
+
+App.setSelectedCustomization = function(next) {
+    const v = next || {};
+    const payload = {
+        sides: Array.isArray(v.sides) ? v.sides : [],
+        sauces: Array.isArray(v.sauces) ? v.sauces : [],
+        instructions: (v.instructions || '').toString()
+    };
+    try { localStorage.setItem('tgt_customization', JSON.stringify(payload)); } catch (e) {}
+};
+
+App.loadCustomizationOptions = async function() {
+    try {
+        const sideWrap = document.getElementById('sideDishesOptions');
+        const sauceWrap = document.getElementById('saucesOptions');
+        if (!sideWrap || !sauceWrap) return;
+
+        // Avoid refetch if already loaded
+        if (sideWrap.dataset.loaded === '1' && sauceWrap.dataset.loaded === '1') {
+            App.bindCustomizationEvents();
+            App.updateCustomizationSummary();
+            return;
+        }
+
+        sideWrap.innerHTML = '<div class="loading" style="padding:16px"><div class="spinner" style="width:26px;height:26px"></div></div>';
+        sauceWrap.innerHTML = '<div class="loading" style="padding:16px"><div class="spinner" style="width:26px;height:26px"></div></div>';
+
+        const base = (window.API_BASE_URL || 'backend/api').replace(/\/+$/, '');
+        const url = base + '/shop/customization-options.php';
+        const res = await fetch(url);
+        const json = await res.json();
+        if (!json || !json.success) {
+            sideWrap.innerHTML = '<div style="color:#666">Aucun accompagnement</div>';
+            sauceWrap.innerHTML = '<div style="color:#666">Aucune sauce</div>';
+            return;
+        }
+
+        const options = Array.isArray(json?.data?.options) ? json.data.options : [];
+        const sides = options.filter(o => String(o.type || '').toLowerCase() === 'side');
+        const sauces = options.filter(o => String(o.type || '').toLowerCase() === 'sauce');
+
+        const sel = App.getSelectedCustomization();
+
+        sideWrap.innerHTML = sides.length ? sides.map(o => {
+            const id = parseInt(o.id, 10);
+            const isSelected = sel.sides.includes(id);
+            const price = parseInt(o.price ?? 0, 10) || 0;
+            return `
+                <button type="button" class="opt-chip ${isSelected ? 'selected' : ''}" data-kind="side" data-id="${id}">
+                    <span class="opt-chip-name">${escapeHtml(o.name || '')}</span>
+                    ${price > 0 ? `<span class="opt-chip-price">+${price} FCFA</span>` : ''}
+                </button>
+            `;
+        }).join('') : '<div style="color:#666">Aucun accompagnement</div>';
+
+        sauceWrap.innerHTML = sauces.length ? sauces.map(o => {
+            const id = parseInt(o.id, 10);
+            const isSelected = sel.sauces.includes(id);
+            const price = parseInt(o.price ?? 0, 10) || 0;
+            return `
+                <button type="button" class="opt-chip ${isSelected ? 'selected' : ''}" data-kind="sauce" data-id="${id}">
+                    <span class="opt-chip-name">${escapeHtml(o.name || '')}</span>
+                    ${price > 0 ? `<span class="opt-chip-price">+${price} FCFA</span>` : ''}
+                </button>
+            `;
+        }).join('') : '<div style="color:#666">Aucune sauce</div>';
+
+        sideWrap.dataset.loaded = '1';
+        sauceWrap.dataset.loaded = '1';
+        App.bindCustomizationEvents();
+
+        // Restore instructions
+        const instr = document.getElementById('specialInstructions');
+        if (instr && !instr.value) instr.value = sel.instructions || '';
+        App.updateCustomizationSummary();
+    } catch (e) {
+        console.error('loadCustomizationOptions error', e);
+    }
+};
+
+App.removeCustomizationOption = function(kind, id) {
+    try {
+        const k = String(kind || '').toLowerCase();
+        const optId = parseInt(id || 0, 10) || 0;
+        if (!optId || (k !== 'side' && k !== 'sauce')) return;
+
+        const sel = App.getSelectedCustomization();
+        const list = k === 'side' ? sel.sides : sel.sauces;
+        const idx = list.indexOf(optId);
+        if (idx >= 0) list.splice(idx, 1);
+        App.setSelectedCustomization(sel);
+
+        // Sync UI chip
+        const wrap = document.getElementById(k === 'side' ? 'sideDishesOptions' : 'saucesOptions');
+        const chip = wrap ? wrap.querySelector(`.opt-chip[data-kind="${k}"][data-id="${optId}"]`) : null;
+        if (chip) chip.classList.remove('selected');
+
+        App.updateCustomizationSummary();
+    } catch (e) {
+        console.error('removeCustomizationOption error', e);
+    }
+};
+
+App.bindCustomizationEvents = function() {
+    const sideWrap = document.getElementById('sideDishesOptions');
+    const sauceWrap = document.getElementById('saucesOptions');
+    if (!sideWrap || !sauceWrap) return;
+
+    function toggle(kind, id) {
+        const sel = App.getSelectedCustomization();
+        const list = kind === 'side' ? sel.sides : sel.sauces;
+        const idx = list.indexOf(id);
+        if (idx >= 0) list.splice(idx, 1);
+        else list.push(id);
+        App.setSelectedCustomization(sel);
+        App.updateCustomizationSummary();
+    }
+
+    [sideWrap, sauceWrap].forEach(wrap => {
+        if (wrap.dataset.bound === '1') return;
+        wrap.dataset.bound = '1';
+        wrap.addEventListener('click', (e) => {
+            const btn = e.target && e.target.closest ? e.target.closest('.opt-chip') : null;
+            if (!btn) return;
+            const kind = btn.getAttribute('data-kind');
+            const id = parseInt(btn.getAttribute('data-id') || '0', 10);
+            if (!id) return;
+            btn.classList.toggle('selected');
+            toggle(kind, id);
+        });
+    });
+
+    const instr = document.getElementById('specialInstructions');
+    if (instr && instr.dataset.bound !== '1') {
+        instr.dataset.bound = '1';
+        instr.addEventListener('input', () => {
+            const sel = App.getSelectedCustomization();
+            sel.instructions = instr.value || '';
+            App.setSelectedCustomization(sel);
+            App.updateCustomizationSummary();
+        });
+    }
+};
+
+App.updateCustomizationSummary = function() {
+    try {
+        const itemsEl = document.getElementById('customizeSelectedItems');
+        const optsEl = document.getElementById('customizeSelectedOptions');
+        if (!itemsEl || !optsEl) return;
+
+        // Selected items from step1: customize-order.js persists into tgt_selected_menus
+        let selected = [];
+        try {
+            const rawSel = localStorage.getItem('tgt_selected_menus');
+            if (rawSel) {
+                const parsedSel = JSON.parse(rawSel);
+                selected = Array.isArray(parsedSel) ? parsedSel : [];
+            }
+        } catch (e) {}
+
+        // Fallback to cart if no explicit selection was persisted
+        if (!selected || !selected.length) {
+            try {
+                const raw = localStorage.getItem('cart') || '[]';
+                const parsed = JSON.parse(raw);
+                selected = Array.isArray(parsed) ? parsed : [];
+            } catch (e) { selected = []; }
+        }
+
+        const lines = (selected || []).slice(0, 8).map(it => {
+            const name = escapeHtml(it.name || it.item_name || 'Article');
+            const qty = parseInt(it.qty ?? it.quantity ?? 1, 10) || 1;
+            return `<div class="customize-pill"><span>${name}</span><span class="muted">x${qty}</span></div>`;
+        }).join('') || '<div class="muted">Aucun plat sélectionné</div>';
+        itemsEl.innerHTML = lines;
+
+        const sel = App.getSelectedCustomization();
+        const sideWrap = document.getElementById('sideDishesOptions');
+        const sauceWrap = document.getElementById('saucesOptions');
+        const selectedOptions = [];
+
+        if (sideWrap) {
+            sel.sides.forEach(id => {
+                const el = sideWrap.querySelector(`.opt-chip[data-kind="side"][data-id="${id}"] .opt-chip-name`);
+                const name = el ? el.textContent.trim() : '';
+                selectedOptions.push({ kind: 'side', id, name });
+            });
+        }
+        if (sauceWrap) {
+            sel.sauces.forEach(id => {
+                const el = sauceWrap.querySelector(`.opt-chip[data-kind="sauce"][data-id="${id}"] .opt-chip-name`);
+                const name = el ? el.textContent.trim() : '';
+                selectedOptions.push({ kind: 'sauce', id, name });
+            });
+        }
+
+        const optHtml = selectedOptions.length
+            ? selectedOptions.map(o => {
+                const label = escapeHtml(o.name || (o.kind === 'side' ? 'Accompagnement' : 'Sauce'));
+                return `
+                    <div class="customize-pill customize-pill-removable">
+                        <span>${label}</span>
+                        <button type="button" class="pill-remove" aria-label="Retirer" data-kind="${o.kind}" data-id="${o.id}">×</button>
+                    </div>
+                `;
+            }).join('')
+            : '<div class="muted">Aucune option sélectionnée</div>';
+        optsEl.innerHTML = optHtml;
+    } catch (e) {
+        console.error('updateCustomizationSummary error', e);
+    }
+};
+
+// Keep Step2 summary in sync with Step1 selection changes
+document.addEventListener('DOMContentLoaded', function () {
+    try {
+        window.addEventListener('tgt:customization:changed', function () {
+            try { App.updateCustomizationSummary(); } catch (e) {}
+        });
+
+        // Allow removing selected options via (x) button in summary
+        const optsEl = document.getElementById('customizeSelectedOptions');
+        if (optsEl && optsEl.dataset.bound !== '1') {
+            optsEl.dataset.bound = '1';
+            optsEl.addEventListener('click', function (e) {
+                const btn = e.target && e.target.closest ? e.target.closest('.pill-remove') : null;
+                if (!btn) return;
+                const kind = btn.getAttribute('data-kind');
+                const id = parseInt(btn.getAttribute('data-id') || '0', 10);
+                App.removeCustomizationOption(kind, id);
+            });
+        }
+    } catch (e) {}
+});
 
 window.prevStep = function(step) {
     try {
         document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
         const target = document.getElementById('wizardStep' + step);
         if (target) target.classList.add('active');
+
+        // sync top indicator
+        try {
+            document.querySelectorAll('.order-steps .step').forEach(s => s.classList.remove('active'));
+            const topo = document.getElementById('step' + step);
+            if (topo) topo.classList.add('active');
+        } catch(e) {}
     } catch (e) { console.error('prevStep error', e); }
 };
 
@@ -439,3 +1041,119 @@ if (document.readyState === 'loading') {
 } else {
     App.init();
 }
+
+// After load: if login redirected back with resume flag or there's a pending wizard, resume it
+document.addEventListener('DOMContentLoaded', function () {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const pendingRaw = localStorage.getItem('tgt_pending_wizard');
+        let pending = null;
+        if (pendingRaw) {
+            try { pending = JSON.parse(pendingRaw); } catch (e) { pending = null; }
+        }
+
+        if (params.get('resume_wizard') === '1' && params.get('return')) {
+            // If return param present, clear it from URL and resume
+            const returnPath = params.get('return');
+            try { history.replaceState(null, '', returnPath); } catch (e) {}
+            setTimeout(()=>{ try { nextStep(2); localStorage.removeItem('tgt_pending_wizard'); } catch(e){} }, 300);
+            return;
+        }
+
+        if (pending && pending.step) {
+            // If pending wizard for this path, resume
+            if (!pending.path || pending.path === (window.location.pathname + window.location.search)) {
+                setTimeout(()=>{ try { nextStep(pending.step); localStorage.removeItem('tgt_pending_wizard'); } catch(e){} }, 300);
+            }
+        }
+    } catch (e) { console.error('resume wizard', e); }
+});
+
+// Initialize order wizard controls (delivery selection, scheduling, prefill)
+document.addEventListener('DOMContentLoaded', function () {
+    try {
+        function initOrderWizard() {
+            // Delivery option toggle
+            document.querySelectorAll('.delivery-option').forEach(opt => {
+                opt.addEventListener('click', function () {
+                    document.querySelectorAll('.delivery-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    const type = this.dataset.type || 'delivery';
+                    try { localStorage.setItem('tgt_delivery_method', type); } catch(e){}
+                    if (type === 'delivery') {
+                        document.getElementById('deliveryAddressSection').style.display = '';
+                        document.getElementById('pickupInfoSection').style.display = 'none';
+                    } else {
+                        document.getElementById('deliveryAddressSection').style.display = 'none';
+                        document.getElementById('pickupInfoSection').style.display = '';
+                    }
+                });
+            });
+
+            // Time options
+            document.querySelectorAll('.time-option').forEach(t => {
+                t.addEventListener('click', function () {
+                    document.querySelectorAll('.time-option').forEach(x => x.classList.remove('selected'));
+                    this.classList.add('selected');
+                    const tm = this.dataset.time || 'asap';
+                    try { localStorage.setItem('tgt_time_mode', tm); } catch(e){}
+                    if (tm === 'later') document.getElementById('scheduleTime').style.display = '';
+                    else document.getElementById('scheduleTime').style.display = 'none';
+                });
+            });
+
+            // Prefill guest/user data if available
+            try {
+                const raw = localStorage.getItem('user_data');
+                if (raw) {
+                    const u = JSON.parse(raw);
+                    if (u) {
+                        if (document.getElementById('guestFirstName')) document.getElementById('guestFirstName').value = u.first_name || '';
+                        if (document.getElementById('guestLastName')) document.getElementById('guestLastName').value = u.last_name || '';
+                        if (document.getElementById('guestPhone')) document.getElementById('guestPhone').value = u.phone || '';
+                        if (document.getElementById('guestEmail')) document.getElementById('guestEmail').value = u.email || '';
+                        // delivery address
+                        if (document.getElementById('deliveryStreet')) document.getElementById('deliveryStreet').value = u.address || '';
+                        if (document.getElementById('deliveryCity')) document.getElementById('deliveryCity').value = u.city || document.getElementById('deliveryCity').value || '';
+                        if (document.getElementById('deliveryQuarter')) document.getElementById('deliveryQuarter').value = u.quarter || '';
+                    }
+                }
+            } catch (e) {}
+
+            // If persisted delivery method exists, apply it
+            try {
+                const dm = localStorage.getItem('tgt_delivery_method');
+                if (dm) {
+                    const el = document.querySelector(`.delivery-option[data-type="${dm}"]`);
+                    if (el) el.click();
+                }
+            } catch(e){}
+
+            // If persisted time mode exists
+            try {
+                const tm = localStorage.getItem('tgt_time_mode');
+                if (tm) {
+                    const el = document.querySelector(`.time-option[data-time="${tm}"]`);
+                    if (el) el.click();
+                }
+            } catch(e){}
+
+            // Place order button handler: validate one more time then dispatch action
+            const placeBtn = document.getElementById('placeOrderBtn');
+            if (placeBtn) {
+                placeBtn.addEventListener('click', async function () {
+                    // Trigger nextStep(4) validation by calling nextStep with same step (it will validate before activation)
+                    try { nextStep(4); } catch(e){}
+                    // If still on step4, proceed to create order (trigger event used by customize-order or call createOrder)
+                    const activeStep = document.querySelector('.wizard-step.active')?.id;
+                    if (activeStep === 'wizardStep4') {
+                        // Dispatch event to submit order (customize-order listens for step 4)
+                        window.dispatchEvent(new CustomEvent('tgt:checkout:step', { detail: { step: 4 } }));
+                    }
+                });
+            }
+        }
+
+        initOrderWizard();
+    } catch (e) { console.error('init order wizard', e); }
+});

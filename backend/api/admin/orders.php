@@ -7,14 +7,41 @@
 // Headers pour API REST
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET');
-header('Access-Control-Allow-Headers: Authorization');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Authorization, Content-Type');
 
 // Inclure la configuration de la base de données
 require_once '../../config/database.php';
 
+function extractBearerToken() {
+    $h = getallheaders();
+    $a = $h['Authorization'] ?? $h['authorization'] ?? '';
+    if (strpos($a, 'Bearer ') === 0) return substr($a, 7);
+    return null;
+}
+
+function verifyJWTToken($token) {
+    $secret = getenv('JWT_SECRET') ?: 'your-secret-key';
+    $parts = explode('.', $token);
+    if (count($parts) !== 3) return false;
+    list($h, $p, $s) = $parts;
+    $signature = hash_hmac('sha256', $h . '.' . $p, $secret, true);
+    $expected = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
+    if (!hash_equals($expected, $s)) return false;
+    $payload = json_decode(base64_decode($p), true);
+    if (!$payload) return false;
+    if (isset($payload['exp']) && time() > $payload['exp']) return false;
+    return $payload;
+}
+
+// Handle OPTIONS
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
 // Vérifier la méthode HTTP
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+if ($_SERVER['REQUEST_METHOD'] !== 'GET' && $_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode([
         'success' => false,
@@ -23,11 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-// Récupérer et vérifier l'authentification admin
-$headers = getallheaders();
-$authHeader = $headers['Authorization'] ?? '';
-
-if (strpos($authHeader, 'Bearer ') !== 0) {
+// Récupérer et vérifier l'authentification admin (JWT)
+$token = extractBearerToken();
+if (!$token) {
     http_response_code(401);
     echo json_encode([
         'success' => false,
@@ -36,19 +61,27 @@ if (strpos($authHeader, 'Bearer ') !== 0) {
     exit;
 }
 
-$token = substr($authHeader, 7);
-
 try {
     // Se connecter à la base de données
     $pdo = getDatabaseConnection();
-    
-    // Vérifier l'utilisateur et ses privilèges admin
-    $userQuery = "SELECT id, is_admin FROM users WHERE auth_token = :token AND active = 1";
-    $userStmt = $pdo->prepare($userQuery);
-    $userStmt->execute(['token' => $token]);
-    $user = $userStmt->fetch();
-    
-    if (!$user || !$user['is_admin']) {
+
+    $payload = verifyJWTToken($token);
+    if (!$payload || empty($payload['user_id'])) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Token invalide']);
+        exit;
+    }
+
+    $userStmt = $pdo->prepare("SELECT id, role, active FROM users WHERE id = :id LIMIT 1");
+    $userStmt->execute(['id' => (int)$payload['user_id']]);
+    $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+    if (!$user || (int)($user['active'] ?? 0) !== 1) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Utilisateur introuvable']);
+        exit;
+    }
+
+    if (!in_array($user['role'] ?? '', ['admin', 'super_admin'], true)) {
         http_response_code(403);
         echo json_encode([
             'success' => false,
@@ -56,10 +89,70 @@ try {
         ]);
         exit;
     }
-    
+
+    // POST: update order status (accept/refuse)
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $raw = file_get_contents('php://input');
+        $data = json_decode($raw, true);
+        if (!$data) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'JSON invalide']);
+            exit;
+        }
+
+        $id = isset($data['id']) ? (int)$data['id'] : 0;
+        $status = isset($data['status']) ? (string)$data['status'] : '';
+        $reason = isset($data['reason']) ? trim((string)$data['reason']) : '';
+
+        $allowed = ['confirmed', 'cancelled', 'rejected'];
+        if (!$id || !in_array($status, $allowed, true)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Paramètres invalides']);
+            exit;
+        }
+
+        $mappedStatus = $status === 'rejected' ? 'cancelled' : $status;
+
+        $check = $pdo->prepare('SELECT id, status FROM orders WHERE id = :id LIMIT 1');
+        $check->execute(['id' => $id]);
+        $order = $check->fetch(PDO::FETCH_ASSOC);
+        if (!$order) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'message' => 'Commande introuvable']);
+            exit;
+        }
+        if (($order['status'] ?? '') !== 'pending') {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Seules les commandes en attente peuvent être traitées']);
+            exit;
+        }
+
+        $sql = 'UPDATE orders SET status = :status, updated_at = NOW() WHERE id = :id';
+        $params = ['status' => $mappedStatus, 'id' => $id];
+
+        // add note if column exists
+        if ($reason !== '') {
+            try {
+                $hasNotes = (bool)$pdo->query("SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'orders' AND column_name = 'notes' LIMIT 1")->fetchColumn();
+                if ($hasNotes) {
+                    $sql = "UPDATE orders SET status = :status, notes = CONCAT(COALESCE(notes,''), '\n[Admin] ', :reason), updated_at = NOW() WHERE id = :id";
+                    $params['reason'] = $reason;
+                }
+            } catch (Exception $e) {
+                // ignore
+            }
+        }
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+
+        echo json_encode(['success' => true, 'message' => 'Statut mis à jour', 'data' => ['id' => $id, 'status' => $mappedStatus]]);
+        exit;
+    }
+
     // Récupérer les paramètres de la requête
     $params = $_GET;
-    
+
     // Construire la requête de base
     $query = "SELECT o.*, 
               CONCAT(u.first_name, ' ', u.last_name) as customer_name,
@@ -106,9 +199,9 @@ try {
     
     foreach ($queryParams as $key => $value) {
         if ($key === 'limit') {
-            $stmt->bindValue($key, $value, PDO::PARAM_INT);
+            $stmt->bindValue(':' . $key, $value, PDO::PARAM_INT);
         } else {
-            $stmt->bindValue($key, $value);
+            $stmt->bindValue(':' . $key, $value);
         }
     }
     

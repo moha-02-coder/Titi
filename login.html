@@ -105,6 +105,7 @@
 
                 <!-- Login Form -->
                 <form id="loginForm" class="auth-form">
+                    <input type="hidden" name="role" id="login_role" value="client" />
                     <!-- Champs de connexion principaux -->
                     <div class="form-section">
                         <div class="form-group">
@@ -122,7 +123,7 @@
                             </label>
                             <div class="password-wrapper">
                                 <input type="password" name="password" id="login_password" class="form-input" required
-                                       placeholder="Votre mot de passe" autocomplete="current-password" minlength="8">
+                                       placeholder="Votre mot de passe" autocomplete="current-password">
                                 <button type="button" class="password-toggle" aria-label="Afficher/masquer le mot de passe">
                                     <i class="fas fa-eye"></i>
                                 </button>
@@ -250,5 +251,25 @@
     <div class="toast-container"></div>
     <script src="assets/js/config.js"></script>
     <script src="assets/js/auth.js"></script>
+    <script>
+        // Ensure role buttons toggle and set hidden role field even if other scripts load late
+        (function () {
+            try {
+                const buttons = document.querySelectorAll('.type-btn');
+                const hidden = document.getElementById('login_role');
+                buttons.forEach(btn => btn.addEventListener('click', function (e) {
+                    buttons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const t = this.dataset.type || this.getAttribute('data-type');
+                    if (hidden) hidden.value = t;
+                    // also dispatch event for AuthController if present
+                    try { document.dispatchEvent(new CustomEvent('roleChanged', { detail: { role: t } })); } catch (e) {}
+                }));
+                // initialize hidden from active button
+                const active = document.querySelector('.type-btn.active');
+                if (active && hidden) hidden.value = active.dataset.type || active.getAttribute('data-type');
+            } catch (e) { console.warn('role buttons init failed', e); }
+        })();
+    </script>
 </body>
 </html>

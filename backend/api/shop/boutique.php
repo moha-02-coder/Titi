@@ -49,6 +49,55 @@ try {
     $stmt->execute($params);
 
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Helper: resolve and verify image file existence, fallback to default
+        $defaultWeb = '/assets/images/default.jpg';
+        $assetsBase = realpath(__DIR__ . '/../../assets');
+        $resolvePath = function($webPath) use ($assetsBase, $defaultWeb) {
+            if (!$webPath) return $defaultWeb;
+            $webPath = trim($webPath);
+            // If JSON array
+            if (strpos($webPath, '[') === 0) {
+                $arr = json_decode($webPath, true);
+                if (is_array($arr)) {
+                    $out = [];
+                    foreach ($arr as $it) {
+                        $it = trim($it);
+                        if (!$it) { $out[] = $defaultWeb; continue; }
+                        if (strpos($it, '/') === 0) {
+                            $file = $assetsBase . $it; // web absolute like /assets/...
+                            if (file_exists($file)) { $out[] = $it; continue; }
+                            $out[] = $defaultWeb; continue;
+                        }
+                        // try common products folder
+                        $candidate = '/images/products/' . ltrim($it, '/');
+                        $file = $assetsBase . $candidate;
+                        if (file_exists($file)) { $out[] = '/assets' . $candidate; continue; }
+                        $out[] = $defaultWeb;
+                    }
+                    return json_encode($out, JSON_UNESCAPED_UNICODE);
+                }
+            }
+            // Single path
+            if (strpos($webPath, '/') === 0) {
+                // path starting with /
+                $file = $assetsBase . $webPath;
+                return file_exists($file) ? $webPath : $defaultWeb;
+            }
+            if (stripos($webPath, 'assets/') === 0) {
+                $file = $assetsBase . '/' . substr($webPath, strlen('assets/'));
+                return file_exists($file) ? '/' . ltrim($webPath, '/') : $defaultWeb;
+            }
+            // assume product image name, try products folder
+            $candidate = '/images/products/' . ltrim($webPath, '/');
+            $file = $assetsBase . $candidate;
+            return file_exists($file) ? '/assets' . $candidate : $defaultWeb;
+        };
+
+        foreach ($rows as &$r) {
+            if (isset($r['image_url'])) $r['image_url'] = $resolvePath($r['image_url']);
+            if (isset($r['images'])) $r['images'] = $resolvePath($r['images']);
+            if (isset($r['main_image'])) $r['main_image'] = $resolvePath($r['main_image']);
+        }
 
     echo json_encode([
         'success' => true,

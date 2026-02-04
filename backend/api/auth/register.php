@@ -173,6 +173,8 @@ try {
     error_log("=== DÉBUT INSCRIPTION ===");
     error_log("Méthode: " . $_SERVER['REQUEST_METHOD']);
     error_log("Content-Type: " . ($_SERVER['CONTENT_TYPE'] ?? 'Non défini'));
+
+    $pdo = null;
     
     // Récupérer les données
     $posted = [];
@@ -267,8 +269,10 @@ try {
     
     // === CONNEXION À LA BASE DE DONNÉES ===
     try {
-        $database = new Database();
-        $pdo = $database->getConnection();
+        if (!function_exists('getDatabaseConnection')) {
+            throw new Exception('Fonction getDatabaseConnection() introuvable (config/database.php)');
+        }
+        $pdo = getDatabaseConnection();
         error_log("Connexion BD réussie");
     } catch (Exception $e) {
         error_log("ERREUR connexion BD: " . $e->getMessage());
@@ -328,7 +332,16 @@ try {
         
         // === CRÉATION DE L'UTILISATEUR ===
         $hashedPassword = password_hash($posted['password'], PASSWORD_DEFAULT);
-        
+
+        // Detect actual columns in users table to avoid schema mismatch
+        $usersColumns = [];
+        try {
+            $usersColumns = $pdo->query("DESCRIBE users")->fetchAll(PDO::FETCH_COLUMN);
+        } catch (Exception $e) {
+            error_log('Impossible de lire la structure de la table users: ' . $e->getMessage());
+            $usersColumns = [];
+        }
+
         // Préparer les données utilisateur
         $userData = [
             'first_name' => $posted['first_name'],
@@ -347,7 +360,17 @@ try {
             'verified' => $role === 'livreur' ? 0 : 1,
             'active' => 1
         ];
-        
+
+        if (!empty($usersColumns)) {
+            $userData = array_filter(
+                $userData,
+                function ($value, $key) use ($usersColumns) {
+                    return in_array($key, $usersColumns, true);
+                },
+                ARRAY_FILTER_USE_BOTH
+            );
+        }
+
         // Construire la requête dynamiquement
         $columns = [];
         $placeholders = [];
@@ -519,7 +542,7 @@ try {
         
     } catch (Exception $e) {
         // Rollback seulement si une transaction est active
-        if ($pdo->inTransaction()) {
+        if ($pdo && $pdo->inTransaction()) {
             $pdo->rollBack();
             error_log("Transaction annulée: " . $e->getMessage());
         }

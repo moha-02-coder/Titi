@@ -91,6 +91,46 @@ try {
     $stmt->execute($params);
 
     $menuItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Resolve menu image paths and verify file existence to avoid 404s
+    $defaultWeb = '/assets/images/default.jpg';
+    $assetsBase = realpath(__DIR__ . '/../../assets');
+    $resolveMenu = function($p) use ($assetsBase, $defaultWeb) {
+        if (!$p) return $defaultWeb;
+        $p = trim($p);
+        if (strpos($p, '[') === 0) {
+            $arr = json_decode($p, true);
+            if (is_array($arr)) {
+                $out = [];
+                foreach ($arr as $it) {
+                    $it = trim($it);
+                    if (!$it) { $out[] = $defaultWeb; continue; }
+                    if (strpos($it, '/') === 0) {
+                        $file = $assetsBase . $it;
+                        $out[] = file_exists($file) ? $it : $defaultWeb; continue;
+                    }
+                    $candidate = '/images/menu/' . ltrim($it, '/');
+                    $file = $assetsBase . $candidate;
+                    $out[] = file_exists($file) ? '/assets' . $candidate : $defaultWeb;
+                }
+                return json_encode($out, JSON_UNESCAPED_UNICODE);
+            }
+        }
+        if (strpos($p, '/') === 0) {
+            $file = $assetsBase . $p;
+            return file_exists($file) ? $p : $defaultWeb;
+        }
+        if (stripos($p, 'assets/') === 0) {
+            $file = $assetsBase . '/' . substr($p, strlen('assets/'));
+            return file_exists($file) ? '/' . ltrim($p, '/') : $defaultWeb;
+        }
+        $candidate = '/images/menu/' . ltrim($p, '/');
+        $file = $assetsBase . $candidate;
+        return file_exists($file) ? '/assets' . $candidate : $defaultWeb;
+    };
+
+    foreach ($menuItems as &$m) {
+        if (isset($m['image_url'])) $m['image_url'] = $resolveMenu($m['image_url']);
+    }
 
     echo json_encode([
         'success' => true,

@@ -1,4 +1,4 @@
-/**
+/*
  * Configuration API - Titi Golden Taste
  */
 const API_CONFIG = {
@@ -80,40 +80,12 @@ class ToastSystem {
     }
 }
 
-// Loading System
-class LoadingSystem {
-    static show(message = 'Chargement...') {
-        let overlay = document.getElementById('loadingOverlay');
-        
-        if (!overlay) {
-            overlay = this.createOverlay();
-        }
-        
-        overlay.querySelector('p').textContent = message;
-        overlay.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-    
-    static hide() {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            overlay.style.display = 'none';
-            document.body.style.overflow = '';
-        }
-    }
-    
-    static createOverlay() {
-        const overlay = document.createElement('div');
-        overlay.id = 'loadingOverlay';
-        overlay.className = 'loading-overlay';
-        overlay.innerHTML = `
-            <div class="spinner"></div>
-            <p>Chargement...</p>
-        `;
-        document.body.appendChild(overlay);
-        return overlay;
-    }
-}
+// LoadingSystem alias: use global `window.LoadingSystem` when available
+var _TGT_LS = (typeof window !== 'undefined' && window.LoadingSystem) ? window.LoadingSystem : {
+    show: function(msg) {},
+    hide: function() {},
+    updateMessage: function(msg) {}
+};
 
 // Password Strength Validator
 class PasswordValidator {
@@ -371,8 +343,14 @@ class FormValidator {
                     }
                     break;
             case 'password':
-                if (value.length > 0 && value.length < 8) {
-                    errors.push('Minimum 8 caractères');
+                // Enforce minimum length only on registration forms.
+                // Login can accept shorter passwords (legacy accounts).
+                {
+                    const formId = field?.form?.id || '';
+                    const shouldEnforceMinLength = formId === 'registerForm' || field.hasAttribute('data-enforce-minlength');
+                    if (shouldEnforceMinLength && value.length > 0 && value.length < 8) {
+                        errors.push('Minimum 8 caractères');
+                    }
                 }
                 break;
         }
@@ -682,7 +660,7 @@ class AuthController {
             return;
         }
         
-        LoadingSystem.show('Création de votre compte...');
+        _TGT_LS.show('Création de votre compte...');
         
         try {
             const formData = new FormData(e.target);
@@ -733,7 +711,7 @@ class AuthController {
             }
         } finally {
             this.isSubmitting = false;
-            LoadingSystem.hide();
+            _TGT_LS.hide();
         }
     }
     
@@ -844,7 +822,7 @@ class AuthController {
             return;
         }
         
-        LoadingSystem.show('Connexion en cours...');
+        _TGT_LS.show('Connexion en cours...');
         
         try {
             const baseURL = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'backend/api');
@@ -876,6 +854,10 @@ class AuthController {
                 
                 await this.handleLoginSuccess(apiData);
             } else {
+                // Provide a clearer message for invalid credentials
+                if (response.status === 401) {
+                    throw new Error('Email ou mot de passe incorrect');
+                }
                 const errorMsg = responseData?.message || responseData?.error || `Échec de la connexion (${response.status})`;
                 console.error('Login failed:', errorMsg, responseData);
                 throw new Error(errorMsg);
@@ -890,7 +872,7 @@ class AuthController {
             }
         } finally {
             this.isSubmitting = false;
-            LoadingSystem.hide();
+            _TGT_LS.hide();
         }
     }
     
@@ -929,6 +911,19 @@ class AuthController {
         
         // Show welcome message before redirect
         setTimeout(() => {
+            // Close any open login modal if present
+            try {
+                const modal = document.getElementById('loginModal');
+                if (modal) {
+                    try { const active = document.activeElement; if (active && modal.contains(active)) try{active.blur();}catch(e){} } catch(e){}
+                    modal.style.display = 'none';
+                    modal.setAttribute('aria-hidden','true');
+                }
+            } catch (e) {}
+
+            // Update header/profile UI immediately
+            try { if (typeof window.initAuthProfile === 'function') window.initAuthProfile(); } catch (e) {}
+
             const role = user.role || 'client';
             console.log('Redirecting to dashboard for role:', role);
             this.redirectToDashboard(role);
@@ -945,6 +940,13 @@ class AuthController {
         if (user) {
             localStorage.setItem('user_data', JSON.stringify(user));
         }
+        // Persist role and id for other scripts that read these keys
+        try {
+            const role = (user && (user.role || user.user_role || user.role_name)) ? (user.role || user.user_role || user.role_name) : 'client';
+            const uid = (user && (user.id || user.user_id || user.uid)) ? (user.id || user.user_id || user.uid) : '';
+            if (role) localStorage.setItem('user_role', role);
+            if (uid) localStorage.setItem('user_id', String(uid));
+        } catch (e) { /* noop */ }
         
         // Set token expiry (7 days comme défini dans l'API)
         const expiry = Date.now() + (7 * 24 * 60 * 60 * 1000);
@@ -958,10 +960,12 @@ class AuthController {
             'delivery': 'delivery/dashboard.html',
             'livreur': 'delivery/dashboard.html',
             'restaurant': 'restaurant/dashboard.html',
-            'client': 'dashboard.html'
+            'client': 'index.html'
         };
         
-        window.location.href = dashboards[role] || 'dashboard.html';
+        // Rediriger selon le rôle
+        const dashboard = dashboards[role] || 'index.html';
+        window.location.href = dashboard;
     }
     
     async validateRegisterForm() {
@@ -1054,11 +1058,11 @@ class AuthController {
         const email = prompt('Veuillez entrer votre adresse email pour réinitialiser votre mot de passe :');
         
         if (email && FormValidator.isValidEmail(email)) {
-            LoadingSystem.show('Envoi du lien de réinitialisation...');
+            _TGT_LS.show('Envoi du lien de réinitialisation...');
             
             // Simulate API call
             setTimeout(() => {
-                LoadingSystem.hide();
+                _TGT_LS.hide();
                 ToastSystem.show('success', 'Email envoyé', 
                     'Un lien de réinitialisation a été envoyé à votre adresse email');
             }, 2000);
@@ -1300,4 +1304,46 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize auth controller
     window.authController = new AuthController();
+    
+    // If redirected here because of a pending order, show a resume banner
+    try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('resume_wizard') === '1') {
+            const returnPath = params.get('return') || '';
+            const banner = document.createElement('div');
+            banner.className = 'resume-banner';
+            banner.innerHTML = `
+                <div class="resume-banner-inner">
+                    <div class="resume-msg">Vous devez vous connecter pour poursuivre votre commande</div>
+                    <div class="resume-actions">
+                        <button type="button" class="btn btn-resume">Retourner à la commande</button>
+                        <button type="button" class="btn btn-dismiss" aria-label="Fermer">&times;</button>
+                    </div>
+                </div>
+            `;
+            const container = document.querySelector('.auth-container') || document.body;
+            container.insertBefore(banner, container.firstChild);
+
+            // Banner styles
+            const bannerCSS = `
+                .resume-banner{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;background:linear-gradient(90deg,#fff8e6,#fffaf0);border:1px solid rgba(212,175,55,0.18);padding:12px 16px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.12);display:flex;align-items:center;gap:12px;max-width:900px;width:calc(100% - 40px)}
+                .resume-banner-inner{display:flex;justify-content:space-between;align-items:center;width:100%}
+                .resume-msg{font-weight:700;color:#111}
+                .resume-actions .btn-resume{background:#d4af37;color:#111;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+                .resume-actions .btn-dismiss{background:transparent;border:none;color:#666;font-size:20px;margin-left:8px;cursor:pointer}
+            `;
+            const s2 = document.createElement('style'); s2.textContent = bannerCSS; document.head.appendChild(s2);
+
+            // Button handlers
+            banner.querySelector('.btn-resume').addEventListener('click', function () {
+                if (returnPath) {
+                    try { window.location.href = returnPath + (returnPath.includes('?') ? '&' : '?') + '_t=' + Date.now(); }
+                    catch (e) { window.location.href = returnPath; }
+                } else {
+                    try { history.back(); } catch (e) { window.location.href = 'index.html'; }
+                }
+            });
+            banner.querySelector('.btn-dismiss').addEventListener('click', function () { banner.remove(); });
+        }
+    } catch (e) { console.error('resume banner', e); }
 });

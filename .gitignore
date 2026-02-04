@@ -1,0 +1,42 @@
+# Fichiers de configuration locaux
+database.php
+backend/config/database.php
+backend/config/websocket.php
+
+# Logs
+logs/
+*.log
+
+# Uploads
+uploads/
+temp/
+
+# Fichiers de l'environnement
+.env
+.env.local
+.env.production
+
+# Cache
+.cache/
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PHP
+composer.lock
+vendor/
+
+# Backup
+*.sql
+*.backup
+
+# Render
+.render/

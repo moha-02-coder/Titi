@@ -36,7 +36,7 @@ try {
     // Discover available columns to avoid selecting non-existing fields
     $colStmt = $pdo->query("DESCRIBE menu");
     $cols = $colStmt->fetchAll(PDO::FETCH_COLUMN);
-    $wanted = ['id','name','description','price','category','available','is_today','image_url'];
+    $wanted = ['id','name','description','price','category','available','is_today','image_url','updated_at'];
     $selectCols = array_values(array_intersect($wanted, $cols));
     if (empty($selectCols)) {
         // fallback to any column list
@@ -68,6 +68,25 @@ try {
     if (!$menu) {
         $response = ['success' => false, 'data' => null, 'message' => 'Aucun menu disponible'];
     } else {
+        // Resolve image path to an existing file or fallback default to avoid 404s
+        $defaultWeb = '/assets/images/default.jpg';
+        $projectRoot = realpath(__DIR__ . '/../../..');
+        $resolve = function($p) use ($projectRoot, $defaultWeb) {
+            if (!$p) return $defaultWeb;
+            $p = trim($p);
+            if (strpos($p, '/') === 0) {
+                $file = $projectRoot . $p;
+                return ($projectRoot && $file && file_exists($file)) ? $p : $defaultWeb;
+            }
+            if (stripos($p, 'assets/') === 0) {
+                $file = $projectRoot . '/' . $p;
+                return ($projectRoot && $file && file_exists($file)) ? '/' . ltrim($p, '/') : $defaultWeb;
+            }
+            $candidate = '/images/menu/' . ltrim($p, '/');
+            $file = $projectRoot . '/assets' . $candidate;
+            return ($projectRoot && $file && file_exists($file)) ? '/assets' . $candidate : $defaultWeb;
+        };
+        if (isset($menu['image_url'])) $menu['image_url'] = $resolve($menu['image_url']);
         $response = ['success' => true, 'data' => $menu, 'message' => ''];
     }
     http_response_code(200);

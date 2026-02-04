@@ -4,6 +4,7 @@
  * GET/POST/PUT/DELETE /backend/api/admin/menu.php
  */
 
+
 // Headers pour API REST
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -13,14 +14,33 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization');
 // Inclure la configuration de la base de données
 require_once '../../config/database.php';
 
+function extractBearerToken() {
+    $h = getallheaders();
+    $a = $h['Authorization'] ?? $h['authorization'] ?? '';
+    if (strpos($a, 'Bearer ') === 0) return substr($a, 7);
+    return null;
+}
+
+function verifyJWTToken($token) {
+    $secret = getenv('JWT_SECRET') ?: 'your-secret-key';
+    $parts = explode('.', $token);
+    if (count($parts) !== 3) return false;
+    list($h, $p, $s) = $parts;
+    $signature = hash_hmac('sha256', $h . '.' . $p, $secret, true);
+    $expected = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
+    if (!hash_equals($expected, $s)) return false;
+    $payload = json_decode(base64_decode($p), true);
+    if (!$payload) return false;
+    if (isset($payload['exp']) && time() > $payload['exp']) return false;
+    return $payload;
+}
+
 // Vérifier la méthode HTTP
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Récupérer et vérifier l'authentification admin
-$headers = getallheaders();
-$authHeader = $headers['Authorization'] ?? '';
-
-if (strpos($authHeader, 'Bearer ') !== 0) {
+// Récupérer et vérifier l'authentification admin (JWT)
+$token = extractBearerToken();
+if (!$token) {
     http_response_code(401);
     echo json_encode([
         'success' => false,
@@ -29,19 +49,27 @@ if (strpos($authHeader, 'Bearer ') !== 0) {
     exit;
 }
 
-$token = substr($authHeader, 7);
-
 try {
     // Se connecter à la base de données
     $pdo = getDatabaseConnection();
-    
-    // Vérifier l'utilisateur et ses privilèges admin
-    $userQuery = "SELECT id, is_admin FROM users WHERE auth_token = :token AND active = 1";
-    $userStmt = $pdo->prepare($userQuery);
-    $userStmt->execute(['token' => $token]);
-    $user = $userStmt->fetch();
-    
-    if (!$user || !$user['is_admin']) {
+
+    $payload = verifyJWTToken($token);
+    if (!$payload || empty($payload['user_id'])) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Token invalide']);
+        exit;
+    }
+
+    // Vérifier rôle admin en base (source de vérité)
+    $userStmt = $pdo->prepare("SELECT id, role, active FROM users WHERE id = :id LIMIT 1");
+    $userStmt->execute(['id' => (int)$payload['user_id']]);
+    $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+    if (!$user || (int)($user['active'] ?? 0) !== 1) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Utilisateur introuvable']);
+        exit;
+    }
+    if (!in_array($user['role'] ?? '', ['admin', 'super_admin'], true)) {
         http_response_code(403);
         echo json_encode([
             'success' => false,
@@ -50,8 +78,17 @@ try {
         exit;
     }
     
+    // Allow POST override for multipart updates
+    $effectiveMethod = $method;
+    if ($method === 'POST' && isset($_POST['_method'])) {
+        $m = strtoupper((string)$_POST['_method']);
+        if (in_array($m, ['PUT', 'DELETE'], true)) {
+            $effectiveMethod = $m;
+        }
+    }
+
     // Gestion des différentes méthodes HTTP
-    switch ($method) {
+    switch ($effectiveMethod) {
         case 'GET':
             handleGetMenu($pdo);
             break;
@@ -118,7 +155,13 @@ function handleGetMenu($pdo) {
 
 // POST - Créer un nouveau plat
 function handleCreateMenu($pdo) {
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data = null;
+    $isMultipart = !empty($_POST) || !empty($_FILES);
+    if ($isMultipart) {
+        $data = $_POST;
+    } else {
+        $data = json_decode(file_get_contents('php://input'), true);
+    }
     
     // Validation des données requises
     $required = ['name', 'price', 'category'];
@@ -133,6 +176,22 @@ function handleCreateMenu($pdo) {
         }
     }
     
+    // Image upload (optional)
+    $imageUrl = null;
+    if ($isMultipart && !empty($_FILES['image']['tmp_name'])) {
+        $uploadsDir = __DIR__ . '/../../../assets/uploads/menu';
+        if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0755, true);
+        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+        $filename = uniqid('menu_') . '.' . $ext;
+        $target = $uploadsDir . '/' . $filename;
+        if (move_uploaded_file($_FILES['image']['tmp_name'], $target)) {
+            $imageUrl = '/assets/uploads/menu/' . $filename;
+        }
+    }
+    if ($imageUrl === null) {
+        $imageUrl = $data['image_url'] ?? null;
+    }
+
     // Insérer le nouveau plat
     $query = "INSERT INTO menu (name, description, price, category, image_url, is_today, available) 
               VALUES (:name, :description, :price, :category, :image_url, :is_today, :available)";
@@ -143,7 +202,7 @@ function handleCreateMenu($pdo) {
         'description' => $data['description'] ?? null,
         'price' => (int)$data['price'],
         'category' => trim($data['category']),
-        'image_url' => $data['image_url'] ?? null,
+        'image_url' => $imageUrl,
         'is_today' => isset($data['is_today']) ? (int)$data['is_today'] : 0,
         'available' => isset($data['available']) ? (int)$data['available'] : 1
     ]);
@@ -173,7 +232,13 @@ function handleCreateMenu($pdo) {
 
 // PUT - Mettre à jour un plat
 function handleUpdateMenu($pdo) {
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data = null;
+    $isMultipart = !empty($_POST) || !empty($_FILES);
+    if ($isMultipart) {
+        $data = $_POST;
+    } else {
+        $data = json_decode(file_get_contents('php://input'), true);
+    }
     
     // Validation de l'ID
     if (!isset($data['id']) || !is_numeric($data['id'])) {
@@ -190,6 +255,18 @@ function handleUpdateMenu($pdo) {
     $updateParams = ['id' => $data['id']];
     
     $allowedFields = ['name', 'description', 'price', 'category', 'image_url', 'is_today', 'available'];
+
+    // Image upload on update (optional)
+    if ($isMultipart && !empty($_FILES['image']['tmp_name'])) {
+        $uploadsDir = __DIR__ . '/../../../assets/uploads/menu';
+        if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0755, true);
+        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+        $filename = uniqid('menu_') . '.' . $ext;
+        $target = $uploadsDir . '/' . $filename;
+        if (move_uploaded_file($_FILES['image']['tmp_name'], $target)) {
+            $data['image_url'] = '/assets/uploads/menu/' . $filename;
+        }
+    }
     
     foreach ($allowedFields as $field) {
         if (isset($data[$field])) {

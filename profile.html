@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Mon profil - Titi Golden Taste</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Use the same header as index.html -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <h1 class="logo">Titi Golden Taste</h1>
+                    <p class="slogan">L'excellence culinaire malienne</p>
+                </div>
+                
+                <!-- Navigation principale -->
+                <nav class="nav">
+                    <ul>
+                        <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i> Accueil</a></li>
+                        <li><a href="index.html#menu" class="nav-link"><i class="fas fa-utensils"></i> Menu</a></li>
+                        <li><a href="boutique.html" class="nav-link"><i class="fas fa-store"></i> Boutique</a></li>
+                        <li><a href="index.html#order" class="nav-link"><i class="fas fa-shopping-cart"></i> Commander</a></li>
+                        <li><a href="index.html#location" class="nav-link"><i class="fas fa-map-marker-alt"></i> Nous trouver</a></li>
+                        <li><a href="index.html#contact" class="nav-link"><i class="fas fa-phone"></i> Contact</a></li>
+                        <li class="nav-auth">
+                            <a href="login.html" class="btn-login" data-login-modal="true"><i class="fas fa-user"></i> Connexion</a>
+                            <a href="register.html" class="btn-register">Inscription</a>
+                        </li>
+                    </ul>
+                </nav>
+                
+                <!-- Menu mobile -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-header">
+            <h3>Navigation</h3>
+            <button class="mobile-nav-close" id="mobileNavClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="mobile-nav-links">
+            <a href="index.html" class="mobile-nav-link"><i class="fas fa-home"></i> Accueil</a>
+            <a href="index.html#menu" class="mobile-nav-link"><i class="fas fa-utensils"></i> Menu</a>
+            <a href="boutique.html" class="mobile-nav-link"><i class="fas fa-store"></i> Boutique</a>
+            <a href="index.html#order" class="mobile-nav-link"><i class="fas fa-shopping-cart"></i> Commander</a>
+            <a href="index.html#location" class="mobile-nav-link"><i class="fas fa-map-marker-alt"></i> Nous trouver</a>
+            <a href="index.html#contact" class="mobile-nav-link"><i class="fas fa-phone"></i> Contact</a>
+            <div class="mobile-auth">
+                <a href="login.html" class="btn-login" data-login-modal="true"><i class="fas fa-user"></i> Connexion</a>
+                <a href="register.html" class="btn-register">Inscription</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container" style="padding-top: 140px; min-height: 100vh;">
+        <div class="page-header">
+            <div class="page-title">
+                <h1><i class="fas fa-user-circle"></i> Mon Profil</h1>
+                <p class="page-subtitle">Gérez vos informations personnelles</p>
+            </div>
+            <div class="page-actions">
+                <a href="index.html" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Retour à l'accueil
+                </a>
+            </div>
+        </div>
+
+        <section class="profile-section">
+            <div class="profile-card-enhanced">
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <div class="profile-avatar-section">
+                        <div class="avatar-container">
+                            <img id="profileAvatar" src="assets/images/default.jpg" alt="Avatar utilisateur" class="profile-avatar-img">
+                            <div class="avatar-overlay">
+                                <i class="fas fa-camera"></i>
+                                <span>Changer</span>
+                            </div>
+                        </div>
+                        <div class="avatar-info">
+                            <h2 id="profileName">Chargement...</h2>
+                            <p id="profileEmail" class="profile-email">email@example.com</p>
+                            <div class="profile-status">
+                                <span class="status-badge active">
+                                    <i class="fas fa-check-circle"></i> Compte vérifié
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-actions-header">
+                        <button class="btn btn-primary" id="editModeBtn">
+                            <i class="fas fa-edit"></i> Modifier le profil
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Profile Content -->
+                <div class="profile-content">
+                    <!-- View Mode -->
+                    <div class="profile-view-mode" id="viewMode">
+                        <div class="info-sections">
+                            <div class="info-section">
+                                <h3><i class="fas fa-user"></i> Informations personnelles</h3>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <label>Prénom</label>
+                                        <span id="viewFirstName">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Nom</label>
+                                        <span id="viewLastName">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Email</label>
+                                        <span id="viewEmail">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Téléphone</label>
+                                        <span id="viewPhone">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h3><i class="fas fa-map-marker-alt"></i> Adresse</h3>
+                                <div class="info-grid">
+                                    <div class="info-item full-width">
+                                        <label>Adresse complète</label>
+                                        <span id="viewAddress">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Ville</label>
+                                        <span id="viewCity">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Quartier</label>
+                                        <span id="viewQuarter">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h3><i class="fas fa-shield-alt"></i> Sécurité</h3>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <label>Mot de passe</label>
+                                        <span>••••••••</span>
+                                        <button class="btn-link" id="changePasswordBtn">Changer le mot de passe</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Mode -->
+                    <div class="profile-edit-mode" id="editMode" style="display: none;">
+                        <form id="profileForm" class="profile-form-enhanced">
+                            <div class="form-sections">
+                                <div class="form-section">
+                                    <h3><i class="fas fa-user"></i> Informations personnelles</h3>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label for="first_name">Prénom *</label>
+                                            <input type="text" id="first_name" name="first_name" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="last_name">Nom *</label>
+                                            <input type="text" id="last_name" name="last_name" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="email">Email *</label>
+                                            <input type="email" id="email" name="email" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="phone">Téléphone</label>
+                                            <input type="tel" id="phone" name="phone" placeholder="+223 XX XX XX XX">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-section">
+                                    <h3><i class="fas fa-map-marker-alt"></i> Adresse</h3>
+                                    <div class="form-grid">
+                                        <div class="form-group full-width">
+                                            <label for="address">Adresse</label>
+                                            <input type="text" id="address" name="address" placeholder="Rue et numéro">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="city">Ville</label>
+                                            <input type="text" id="city" name="city" value="Bamako">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="quarter">Quartier</label>
+                                            <input type="text" id="quarter" name="quarter" placeholder="Ex: Badalabougou">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-section">
+                                    <h3><i class="fas fa-shield-alt"></i> Sécurité</h3>
+                                    <div class="form-grid">
+                                        <div class="form-group full-width">
+                                            <label for="password">Nouveau mot de passe</label>
+                                            <input type="password" id="password" name="password" placeholder="Laisser vide pour ne pas changer">
+                                            <small class="form-hint">Minimum 8 caractères, incluant majuscules, chiffres et caractères spéciaux</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" id="cancelEditBtn" class="btn btn-outline">
+                                    <i class="fas fa-times"></i> Annuler
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Enregistrer les modifications
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role-specific panels -->
+            <div id="rolePanels" style="margin-top: 30px;"></div>
+        </section>
+    </main>
+
+    <script src="assets/js/frontend.js"></script>
+    <script src="assets/js/profile.js"></script>
+    <script>
+        // Enhanced profile page functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const viewMode = document.getElementById('viewMode');
+            const editMode = document.getElementById('editMode');
+            const editModeBtn = document.getElementById('editModeBtn');
+            const cancelEditBtn = document.getElementById('cancelEditBtn');
+            const changePasswordBtn = document.getElementById('changePasswordBtn');
+
+            // Toggle edit mode
+            editModeBtn.addEventListener('click', function() {
+                viewMode.style.display = 'none';
+                editMode.style.display = 'block';
+                editModeBtn.style.display = 'none';
+            });
+
+            cancelEditBtn.addEventListener('click', function() {
+                viewMode.style.display = 'block';
+                editMode.style.display = 'none';
+                editModeBtn.style.display = 'block';
+            });
+
+            // Change password button
+            changePasswordBtn.addEventListener('click', function() {
+                const passwordField = document.getElementById('password');
+                passwordField.focus();
+                passwordField.scrollIntoView({ behavior: 'smooth' });
+                viewMode.style.display = 'none';
+                editMode.style.display = 'block';
+                editModeBtn.style.display = 'none';
+            });
+
+            // Update view mode with loaded data
+            function updateViewMode() {
+                document.getElementById('viewFirstName').textContent = document.getElementById('first_name').value || '-';
+                document.getElementById('viewLastName').textContent = document.getElementById('last_name').value || '-';
+                document.getElementById('viewEmail').textContent = document.getElementById('email').value || '-';
+                document.getElementById('viewPhone').textContent = document.getElementById('phone').value || '-';
+                document.getElementById('viewAddress').textContent = document.getElementById('address').value || '-';
+                document.getElementById('viewCity').textContent = document.getElementById('city').value || '-';
+                document.getElementById('viewQuarter').textContent = document.getElementById('quarter').value || '-';
+            }
+
+            // Update view mode after profile loads
+            setTimeout(updateViewMode, 1000);
+
+            // Update view mode when form values change
+            const formInputs = document.querySelectorAll('#profileForm input');
+            formInputs.forEach(input => {
+                input.addEventListener('input', updateViewMode);
+            });
+        });
+    </script>
+</body>
+</html>
