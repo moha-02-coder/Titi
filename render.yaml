@@ -1,8 +1,9 @@
 services:
   # Service PHP principal
   - type: web
-    name: titi-golden-taste
+    name: titi
     env: php
+    runtime: php
     plan: free
     buildCommand: |
       # Installation des dépendances PHP si nécessaire
