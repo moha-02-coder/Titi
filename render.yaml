@@ -1,9 +1,8 @@
 services:
-  # Service PHP principal
+  # Service PHP principal avec Docker
   - type: web
     name: titi
-    env: php
-    runtime: php
+    env: docker
     plan: free
     buildCommand: |
       # Installation des dépendances PHP si nécessaire
