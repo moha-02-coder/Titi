@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Live Streaming - Titi Golden Taste</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .test-header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 35px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        .test-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .test-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .test-btn.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .test-btn.danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .test-btn.info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .test-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .debug-console {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 35px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .admin-badge {
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1><i class="fas fa-broadcast-tower"></i> Test Live Streaming</h1>
+            <p>Interface de test pour le système de live streaming amélioré</p>
+            <span id="userRole" class="admin-badge">Mode: Client</span>
+        </div>
+
+        <!-- Section Test Admin -->
+        <div class="test-section">
+            <h3><i class="fas fa-user-shield"></i> Test Administration</h3>
+            
+            <div class="form-group">
+                <label for="liveTitle">Titre du live</label>
+                <input type="text" id="liveTitle" value="Test Live - Titi Golden Taste" />
+            </div>
+            
+            <div class="form-group">
+                <label for="liveDescription">Description</label>
+                <textarea id="liveDescription">Test du système de live streaming</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="liveStreamUrl">URL externe (optionnel)</label>
+                <input type="url" id="liveStreamUrl" placeholder="https://www.tiktok.com/@..." />
+            </div>
+            
+            <div class="test-buttons">
+                <button class="test-btn primary" onclick="startTestLive()">
+                    <i class="fas fa-play"></i> Démarrer le live
+                </button>
+                <button class="test-btn danger" onclick="stopTestLive()">
+                    <i class="fas fa-stop"></i> Arrêter le live
+                </button>
+                <button class="test-btn info" onclick="checkLiveStatus()">
+                    <i class="fas fa-info-circle"></i> Vérifier statut
+                </button>
+                <button class="test-btn info" onclick="toggleDebugMode()">
+                    <i class="fas fa-bug"></i> Toggle Debug
+                </button>
+                <button class="test-btn info" onclick="simulateAdmin()">
+                    <i class="fas fa-user-shield"></i> Simuler Admin
+                </button>
+            </div>
+            
+            <div class="status-display" id="statusDisplay">
+                Statut: En attente...
+            </div>
+        </div>
+
+        <!-- Section Test Client -->
+        <div class="test-section">
+            <h3><i class="fas fa-users"></i> Test Client</h3>
+            
+            <div class="test-buttons">
+                <button class="test-btn info" onclick="checkNotifications()">
+                    <i class="fas fa-bell"></i> Vérifier notifications
+                </button>
+                <button class="test-btn info" onclick="simulateClient()">
+                    <i class="fas fa-user"></i> Simuler Client
+                </button>
+                <button class="test-btn info" onclick="joinLive()">
+                    <i class="fas fa-tv"></i> Rejoindre le live
+                </button>
+            </div>
+        </div>
+
+        <!-- Section Debug -->
+        <div class="test-section">
+            <h3><i class="fas fa-terminal"></i> Console de Debug</h3>
+            
+            <div class="test-buttons">
+                <button class="test-btn info" onclick="clearDebugConsole()">
+                    <i class="fas fa-trash"></i> Vider console
+                </button>
+                <button class="test-btn info" onclick="showLiveDetails()">
+                    <i class="fas fa-list"></i> Détails du live
+                </button>
+                <button class="test-btn info" onclick="testAPI()">
+                    <i class="fas fa-plug"></i> Tester API
+                </button>
+            </div>
+            
+            <div class="debug-console" id="debugConsole">
+                Console de debug prête...
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/live-streaming-enhanced.js"></script>
+    
+    <script>
+        let isAdminMode = false;
+        
+        // Intercepter les logs pour les afficher dans la console
+        const originalLog = console.log;
+        console.log = function(...args) {
+            if (args[0] && args[0].includes && args[0].includes('[LiveManager]')) {
+                appendToDebugConsole(args.join(' '));
+            }
+            originalLog.apply(console, args);
+        };
+        
+        function appendToDebugConsole(message) {
+            const console = document.getElementById('debugConsole');
+            const timestamp = new Date().toLocaleTimeString();
+            console.innerHTML += `[${timestamp}] ${message}\n`;
+            console.scrollTop = console.scrollHeight;
+        }
+        
+        function updateStatus(message) {
+            document.getElementById('statusDisplay').textContent = `Statut: ${message}`;
+        }
+        
+        function updateUserRole() {
+            const badge = document.getElementById('userRole');
+            badge.textContent = `Mode: ${isAdminMode ? 'Admin' : 'Client'}`;
+            badge.style.background = isAdminMode ? '#dc3545' : '#28a745';
+        }
+        
+        async function startTestLive() {
+            if (!isAdminMode) {
+                alert('Vous devez être en mode admin pour démarrer un live');
+                return;
+            }
+            
+            const title = document.getElementById('liveTitle').value;
+            const description = document.getElementById('liveDescription').value;
+            const streamUrl = document.getElementById('liveStreamUrl').value;
+            
+            updateStatus('Démarrage du live...');
+            
+            // Définir l'URL externe si fournie
+            if (window.enhancedLiveManager) {
+                window.enhancedLiveManager.pendingStreamUrl = streamUrl;
+            }
+            
+            const result = await window.startLive(title, description);
+            updateStatus(result ? 'Live démarré avec succès' : 'Échec du démarrage');
+        }
+        
+        async function stopTestLive() {
+            if (!isAdminMode) {
+                alert('Vous devez être en mode admin pour arrêter un live');
+                return;
+            }
+            
+            updateStatus('Arrêt du live...');
+            const result = await window.endLive();
+            updateStatus(result ? 'Live arrêté avec succès' : 'Échec de l\'arrêt');
+        }
+        
+        async function checkLiveStatus() {
+            updateStatus('Vérification du statut...');
+            
+            if (window.enhancedLiveManager) {
+                await window.enhancedLiveManager.checkForActiveLive();
+                const currentLive = window.enhancedLiveManager.currentLive;
+                
+                if (currentLive) {
+                    updateStatus(`Live actif: ${currentLive.title} (ID: ${currentLive.id || currentLive.live_id})`);
+                } else {
+                    updateStatus('Aucun live actif');
+                }
+            }
+        }
+        
+        function toggleDebugMode() {
+            if (window.enhancedLiveManager) {
+                window.toggleLiveDebug();
+                updateStatus('Mode debug inversé');
+            }
+        }
+        
+        function simulateAdmin() {
+            isAdminMode = !isAdminMode;
+            localStorage.setItem('user_role', isAdminMode ? 'admin' : 'customer');
+            updateUserRole();
+            updateStatus(`Mode ${isAdminMode ? 'admin' : 'client'} activé`);
+        }
+        
+        async function checkNotifications() {
+            if (window.enhancedLiveManager) {
+                await window.enhancedLiveManager.checkNotifications();
+                updateStatus('Notifications vérifiées');
+            }
+        }
+        
+        function simulateClient() {
+            isAdminMode = false;
+            localStorage.setItem('user_role', 'customer');
+            updateUserRole();
+            updateStatus('Mode client activé');
+        }
+        
+        function joinLive() {
+            if (window.enhancedLiveManager && window.enhancedLiveManager.currentLive) {
+                window.enhancedLiveManager.joinLive(window.enhancedLiveManager.currentLive);
+                updateStatus('Tentative de rejoindre le live');
+            } else {
+                updateStatus('Aucun live actif à rejoindre');
+            }
+        }
+        
+        function clearDebugConsole() {
+            document.getElementById('debugConsole').innerHTML = 'Console vidée...\n';
+        }
+        
+        function showLiveDetails() {
+            if (window.enhancedLiveManager) {
+                window.enhancedLiveManager.showLiveDetails();
+            }
+        }
+        
+        async function testAPI() {
+            updateStatus('Test de l\'API...');
+            
+            try {
+                const response = await fetch('/backend/api/lives/manage.php?action=status');
+                const data = await response.json();
+                
+                updateStatus(`API OK: ${data.success ? 'SUCCESS' : 'ERROR'}`);
+                appendToDebugConsole(`API Response: ${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                updateStatus(`API ERROR: ${error.message}`);
+                appendToDebugConsole(`API Error: ${error.message}`);
+            }
+        }
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUserRole();
+            updateStatus('Prêt pour les tests');
+            appendToDebugConsole('Page de test initialisée');
+            
+            // Vérifier le statut initial
+            setTimeout(checkLiveStatus, 1000);
+        });
+    </script>
+</body>
+</html>

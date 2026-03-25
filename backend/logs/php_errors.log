@@ -880,3 +880,305 @@ Stack trace:
 [27-Jan-2026 23:17:44 UTC] Livreur créé avec ID: 2
 [27-Jan-2026 23:17:44 UTC] Transaction validée
 [27-Jan-2026 23:17:44 UTC] INSCRIPTION RÉUSSIE: Inscription réussie ! Votre compte livreur est en attente de validation.
+[27-Feb-2026 22:59:20 UTC] === DÉBUT INSCRIPTION ===
+[27-Feb-2026 22:59:20 UTC] Méthode: POST
+[27-Feb-2026 22:59:20 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryhPWp67xDLCBL7anT
+[27-Feb-2026 22:59:20 UTC] Données POST: Array
+(
+    [first_name] => Mohammed
+    [last_name] => Guindo
+    [email] => mahometguindo@gmail.com
+    [phone] => 77148204
+    [birth_date] => 2005-02-27
+    [address] => bamako mali fadjigula
+    [city] => Bamako
+    [quarter] => Fadjigula
+    [password] => ris4WdMBV7zyL9b
+    [password_confirm] => ris4WdMBV7zyL9b
+    [vehicle_type] => 
+    [vehicle_brand] => 
+    [vehicle_model] => 
+    [vehicle_year] => 
+    [vehicle_plate] => 
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => client
+)
+
+[27-Feb-2026 22:59:20 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => pink-handbags.jpg
+            [full_path] => pink-handbags.jpg
+            [type] => 
+            [tmp_name] => 
+            [error] => 1
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[27-Feb-2026 22:59:20 UTC] Connexion BD réussie
+[27-Feb-2026 22:59:20 UTC] Transaction démarrée
+[27-Feb-2026 22:59:20 UTC] Insertion utilisateur SQL: INSERT INTO users (first_name, last_name, email, password, phone, address, avatar, newsletter, role, verified, active, created_at) VALUES (:first_name, :last_name, :email, :password, :phone, :address, :avatar, :newsletter, :role, :verified, :active, NOW())
+[27-Feb-2026 22:59:20 UTC] Données utilisateur: Array
+(
+    [first_name] => Mohammed
+    [last_name] => Guindo
+    [email] => mahometguindo@gmail.com
+    [password] => $2y$10$U6DLJXrVIiQZTJvzTQoS/..ZmNXXM3fl9zJiDJcy4uiF7zImWAzyG
+    [phone] => 77148204
+    [address] => bamako mali fadjigula
+    [avatar] => 
+    [newsletter] => 1
+    [role] => client
+    [verified] => 1
+    [active] => 1
+)
+
+[27-Feb-2026 22:59:20 UTC] Utilisateur créé avec ID: 8
+[27-Feb-2026 22:59:20 UTC] Panier créé
+[27-Feb-2026 22:59:20 UTC] Transaction validée
+[27-Feb-2026 22:59:20 UTC] ERREUR dans le traitement: SQLSTATE[42S22]: Column not found: 1054 Champ 'city' inconnu dans field list
+[27-Feb-2026 22:59:20 UTC] Trace: #0 C:\wamp64\www\Titi\backend\api\auth\register.php(501): PDO->prepare('\r\n            S...')
+#1 {main}
+[27-Feb-2026 23:16:05 UTC] === DÉBUT INSCRIPTION ===
+[27-Feb-2026 23:16:05 UTC] Méthode: POST
+[27-Feb-2026 23:16:05 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryYuAKxNZn8cxRXlE3
+[27-Feb-2026 23:16:05 UTC] Données POST: Array
+(
+    [first_name] => Mohammed
+    [last_name] => Guindo
+    [email] => mahometguindo@gmail.com
+    [phone] => 77148204
+    [birth_date] => 2005-02-27
+    [address] => bamako mali fadjigula
+    [city] => Bamako
+    [quarter] => Fadjigula
+    [password] => ris4WdMBV7zyL9b
+    [password_confirm] => ris4WdMBV7zyL9b
+    [vehicle_type] => 
+    [vehicle_brand] => 
+    [vehicle_model] => 
+    [vehicle_year] => 
+    [vehicle_plate] => 
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => client
+)
+
+[27-Feb-2026 23:16:05 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => pink-handbags.jpg
+            [full_path] => pink-handbags.jpg
+            [type] => 
+            [tmp_name] => 
+            [error] => 1
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[27-Feb-2026 23:16:05 UTC] Connexion BD réussie
+[27-Feb-2026 23:16:27 UTC] === DÉBUT INSCRIPTION ===
+[27-Feb-2026 23:16:27 UTC] Méthode: POST
+[27-Feb-2026 23:16:27 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryuX1hZuhGOoQariqA
+[27-Feb-2026 23:16:27 UTC] Données POST: Array
+(
+    [first_name] => Mohammed
+    [last_name] => Guindo
+    [email] => guindomhd@gmail.com
+    [phone] => 77148204
+    [birth_date] => 2005-02-27
+    [address] => bamako mali fadjigula
+    [city] => Bamako
+    [quarter] => Fadjigula
+    [password] => ris4WdMBV7zyL9b
+    [password_confirm] => ris4WdMBV7zyL9b
+    [vehicle_type] => 
+    [vehicle_brand] => 
+    [vehicle_model] => 
+    [vehicle_year] => 
+    [vehicle_plate] => 
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => client
+)
+
+[27-Feb-2026 23:16:27 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => pink-handbags.jpg
+            [full_path] => pink-handbags.jpg
+            [type] => 
+            [tmp_name] => 
+            [error] => 1
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[27-Feb-2026 23:16:27 UTC] Connexion BD réussie
+[27-Feb-2026 23:16:37 UTC] === DÉBUT INSCRIPTION ===
+[27-Feb-2026 23:16:37 UTC] Méthode: POST
+[27-Feb-2026 23:16:37 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryN8vNmkI79OcmhTZZ
+[27-Feb-2026 23:16:37 UTC] Données POST: Array
+(
+    [first_name] => Mohammed
+    [last_name] => Guindo
+    [email] => guindomhd@gmail.com
+    [phone] => 77128204
+    [birth_date] => 2005-02-27
+    [address] => bamako mali fadjigula
+    [city] => Bamako
+    [quarter] => Fadjigula
+    [password] => ris4WdMBV7zyL9b
+    [password_confirm] => ris4WdMBV7zyL9b
+    [vehicle_type] => 
+    [vehicle_brand] => 
+    [vehicle_model] => 
+    [vehicle_year] => 
+    [vehicle_plate] => 
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => client
+)
+
+[27-Feb-2026 23:16:37 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => pink-handbags.jpg
+            [full_path] => pink-handbags.jpg
+            [type] => 
+            [tmp_name] => 
+            [error] => 1
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[27-Feb-2026 23:16:37 UTC] Connexion BD réussie
+[27-Feb-2026 23:16:37 UTC] Transaction démarrée
+[27-Feb-2026 23:16:37 UTC] Insertion utilisateur SQL: INSERT INTO users (first_name, last_name, email, password, phone, address, city, avatar, newsletter, role, verified, active, created_at) VALUES (:first_name, :last_name, :email, :password, :phone, :address, :city, :avatar, :newsletter, :role, :verified, :active, NOW())
+[27-Feb-2026 23:16:37 UTC] Données utilisateur: Array
+(
+    [first_name] => Mohammed
+    [last_name] => Guindo
+    [email] => guindomhd@gmail.com
+    [password] => $2y$10$BTJauONFRdwNNtBXf8yHcO2x8KpUYGeIPjUUWORJZ41.Ev2BIHsuK
+    [phone] => 77128204
+    [address] => bamako mali fadjigula
+    [city] => Bamako
+    [avatar] => 
+    [newsletter] => 1
+    [role] => client
+    [verified] => 1
+    [active] => 1
+)
+
+[27-Feb-2026 23:16:37 UTC] Utilisateur créé avec ID: 9
+[27-Feb-2026 23:16:37 UTC] Panier créé
+[27-Feb-2026 23:16:37 UTC] Transaction validée
+[27-Feb-2026 23:16:37 UTC] ERREUR dans le traitement: SQLSTATE[42S22]: Column not found: 1054 Champ 'quarter' inconnu dans field list
+[27-Feb-2026 23:16:37 UTC] Trace: #0 C:\wamp64\www\Titi\backend\api\auth\register.php(501): PDO->prepare('\r\n            S...')
+#1 {main}
+[27-Feb-2026 23:22:44 UTC] === DÉBUT INSCRIPTION ===
+[27-Feb-2026 23:22:44 UTC] Méthode: POST
+[27-Feb-2026 23:22:44 UTC] Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryIprBThY0fuoiJcGX
+[27-Feb-2026 23:22:44 UTC] Données POST: Array
+(
+    [first_name] => Mohammed
+    [last_name] => Guindo
+    [email] => guindomhd@gmail.com
+    [phone] => 77128204
+    [birth_date] => 2005-02-27
+    [address] => bamako mali fadjigula
+    [city] => Bamako
+    [quarter] => Fadjigula
+    [password] => ris4WdMBV7zyL9b
+    [password_confirm] => ris4WdMBV7zyL9b
+    [vehicle_type] => 
+    [vehicle_brand] => 
+    [vehicle_model] => 
+    [vehicle_year] => 
+    [vehicle_plate] => 
+    [accept_terms] => on
+    [newsletter] => on
+    [sms_notifications] => on
+    [role] => client
+)
+
+[27-Feb-2026 23:22:44 UTC] Fichiers reçus: Array
+(
+    [avatar] => Array
+        (
+            [name] => pink-handbags.jpg
+            [full_path] => pink-handbags.jpg
+            [type] => 
+            [tmp_name] => 
+            [error] => 1
+            [size] => 0
+        )
+
+    [id_document] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[27-Feb-2026 23:22:44 UTC] Connexion BD réussie

@@ -1,7 +1,7 @@
--- Base de données Titi Golden Taste - Schéma complet et données de démonstration
-DROP DATABASE IF EXISTS titi;
-CREATE DATABASE titi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE titi;
+-- -- Base de données Titi Golden Taste - Schéma complet et données de démonstration
+-- DROP DATABASE IF EXISTS titi;
+-- CREATE DATABASE titi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- USE titi;
 
 -- Table des utilisateurs
 CREATE TABLE users (

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Dashboard Admin - Titi Golden Taste</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -28,6 +28,8 @@
                 <li><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
             </ul>
         </aside>
+
+        <div class="admin-sidebar-overlay" id="adminSidebarOverlay" aria-hidden="true"></div>
 
         <!-- Main Content -->
         <main class="admin-content">
@@ -83,28 +85,70 @@
                 </div>
 
                 <div id="restaurant-tab" class="tab-content active">
-                    <h2>Gestion du Restaurant</h2>
-                    <div id="restaurantContent">
-                        <p>Chargement...</p>
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-utensils"></i> Plats Populaires</h3>
+                                <button class="btn btn-sm btn-primary" onclick="window.location.href='#restaurant'">
+                                    <i class="fas fa-plus"></i> Voir tout
+                                </button>
+                            </div>
+                            <div class="card-content" id="popularMenus">
+                                <p>Chargement...</p>
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-star"></i> Produits en Vedette</h3>
+                                <button class="btn btn-sm btn-primary" onclick="window.location.href='#boutique'">
+                                    <i class="fas fa-plus"></i> Voir tout
+                                </button>
+                            </div>
+                            <div class="card-content" id="featuredProducts">
+                                <p>Chargement...</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div id="boutique-tab" class="tab-content">
-                    <h2>Gestion de la Boutique</h2>
-                    <div id="boutiqueContent">
-                        <p>Chargement...</p>
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-chart-line"></i> Ventes Récentes</h3>
+                                <button class="btn btn-sm btn-primary">
+                                    <i class="fas fa-download"></i> Exporter
+                                </button>
+                            </div>
+                            <div class="card-content" id="recentSales">
+                                <p>Chargement...</p>
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-users"></i> Activité Clients</h3>
+                                <button class="btn btn-sm btn-primary">
+                                    <i class="fas fa-chart-bar"></i> Statistiques
+                                </button>
+                            </div>
+                            <div class="card-content" id="customerActivity">
+                                <p>Chargement...</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
             <!-- Restaurant Management -->
             <section id="restaurant" class="content-section" style="display: none;">
-                <h2><i class="fas fa-utensils"></i> Gestion du Menu</h2>
+                <div class="admin-header">
+                    <h1><i class="fas fa-utensils"></i> Gestion du Menu</h1>
+                    <button class="btn btn-primary" id="addMenuBtn" type="button">
+                        <i class="fas fa-plus"></i> Ajouter un plat
+                    </button>
+                </div>
                 <div class="section-toolbar">
                     <div class="section-toolbar-left">
-                        <button class="btn btn-primary" id="addMenuBtn" type="button">
-                            <i class="fas fa-plus"></i> Ajouter un plat
-                        </button>
                         <input class="form-input section-search" id="menuSearch" type="search" placeholder="Rechercher un plat..." autocomplete="off">
                         <select class="form-input section-select" id="menuCategoryFilter">
                             <option value="">Toutes les catégories</option>
@@ -114,19 +158,21 @@
                         <span class="section-meta" id="menuMeta"></span>
                     </div>
                 </div>
-                <div id="menuList" style="margin-top: 20px;">
+                <div id="menuList" class="table-container">
                     <p>Chargement...</p>
                 </div>
             </section>
 
             <!-- Boutique Management -->
             <section id="boutique" class="content-section" style="display: none;">
-                <h2><i class="fas fa-store"></i> Gestion de la Boutique</h2>
+                <div class="admin-header">
+                    <h1><i class="fas fa-store"></i> Gestion de la Boutique</h1>
+                    <button class="btn btn-primary" id="addProductBtn" type="button">
+                        <i class="fas fa-plus"></i> Ajouter un produit
+                    </button>
+                </div>
                 <div class="section-toolbar">
                     <div class="section-toolbar-left">
-                        <button class="btn btn-primary" id="addProductBtn" type="button">
-                            <i class="fas fa-plus"></i> Ajouter un produit
-                        </button>
                         <input class="form-input section-search" id="productSearch" type="search" placeholder="Rechercher un produit..." autocomplete="off">
                         <select class="form-input section-select" id="productCategoryFilter">
                             <option value="">Toutes les catégories</option>
@@ -136,14 +182,19 @@
                         <span class="section-meta" id="productsMeta"></span>
                     </div>
                 </div>
-                <div id="productsList" style="margin-top: 20px;">
+                <div id="productsList" class="table-container">
                     <p>Chargement...</p>
                 </div>
             </section>
 
             <!-- Orders Management -->
             <section id="orders" class="content-section" style="display: none;">
-                <h2><i class="fas fa-shopping-cart"></i> Gestion des Commandes</h2>
+                <div class="admin-header">
+                    <h1><i class="fas fa-shopping-cart"></i> Gestion des Commandes</h1>
+                    <button class="btn btn-outline" id="exportOrdersBtn" type="button">
+                        <i class="fas fa-download"></i> Exporter
+                    </button>
+                </div>
                 <div class="section-toolbar">
                     <div class="section-toolbar-left">
                         <input class="form-input section-search" id="ordersSearch" type="search" placeholder="Rechercher (ID, client, email)..." autocomplete="off">
@@ -161,38 +212,42 @@
                         <span class="section-meta" id="ordersMeta"></span>
                     </div>
                 </div>
-                <div id="ordersList">
+                <div id="ordersList" class="table-container">
                     <p>Chargement...</p>
                 </div>
             </section>
 
             <!-- Users Management -->
             <section id="users" class="content-section" style="display: none;">
-                <h2><i class="fas fa-users"></i> Gestion des Utilisateurs</h2>
+                <div class="admin-header">
+                    <h1><i class="fas fa-users"></i> Gestion des Utilisateurs</h1>
+                    <button class="btn btn-primary" id="addUserBtn" type="button">
+                        <i class="fas fa-user-plus"></i> Ajouter un client
+                    </button>
+                </div>
                 <div class="section-toolbar">
                     <div class="section-toolbar-left">
-                        <button class="btn btn-primary" id="addUserBtn" type="button">
-                            <i class="fas fa-user-plus"></i> Ajouter un client
-                        </button>
                         <input class="form-input section-search" id="usersSearch" type="search" placeholder="Rechercher un client..." autocomplete="off">
                     </div>
                     <div class="section-toolbar-right">
                         <span class="section-meta" id="usersMeta"></span>
                     </div>
                 </div>
-                <div id="usersList">
+                <div id="usersList" class="table-container">
                     <p>Chargement...</p>
                 </div>
             </section>
 
             <!-- Drivers Management -->
             <section id="drivers" class="content-section" style="display: none;">
-                <h2><i class="fas fa-motorcycle"></i> Gestion des Livreurs</h2>
+                <div class="admin-header">
+                    <h1><i class="fas fa-motorcycle"></i> Gestion des Livreurs</h1>
+                    <button class="btn btn-primary" id="addDriverBtn" type="button">
+                        <i class="fas fa-user-plus"></i> Ajouter un livreur
+                    </button>
+                </div>
                 <div class="section-toolbar">
                     <div class="section-toolbar-left">
-                        <button class="btn btn-primary" id="addDriverBtn" type="button">
-                            <i class="fas fa-user-plus"></i> Ajouter un livreur
-                        </button>
                         <input class="form-input section-search" id="driversSearch" type="search" placeholder="Rechercher un livreur..." autocomplete="off">
                         <select class="form-input section-select" id="driversStatusFilter">
                             <option value="">Tous</option>
@@ -211,21 +266,27 @@
                         <span class="section-meta" id="driversMeta"></span>
                     </div>
                 </div>
-                <div id="driversList">
+                <div id="driversList" class="table-container">
                     <p>Chargement...</p>
                 </div>
             </section>
 
             <!-- Settings -->
             <section id="settings" class="content-section" style="display: none;">
-                <h2><i class="fas fa-cog"></i> Paramètres</h2>
-                <div id="settingsContent">
+                <div class="admin-header">
+                    <h1><i class="fas fa-cog"></i> Paramètres</h1>
+                    <button class="btn btn-primary" id="saveSettingsBtn" type="button">
+                        <i class="fas fa-save"></i> Sauvegarder
+                    </button>
+                </div>
+                <div id="settingsContent" class="settings-grid">
                     <p>Paramètres du restaurant et de la boutique</p>
                 </div>
             </section>
         </main>
     </div>
 
+    <!-- Modals -->
     <div class="admin-modal" id="adminModal" aria-hidden="true">
         <div class="admin-modal-backdrop" data-close="true"></div>
         <div class="admin-modal-panel" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
@@ -257,5 +318,11 @@
 
     <script src="../assets/js/config.js"></script>
     <script src="../assets/js/admin.js"></script>
+    <script src="../assets/js/admin-fixes.js"></script>
+    <script src="../assets/js/live-streaming.js"></script>
+    <script src="../assets/js/menu-videos.js"></script>
+    <script src="../assets/js/social-sync.js"></script>
+    <script src="../assets/js/menu-likes.js"></script>
+    <script src="../assets/js/menu-media.js"></script>
 </body>
 </html>

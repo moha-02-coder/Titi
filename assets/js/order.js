@@ -581,7 +581,7 @@ function openModal(title, content) {
             }
             
             .modal-header {
-                padding: 20px;
+                padding: 35px;
                 border-bottom: 1px solid #e0e0e0;
                 display: flex;
                 justify-content: space-between;
@@ -602,11 +602,11 @@ function openModal(title, content) {
             }
             
             .modal-body {
-                padding: 20px;
+                padding: 35px;
             }
             
             .modal-footer {
-                padding: 20px;
+                padding: 35px;
                 border-top: 1px solid #e0e0e0;
                 text-align: right;
             }
@@ -740,7 +740,7 @@ function printOrder(orderId) {
         <head>
             <title>Commande #${orderId}</title>
             <style>
-                body { font-family: Arial, sans-serif; padding: 20px; }
+                body { font-family: Arial, sans-serif; padding: 35px; }
                 .header { text-align: center; margin-bottom: 30px; }
                 .header h1 { color: #d4af37; }
                 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }

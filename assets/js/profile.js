@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+﻿document.addEventListener('DOMContentLoaded', function () {
     const token = localStorage.getItem('auth_token');
     const form = document.getElementById('profileForm');
     const avatar = document.getElementById('profileAvatar');
@@ -59,7 +59,12 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (e) { console.error(e); if (typeof ToastSystem !== 'undefined') ToastSystem.show('error','Erreur','Erreur réseau'); }
     }
 
-    document.getElementById('saveProfile').addEventListener('click', saveProfile);
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            saveProfile();
+        });
+    }
     loadProfile();
 
     // Role-based UI
@@ -121,3 +126,5 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 });
+
+

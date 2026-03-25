@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes commandes - Titi Golden Taste</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header"></header>
+
+    <main class="container orders-page-main">
+        <section class="orders-page">
+            <div class="orders-page-head">
+                <div>
+                    <h1><i class="fas fa-clipboard-list"></i> Mes commandes</h1>
+                    <p id="userRoleInfo">Suivez l'etat de vos commandes et consultez votre historique.</p>
+                </div>
+                <div class="orders-page-actions">
+                    <label for="orderStatusFilter" class="orders-filter-label">Filtrer</label>
+                    <select id="orderStatusFilter" class="orders-filter-select">
+                        <option value="all">Toutes</option>
+                        <option value="pending">En attente</option>
+                        <option value="assigned">Assignée</option>
+                        <option value="preparing">En préparation</option>
+                        <option value="delivery">En livraison</option>
+                        <option value="completed">Terminée</option>
+                        <option value="cancelled">Annulée</option>
+                    </select>
+                    <button type="button" id="refreshOrdersBtn" class="btn btn-outline">
+                        <i class="fas fa-rotate-right"></i> Actualiser
+                    </button>
+                </div>
+            </div>
+
+            <div id="ordersLoading" class="loading">
+                <div class="spinner"></div>
+                <p>Chargement de vos commandes...</p>
+            </div>
+
+            <div id="ordersError" class="orders-empty" style="display:none;">
+                <i class="fas fa-triangle-exclamation"></i>
+                <h3>Impossible de charger vos commandes</h3>
+                <p>Reessayez dans quelques instants.</p>
+            </div>
+
+            <div id="ordersEmpty" class="orders-empty" style="display:none;">
+                <i class="fas fa-basket-shopping"></i>
+                <h3>Aucune commande pour le moment</h3>
+                <p>Commencez par ajouter des plats ou produits à votre panier.</p>
+                <a href="index.html#menu" class="btn btn-primary">
+                    <i class="fas fa-utensils"></i> Commander maintenant
+                </a>
+            </div>
+
+            <div id="ordersList" class="orders-list" style="display:none;"></div>
+        </section>
+    </main>
+
+    <footer class="footer"></footer>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/header-manager.js"></script>
+    <script src="assets/js/cart.js"></script>
+    <script src="assets/js/notifications.js"></script>
+    <script src="assets/js/frontend.js"></script>
+    <script src="assets/js/orders.js"></script>
+</body>
+</html>
+
+
+
+
+

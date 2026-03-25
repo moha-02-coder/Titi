@@ -1,10 +1,31 @@
 /**
  * Dashboard Admin - Titi Golden Taste
  * Gestion complète du restaurant et de la boutique
+ * UTF-8 ENCODING
  */
 
 (function() {
     'use strict';
+
+    // BLOCAGE SCROLL HORIZONTAL GLOBAL
+    document.addEventListener('DOMContentLoaded', function() {
+        // Bloquer le scroll horizontal sur tout le document
+        document.documentElement.style.overflowX = 'hidden';
+        document.body.style.overflowX = 'hidden';
+        
+        // Bloquer sur tous les conteneurs principaux
+        const containers = document.querySelectorAll('.admin-layout, .admin-content, .admin-main, .modal, .dropdown');
+        containers.forEach(container => {
+            container.style.overflowX = 'hidden';
+        });
+        
+        // Empêcher le scroll horizontal sur la molette
+        document.addEventListener('wheel', function(e) {
+            if (e.deltaX !== 0 && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    });
 
     let ASSET_BUST = 0;
 
@@ -37,11 +58,84 @@
         }
 
         if (v.startsWith('/')) {
-            // absolute URL within host (keep as-is)
-            return bustUrl(v);
+            // absolute path within host -> ensure it is scoped under site root (e.g. /Titi)
+            if (root && v.startsWith(root + '/')) {
+                return bustUrl(v);
+            }
+            return bustUrl(`${root}${v}`);
         }
         // common relative paths stored in DB: assets/... backend/... etc.
         return bustUrl(`${root}/${v.replace(/^\/+/, '')}`);
+    }
+
+    function safeImageLoad(src, fallback, maxRetries = 2) {
+        return new Promise((resolve) => {
+            let retries = 0;
+            
+            const tryLoad = () => {
+                const img = new Image();
+                img.onload = () => resolve(src);
+                img.onerror = () => {
+                    retries++;
+                    if (retries <= maxRetries) {
+                        // Retry with cache bust
+                        const bustSrc = src.includes('?') ? `${src}&retry=${retries}` : `${src}?retry=${retries}`;
+                        img.src = bustSrc;
+                    } else {
+                        resolve(fallback);
+                    }
+                };
+                img.src = src;
+            };
+            
+            tryLoad();
+        });
+    }
+
+    function loadImageFromFile(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onerror = () => reject(new Error('Impossible de lire le fichier'));
+            reader.onload = () => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error('Image invalide'));
+                img.src = String(reader.result || '');
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async function compressImageFile(file, opts = {}) {
+        if (!(file instanceof File)) return file;
+        const type = String(file.type || '').toLowerCase();
+        if (!type.startsWith('image/')) return file;
+
+        const maxW = Math.max(200, parseInt(opts.maxW ?? 1200, 10) || 1200);
+        const maxH = Math.max(200, parseInt(opts.maxH ?? 1200, 10) || 1200);
+        const quality = Math.min(0.95, Math.max(0.45, Number(opts.quality ?? 0.82)));
+
+        const img = await loadImageFromFile(file);
+        const w = img.naturalWidth || img.width || 1;
+        const h = img.naturalHeight || img.height || 1;
+        const ratio = Math.min(maxW / w, maxH / h, 1);
+        const newW = Math.max(1, Math.floor(w * ratio));
+        const newH = Math.max(1, Math.floor(h * ratio));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = newW;
+        canvas.height = newH;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return file;
+        ctx.drawImage(img, 0, 0, newW, newH);
+
+        const blob = await new Promise((resolve) => {
+            canvas.toBlob((b) => resolve(b), 'image/jpeg', quality);
+        });
+
+        if (!blob) return file;
+        const name = (file.name || 'image').replace(/\.[a-z0-9]+$/i, '') + '.jpg';
+        return new File([blob], name, { type: 'image/jpeg' });
     }
 
     function resolveApiBase(raw) {
@@ -118,10 +212,27 @@
         if (duration) setTimeout(close, duration);
     }
 
+    let modalScrollLocks = 0;
+
+    function lockModalScroll() {
+        modalScrollLocks += 1;
+        document.body.classList.add('admin-modal-open');
+        document.documentElement.classList.add('admin-modal-open');
+    }
+
+    function unlockModalScroll() {
+        modalScrollLocks = Math.max(0, modalScrollLocks - 1);
+        if (modalScrollLocks === 0) {
+            document.body.classList.remove('admin-modal-open');
+            document.documentElement.classList.remove('admin-modal-open');
+        }
+    }
+
     const Modal = {
         open(title, bodyHtml, footerHtml = '') {
             const modal = qs('#adminModal');
             if (!modal) return;
+            const wasClosed = modal.getAttribute('aria-hidden') !== 'false';
             const t = qs('#adminModalTitle');
             const b = qs('#adminModalBody');
             const f = qs('#adminModalFooter');
@@ -129,13 +240,14 @@
             if (b) b.innerHTML = bodyHtml || '';
             if (f) f.innerHTML = footerHtml || '';
             modal.setAttribute('aria-hidden', 'false');
-            document.body.classList.add('admin-modal-open');
+            if (wasClosed) lockModalScroll();
         },
         close() {
             const modal = qs('#adminModal');
             if (!modal) return;
+            const wasOpen = modal.getAttribute('aria-hidden') === 'false';
             modal.setAttribute('aria-hidden', 'true');
-            document.body.classList.remove('admin-modal-open');
+            if (wasOpen) unlockModalScroll();
         }
     };
 
@@ -144,12 +256,13 @@
         ask(message, title = 'Confirmation') {
             const dialog = qs('#adminConfirm');
             if (!dialog) return Promise.resolve(false);
+            const wasClosed = dialog.getAttribute('aria-hidden') !== 'false';
             const t = qs('#adminConfirmTitle');
             const b = qs('#adminConfirmBody');
             if (t) t.textContent = title;
             if (b) b.innerHTML = `<p>${message || ''}</p>`;
             dialog.setAttribute('aria-hidden', 'false');
-            document.body.classList.add('admin-modal-open');
+            if (wasClosed) lockModalScroll();
             return new Promise(resolve => {
                 this._resolver = resolve;
             });
@@ -157,8 +270,9 @@
         close(result) {
             const dialog = qs('#adminConfirm');
             if (!dialog) return;
+            const wasOpen = dialog.getAttribute('aria-hidden') === 'false';
             dialog.setAttribute('aria-hidden', 'true');
-            document.body.classList.remove('admin-modal-open');
+            if (wasOpen) unlockModalScroll();
             if (this._resolver) {
                 this._resolver(!!result);
                 this._resolver = null;
@@ -256,7 +370,7 @@
     }
 
     function openJsonModal(title, obj) {
-        const body = `<pre style="margin:0;white-space:pre-wrap;word-break:break-word;">${escapeHtml(JSON.stringify(obj, null, 2))}</pre>`;
+        const body = `<pre class="json-view">${escapeHtml(JSON.stringify(obj, null, 2))}</pre>`;
         const footer = `<button class="btn" type="button" data-close="true">Fermer</button>`;
         Modal.open(title, body, footer);
     }
@@ -281,11 +395,11 @@
 
     function openMenuDetails(menu) {
         const title = `Plat #${menu.id}`;
-        const img = escapeHtml(resolveAssetUrl(menu.image_url, '../assets/images/default.jpg'));
+        const img = escapeHtml(resolveAssetUrl(menu.image_url, '/Titi/assets/images/default.jpg'));
         const body = `
             <div class="detail-card">
                 <div class="detail-head">
-                    <img class="detail-image" src="${img}" alt="${escapeHtml(menu.name || 'Plat')}" onerror="this.onerror=null;this.src='../assets/images/default.jpg';">
+                    <img class="detail-image" src="${img}" alt="${escapeHtml(menu.name || 'Plat')}" />
                     <div class="detail-head-main">
                         <div class="detail-title">${escapeHtml(menu.name || '-')}</div>
                         <div class="detail-sub">${escapeHtml(menu.category || '-')} • ${formatMoney(menu.price ?? 0)}</div>
@@ -327,12 +441,12 @@
 
     function openProductDetails(product) {
         const title = `Produit #${product.id}`;
-        const img = escapeHtml(resolveAssetUrl(product.image_url || product.main_image, '../assets/images/default.jpg'));
+        const img = escapeHtml(resolveAssetUrl(product.image_url || product.main_image, '/Titi/assets/images/default.jpg'));
         const stock = product.stock ?? product.stock_quantity ?? 0;
         const body = `
             <div class="detail-card">
                 <div class="detail-head">
-                    <img class="detail-image" src="${img}" alt="${escapeHtml(product.name || 'Produit')}" onerror="this.onerror=null;this.src='../assets/images/default.jpg';">
+                    <img class="detail-image" src="${img}" alt="${escapeHtml(product.name || 'Produit')}" onerror="this.onerror=null;this.src='/Titi/assets/images/default.jpg';">
                     <div class="detail-head-main">
                         <div class="detail-title">${escapeHtml(product.name || '-')}</div>
                         <div class="detail-sub">${escapeHtml(product.category || '-')} • ${formatMoney(product.price ?? 0)}</div>
@@ -580,16 +694,16 @@
 
         const docBlock = (label, urlValue) => {
             const url = fileUrl(urlValue);
-            if (!url) return `<div class="detail-section"><div class="detail-section-title">${escapeHtml(label)}</div><div style="color:#666;">-</div></div>`;
+            if (!url) return `<div class="detail-section"><div class="detail-section-title">${escapeHtml(label)}</div><div class="detail-empty">-</div></div>`;
             const safeUrl = escapeHtml(url);
             return `
                 <div class="detail-section">
                     <div class="detail-section-title">${escapeHtml(label)}</div>
-                    <div style="display:flex; gap:12px; align-items:flex-start; flex-wrap:wrap;">
-                        <a href="${safeUrl}" target="_blank" rel="noopener" class="btn" style="padding:8px 10px;">Ouvrir</a>
-                        <div style="width:220px; max-width:100%;">
-                            <img src="${safeUrl}" alt="${escapeHtml(label)}" style="width:100%; height:auto; border-radius:12px; border:1px solid rgba(0,0,0,0.08);" onerror="this.onerror=null;this.style.display='none';">
-                            <div style="margin-top:6px; font-size:12px; color:#666; word-break:break-all;">${safeUrl}</div>
+                    <div class="detail-doc-layout">
+                        <a href="${safeUrl}" target="_blank" rel="noopener" class="btn detail-doc-link">Ouvrir</a>
+                        <div class="detail-doc-preview">
+                            <img src="${safeUrl}" alt="${escapeHtml(label)}" class="detail-doc-image" onerror="this.onerror=null;this.style.display='none';">
+                            <div class="detail-doc-caption">${safeUrl}</div>
                         </div>
                     </div>
                 </div>
@@ -962,6 +1076,197 @@
         if (downloadImagesBtn) {
             downloadImagesBtn.addEventListener('click', () => window.loadImages());
         }
+
+        // Live controls (TikTok/IG/YouTube lien externe)
+        const topbarRight = qs('.admin-topbar-user');
+        if (topbarRight) {
+            // Avoid duplicates
+            if (!qs('#adminLiveBtn')) {
+                const liveBtn = document.createElement('button');
+                liveBtn.className = 'btn btn-sm btn-danger';
+                liveBtn.id = 'adminLiveBtn';
+                liveBtn.type = 'button';
+                liveBtn.innerHTML = '<i class="fas fa-broadcast-tower"></i> Live';
+
+                const detailsBtn = document.createElement('button');
+                detailsBtn.className = 'btn btn-sm btn-outline';
+                detailsBtn.id = 'adminLiveDetailsBtn';
+                detailsBtn.type = 'button';
+                detailsBtn.innerHTML = '<i class="fas fa-info-circle"></i> Détails Live';
+
+                const isLiveRunning = (live) => {
+                    if (!live) return false;
+                    const status = String(live.status || '').toLowerCase();
+                    return status === 'live';
+                };
+
+                let liveActionPending = false;
+                const setActionPending = (pending) => {
+                    liveActionPending = !!pending;
+                    if (liveActionPending) {
+                        liveBtn.disabled = true;
+                        detailsBtn.disabled = true;
+                    }
+                };
+
+                const refreshButtons = () => {
+                    const lm = window.liveManager;
+                    const currentLive = lm ? lm.currentLive : null;
+                    const isLive = isLiveRunning(currentLive);
+                    liveBtn.classList.toggle('btn-danger', !isLive);
+                    liveBtn.classList.toggle('btn-outline', isLive);
+                    liveBtn.innerHTML = isLive
+                        ? '<i class="fas fa-stop"></i> Arrêter Live'
+                        : '<i class="fas fa-broadcast-tower"></i> Démarrer Live';
+                    if (!liveActionPending) {
+                        liveBtn.disabled = false;
+                        detailsBtn.disabled = !currentLive;
+                    }
+                };
+
+                const openStartLiveModal = () => {
+                    const body = `
+                        <div class="detail-card admin-edit-card">
+                            <div class="form-group">
+                                <label>Titre du live</label>
+                                <input class="form-input" type="text" id="liveTitle" value="Live Culinaire - Titi Golden Taste" />
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea class="form-input" id="liveDescription" rows="3">Rejoignez notre session de cuisine en direct !</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Lien du live (TikTok / Instagram / YouTube...)</label>
+                                <input class="form-input" type="url" id="liveStreamUrl" placeholder="https://www.tiktok.com/@.../live" />
+                                <div class="muted detail-help-text">
+                                    Optionnel. Si vide, un stream_url interne sera généré.
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    const footer = `
+                        <button class="btn" type="button" data-close="true">Annuler</button>
+                        <button class="btn btn-primary" type="button" id="startLiveConfirmBtn">Démarrer</button>
+                    `;
+                    Modal.open('Démarrer un live', body, footer);
+                    const startBtn = qs('#startLiveConfirmBtn');
+                    if (startBtn) {
+                        startBtn.addEventListener('click', async () => {
+                            const lm = window.liveManager;
+                            if (!lm || typeof lm.startLive !== 'function') {
+                                toast('error', 'Live', 'Le module live n\'est pas chargé');
+                                return;
+                            }
+                            const title = (qs('#liveTitle')?.value || '').toString().trim();
+                            const desc = (qs('#liveDescription')?.value || '').toString().trim();
+                            const url = (qs('#liveStreamUrl')?.value || '').toString().trim();
+                            lm.pendingStreamUrl = url;
+                            startBtn.disabled = true;
+                            try {
+                                const ok = await lm.startLive(title || 'Live Direct - Titi Golden Taste', desc);
+                                if (ok) {
+                                    toast('success', 'Live', 'Live démarré');
+                                    Modal.close();
+                                }
+                            } catch (e) {
+                                toast('error', 'Live', e.message || 'Impossible de démarrer');
+                            } finally {
+                                startBtn.disabled = false;
+                                refreshButtons();
+                            }
+                        });
+                    }
+                };
+
+                liveBtn.addEventListener('click', async () => {
+                    if (liveActionPending) return;
+                    const lm = window.liveManager;
+                    if (!lm) {
+                        toast('error', 'Live', 'Le module live n\'est pas chargé');
+                        return;
+                    }
+                    setActionPending(true);
+                    try {
+                        // Ensure we have latest status
+                        try { await lm.checkForActiveLive(); } catch (e) {}
+                        const isLive = isLiveRunning(lm.currentLive);
+                        if (!isLive) {
+                            openStartLiveModal();
+                            return;
+                        }
+                        const ok = await Confirm.ask('Arrêter le live en cours ?', 'Arrêter le live');
+                        if (!ok) return;
+                        const ended = await lm.endLive();
+                        if (ended) {
+                            toast('success', 'Live', 'Live arrêté');
+                            try { await lm.checkForActiveLive(); } catch (e) {}
+                        }
+                    } finally {
+                        setActionPending(false);
+                        refreshButtons();
+                    }
+                });
+
+                detailsBtn.addEventListener('click', async () => {
+                    const lm = window.liveManager;
+                    if (!lm || !lm.currentLive) return;
+                    try {
+                        // Refresh details
+                        const id = lm.currentLive.live_id || lm.currentLive.id;
+                        if (id) {
+                            const latest = await lm.apiCall(`/lives/manage.php?action=status&live_id=${id}`);
+                            if (latest && latest.success && latest.data) lm.currentLive = latest.data;
+                        }
+                    } catch (e) {}
+                    const live = lm.currentLive;
+                    const body = `
+                        <div class="detail-card">
+                            <div class="detail-grid">
+                                ${dlRow('Titre', formatMaybe(live.title))}
+                                ${dlRow('Statut', formatMaybe(live.status))}
+                                ${dlRow('ID', formatMaybe(live.id || live.live_id))}
+                                ${dlRow('Viewers', formatMaybe(live.viewers_count))}
+                                ${dlRow('URL', formatMaybe(live.stream_url))}
+                                ${dlRow('Stream key', formatMaybe(live.stream_key))}
+                            </div>
+                        </div>
+                    `;
+                    const footer = `
+                        <button class="btn" type="button" data-close="true">Fermer</button>
+                        <button class="btn btn-outline" type="button" id="openLiveUrlBtn">Ouvrir le lien</button>
+                    `;
+                    Modal.open('Détails du live', body, footer);
+                    const openBtn = qs('#openLiveUrlBtn');
+                    if (openBtn) {
+                        openBtn.addEventListener('click', () => {
+                            const url = (live.stream_url || '').toString().trim();
+                            if (url && /^https?:\/\//i.test(url)) {
+                                window.open(url, '_blank');
+                            } else {
+                                toast('warning', 'Live', 'Aucun lien externe valide');
+                            }
+                        });
+                    }
+                });
+
+                // Insert before sync button for better UX
+                topbarRight.insertBefore(detailsBtn, topbarRight.firstChild);
+                topbarRight.insertBefore(liveBtn, topbarRight.firstChild);
+
+                window.addEventListener('live:started', refreshButtons);
+                window.addEventListener('live:ended', refreshButtons);
+
+                // Initial state
+                setTimeout(async () => {
+                    try {
+                        if (window.liveManager && typeof window.liveManager.checkForActiveLive === 'function') {
+                            await window.liveManager.checkForActiveLive();
+                        }
+                    } catch (e) {}
+                    refreshButtons();
+                }, 300);
+            }
+        }
     }
 
     function setupCrudButtons() {
@@ -1040,7 +1345,7 @@
                 </div>
                 <div class="detail-section">
                     <div class="detail-section-title">Actions rapides</div>
-                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <div class="detail-actions">
                         <button class="btn btn-primary" type="button" id="dashAddMenuBtn">Ajouter un plat</button>
                         <a class="btn" href="#restaurant" id="dashGoRestaurant">Ouvrir la gestion complète</a>
                     </div>
@@ -1070,7 +1375,7 @@
                 </div>
                 <div class="detail-section">
                     <div class="detail-section-title">Actions rapides</div>
-                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <div class="detail-actions">
                         <button class="btn btn-primary" type="button" id="dashAddProductBtn">Ajouter un produit</button>
                         <a class="btn" href="#boutique" id="dashGoBoutique">Ouvrir la gestion complète</a>
                     </div>
@@ -1145,7 +1450,7 @@
                 ${sorted.map(menu => `
                     <tr class="clickable-row" data-entity="menu" data-id="${menu.id}">
                         <td data-label="ID">${menu.id}</td>
-                        <td data-label="Image"><img src="${resolveAssetUrl(menu.image_url, '../assets/images/default.jpg')}" alt="${escapeHtml(menu.name || '')}" style="width: 50px; height: 50px; object-fit: cover;" onerror="this.onerror=null;this.src='../assets/images/default.jpg';"></td>
+                        <td data-label="Image"><img src="${resolveAssetUrl(menu.image_url, '')}" alt="${escapeHtml(menu.name || '')}" class="table-thumb" /></td>
                         <td data-label="Nom">${menu.name}</td>
                         <td data-label="Description">${(menu.description || '').substring(0, 50)}...</td>
                         <td data-label="Prix">${menu.price} FCFA</td>
@@ -1233,7 +1538,7 @@
                 ${sorted.map(product => `
                     <tr class="clickable-row" data-entity="product" data-id="${product.id}">
                         <td data-label="ID">${product.id}</td>
-                        <td data-label="Image"><img src="${resolveAssetUrl(product.image_url || product.main_image, '../assets/images/default.jpg')}" alt="${escapeHtml(product.name || '')}" style="width: 50px; height: 50px; object-fit: cover;" onerror="this.onerror=null;this.src='../assets/images/default.jpg';"></td>
+                        <td data-label="Image"><img src="${resolveAssetUrl(product.image_url || product.main_image, '')}" alt="${escapeHtml(product.name || '')}" class="table-thumb" /></td>
                         <td data-label="Nom">${product.name}</td>
                         <td data-label="Description">${(product.description || '').substring(0, 50)}...</td>
                         <td data-label="Prix">${product.price} FCFA</td>
@@ -1263,12 +1568,19 @@
         const title = isEdit ? 'Modifier un plat' : 'Ajouter un plat';
         const rawImg = isEdit ? (menu.image_url || '') : '';
         const currentImg = escapeHtml(rawImg || '');
-        const previewSrc = escapeHtml(resolveAssetUrl(rawImg, '../assets/images/default.jpg'));
+        const previewSrc = escapeHtml(resolveAssetUrl(rawImg, ''));
 
         const body = `
             <div class="detail-card admin-edit-card">
                 <div class="detail-head">
-                    <img class="detail-image" src="${previewSrc}" alt="${escapeHtml(isEdit ? (menu.name || 'Plat') : 'Plat')}" onerror="this.onerror=null;this.src='../assets/images/default.jpg';">
+                    <div class="image-preview-container">
+                        <img class="detail-image" src="${previewSrc}" alt="${escapeHtml(isEdit ? (menu.name || 'Plat') : 'Plat')}" />
+                        <div class="image-overlay">
+                            <button type="button" class="btn btn-sm btn-outline image-change-btn" onclick="document.querySelector('[data-image-field=\"menu\"] .image-choice label:nth-child(2) input').click();">
+                                <i class="fas fa-camera"></i> Changer
+                            </button>
+                        </div>
+                    </div>
                     <div class="detail-head-main">
                         <div class="detail-title">${escapeHtml(isEdit ? (menu.name || 'Plat') : 'Nouveau plat')}</div>
                         <div class="detail-sub">${escapeHtml(isEdit ? (menu.category || '-') : '-') } • ${formatMoney(isEdit ? (menu.price ?? 0) : 0)}</div>
@@ -1280,56 +1592,99 @@
                 </div>
 
                 <form id="menuForm" class="admin-form" enctype="multipart/form-data">
-                    <div class="detail-grid">
-                        <div class="form-group">
-                            <label>Nom *</label>
-                            <input class="form-input" type="text" name="name" value="${isEdit ? escapeHtml(menu.name || '') : ''}" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Prix (FCFA) *</label>
-                            <input class="form-input" type="number" name="price" min="0" step="50" value="${isEdit ? (menu.price ?? '') : ''}" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Catégorie *</label>
-                            <input class="form-input" type="text" name="category" value="${isEdit ? escapeHtml(menu.category || '') : ''}" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Image</label>
-                            <div class="image-field" data-image-field="menu">
-                                <div class="image-choice">
-                                    <label>
-                                        <input type="radio" name="image_mode" value="url" checked>
-                                        <span>Lien / Chemin</span>
-                                    </label>
-                                    <label>
-                                        <input type="radio" name="image_mode" value="file">
-                                        <span>Uploader depuis le disque</span>
-                                    </label>
+                    <div class="form-tabs">
+                        <button type="button" class="tab-btn active" data-tab="basic">Informations de base</button>
+                        <button type="button" class="tab-btn" data-tab="details">Détails</button>
+                        <button type="button" class="tab-btn" data-tab="image">Image</button>
+                    </div>
+
+                    <div class="tab-content active" data-tab="basic">
+                        <div class="detail-grid">
+                            <div class="form-group">
+                                <label>Nom du plat *</label>
+                                <input class="form-input" type="text" name="name" value="${isEdit ? escapeHtml(menu.name || '') : ''}" required placeholder="Ex: Thieboudienne">
+                            </div>
+                            <div class="form-group">
+                                <label>Prix (FCFA) *</label>
+                                <input class="form-input" type="number" name="price" min="0" step="50" value="${isEdit ? (menu.price ?? '') : ''}" required placeholder="Ex: 2500">
+                            </div>
+                            <div class="form-group">
+                                <label>Catégorie *</label>
+                                <div class="category-input-group">
+                                    <select class="form-input" name="category" id="menuCategorySelect" required>
+                                        <option value="">Sélectionner une catégorie</option>
+                                        <option value="Plats principaux" ${isEdit && menu.category === 'Plats principaux' ? 'selected' : ''}>Plats principaux</option>
+                                        <option value="Entrées" ${isEdit && menu.category === 'Entrées' ? 'selected' : ''}>Entrées</option>
+                                        <option value="Desserts" ${isEdit && menu.category === 'Desserts' ? 'selected' : ''}>Desserts</option>
+                                        <option value="Boissons" ${isEdit && menu.category === 'Boissons' ? 'selected' : ''}>Boissons</option>
+                                        <option value="Snacks" ${isEdit && menu.category === 'Snacks' ? 'selected' : ''}>Snacks</option>
+                                    </select>
+                                    <button type="button" class="btn btn-sm btn-outline" id="addNewMenuCategoryBtn" title="Créer une nouvelle catégorie">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
                                 </div>
-                                <input class="form-input" type="text" name="image_url" value="${currentImg}" placeholder="https://... ou assets/uploads/...">
-                                <input class="form-input" type="file" name="image" accept="image/*" style="display:none;">
-                                <img class="image-preview" src="${previewSrc}" alt="Aperçu" onerror="this.onerror=null;this.src='../assets/images/default.jpg';">
+                                <div class="new-category-input" id="newMenuCategoryInput">
+                                    <input class="form-input" type="text" id="newMenuCategoryName" placeholder="Nom de la nouvelle catégorie" maxlength="50">
+                                    <button type="button" class="btn btn-sm btn-primary" id="confirmNewMenuCategoryBtn">Ajouter</button>
+                                    <button type="button" class="btn btn-sm btn-outline" id="cancelNewMenuCategoryBtn">Annuler</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Temps de préparation (min)</label>
+                                <input class="form-input" type="number" name="preparation_time" min="5" max="120" value="${isEdit ? (menu.preparation_time ?? '') : ''}" placeholder="Ex: 30">
                             </div>
                         </div>
                     </div>
 
-                    <div class="detail-section">
-                        <div class="detail-section-title">Description</div>
-                        <textarea class="form-input" name="description" rows="3">${isEdit ? escapeHtml(menu.description || '') : ''}</textarea>
-                    </div>
-
-                    <div class="detail-grid">
+                    <div class="tab-content" data-tab="details">
                         <div class="form-group">
-                            <label class="checkbox">
-                                <input type="checkbox" name="available" ${!isEdit || menu.available ? 'checked' : ''}>
-                                <span>Disponible</span>
-                            </label>
+                            <label>Description</label>
+                            <textarea class="form-input" name="description" rows="4" placeholder="Décrivez votre plat...">${isEdit ? escapeHtml(menu.description || '') : ''}</textarea>
                         </div>
                         <div class="form-group">
-                            <label class="checkbox">
-                                <input type="checkbox" name="is_today" ${isEdit && menu.is_today ? 'checked' : ''}>
-                                <span>Menu du jour</span>
-                            </label>
+                            <label>Ingrédients (un par ligne)</label>
+                            <textarea class="form-input" name="ingredients" rows="4" placeholder="Ex:\nRiz\nPoisson\nLégumes">${isEdit ? escapeHtml(menu.ingredients || '') : ''}</textarea>
+                        </div>
+                        <div class="detail-grid">
+                            <div class="form-group">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="available" ${!isEdit || menu.available ? 'checked' : ''}>
+                                    <span>Disponible à la vente</span>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="is_today" ${isEdit && menu.is_today ? 'checked' : ''}>
+                                    <span>Menu du jour</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" data-tab="image">
+                        <div class="image-upload-section">
+                            <div class="image-field" data-image-field="menu">
+                                <div class="image-choice">
+                                    <label>
+                                        <input type="radio" name="image_mode" value="url" ${!isEdit || !menu.image_url ? 'checked' : ''}>
+                                        <span><i class="fas fa-link"></i> URL / Chemin</span>
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="image_mode" value="file" ${isEdit && menu.image_url && menu.image_url.startsWith('data:') ? 'checked' : ''}>
+                                        <span><i class="fas fa-upload"></i> Uploader</span>
+                                    </label>
+                                </div>
+                                <div class="image-input-group">
+                                    <input class="form-input" type="text" name="image_url" value="${currentImg}" placeholder="https://example.com/image.jpg ou assets/uploads/image.jpg">
+                                    <input class="form-input file-input-hidden" type="file" name="image" accept="image/*">
+                                </div>
+                                <div class="image-preview-wrapper">
+                                    <img class="image-preview" src="${previewSrc}" alt="Aperçu" />
+                                    <div class="image-preview-info">
+                                        <p class="small">Format recommandé: 800x600px, JPG/PNG, max 5MB</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -1345,12 +1700,80 @@
 
         Modal.open(title, body, footer);
         initImageField('menu');
+        initFormTabs();
+        
+        // Gestion dynamique des catégories pour menus
+        const addMenuCatBtn = qs('#addNewMenuCategoryBtn');
+        const newMenuCatInput = qs('#newMenuCategoryInput');
+        const newMenuCatName = qs('#newMenuCategoryName');
+        const confirmMenuCatBtn = qs('#confirmNewMenuCategoryBtn');
+        const cancelMenuCatBtn = qs('#cancelNewMenuCategoryBtn');
+        const menuCategorySelect = qs('#menuCategorySelect');
+        
+        if (addMenuCatBtn && newMenuCatInput && newMenuCatName && confirmMenuCatBtn && cancelMenuCatBtn && menuCategorySelect) {
+            addMenuCatBtn.addEventListener('click', () => {
+                newMenuCatInput.style.display = 'flex';
+                newMenuCatName.focus();
+            });
+            
+            const hideNewMenuCategoryInput = () => {
+                newMenuCatInput.style.display = 'none';
+                newMenuCatName.value = '';
+            };
+            
+            cancelMenuCatBtn.addEventListener('click', hideNewMenuCategoryInput);
+            
+            confirmMenuCatBtn.addEventListener('click', () => {
+                const newCat = (newMenuCatName.value || '').trim();
+                if (newCat) {
+                    // Vérifier si la catégorie existe déjà
+                    const exists = Array.from(menuCategorySelect.options).some(opt => opt.value === newCat);
+                    if (!exists) {
+                        const option = new Option(newCat, newCat, false, true);
+                        menuCategorySelect.add(option);
+                    } else {
+                        menuCategorySelect.value = newCat;
+                    }
+                    hideNewMenuCategoryInput();
+                }
+            });
+            
+            newMenuCatName.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    confirmMenuCatBtn.click();
+                } else if (e.key === 'Escape') {
+                    hideNewMenuCategoryInput();
+                }
+            });
+        }
+        
         const btn = qs('#saveMenuBtn');
         if (btn) {
             btn.addEventListener('click', async () => {
                 await saveMenu(isEdit);
             });
         }
+    }
+
+    function initFormTabs() {
+        const tabBtns = qsa('.form-tabs .tab-btn');
+        const tabContents = qsa('.tab-content[data-tab]');
+        
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.dataset.tab;
+                
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                btn.classList.add('active');
+                const targetContent = qs(`.tab-content[data-tab="${targetTab}"]`);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+            });
+        });
     }
 
     function initImageField(kind) {
@@ -1372,17 +1795,39 @@
             }
         };
 
+        const updatePreview = async (src) => {
+            if (!previewEl) return;
+            if (!src || src.trim() === '') {
+                previewEl.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const finalSrc = await safeImageLoad(src, '');
+                previewEl.src = finalSrc;
+                previewEl.style.display = 'block';
+            } catch (e) {
+                previewEl.style.display = 'none';
+            }
+        };
+
         modeEls.forEach(r => r.addEventListener('change', sync));
         if (urlEl && previewEl) {
+            let debounceTimer;
             urlEl.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
                 const v = (urlEl.value || '').trim();
-                previewEl.src = resolveAssetUrl(v, '../assets/images/default.jpg');
+                debounceTimer = setTimeout(() => {
+                    updatePreview(v);
+                }, 300);
             });
         }
         if (fileEl && previewEl) {
             fileEl.addEventListener('change', () => {
                 const f = fileEl.files && fileEl.files[0];
-                if (f) previewEl.src = URL.createObjectURL(f);
+                if (f) {
+                    previewEl.src = URL.createObjectURL(f);
+                }
             });
         }
 
@@ -1397,6 +1842,21 @@
         const id = (fd.get('id') || '').toString().trim();
         const mode = (fd.get('image_mode') || 'url').toString();
         const didUploadFile = mode === 'file' && (fd.get('image') instanceof File) && (fd.get('image') && fd.get('image').name);
+
+        // Validation des champs requis
+        const name = (fd.get('name') || '').toString().trim();
+        const price = (fd.get('price') || '').toString().trim();
+
+        if (!name) {
+            toast('error', 'Erreur', 'Le champ \'name\' est requis');
+            return;
+        }
+
+        if (!price || isNaN(parseFloat(price)) || parseFloat(price) < 0) {
+            toast('error', 'Erreur', 'Le champ \'price\' est requis et doit être un nombre positif');
+            return;
+        }
+
         if (mode !== 'file') {
             const url = (fd.get('image_url') || '').toString().trim();
             if (!url) fd.delete('image_url');
@@ -1406,6 +1866,15 @@
             const file = fd.get('image');
             if (!(file instanceof File) || !file || !file.name) {
                 fd.delete('image');
+            } else {
+                try {
+                    const compressed = await compressImageFile(file, { maxW: 1400, maxH: 1400, quality: 0.82 });
+                    if (compressed instanceof File) {
+                        fd.set('image', compressed);
+                    }
+                } catch (e) {
+                    // keep original file
+                }
             }
         }
         fd.delete('image_mode');
@@ -1455,61 +1924,127 @@
         const title = isEdit ? 'Modifier un produit' : 'Ajouter un produit';
         const rawImg = isEdit ? (product.image_url || product.main_image || '') : '';
         const currentImg = isEdit ? escapeHtml(rawImg) : '';
-        const previewSrc = escapeHtml(resolveAssetUrl(rawImg, '../assets/images/default.jpg'));
+        const previewSrc = escapeHtml(resolveAssetUrl(rawImg, ''));
+        const currentActive = isEdit ? (parseInt((product.active ?? product.is_active ?? product.is_available ?? 1), 10) ? 1 : 0) : 1;
+
         const body = `
             <div class="detail-card admin-edit-card">
                 <div class="detail-head">
-                    <img class="detail-image" src="${previewSrc}" alt="${escapeHtml(isEdit ? (product.name || 'Produit') : 'Produit')}" onerror="this.onerror=null;this.src='../assets/images/default.jpg';">
+                    <div class="image-preview-container">
+                        <img class="detail-image" src="${previewSrc}" alt="${escapeHtml(isEdit ? (product.name || 'Produit') : 'Produit')}" />
+                        <div class="image-overlay">
+                            <button type="button" class="btn btn-sm btn-outline image-change-btn" onclick="document.querySelector('[data-image-field=\"product\"] .image-choice label:nth-child(2) input').click();">
+                                <i class="fas fa-camera"></i> Changer
+                            </button>
+                        </div>
+                    </div>
                     <div class="detail-head-main">
                         <div class="detail-title">${escapeHtml(isEdit ? (product.name || 'Produit') : 'Nouveau produit')}</div>
                         <div class="detail-sub">${escapeHtml(isEdit ? (product.category || '-') : '-') } • ${formatMoney(isEdit ? (product.price ?? 0) : 0)}</div>
                         <div class="detail-badges">
-                            ${badge(escapeHtml(`Stock: ${isEdit ? (product.stock ?? product.stock_quantity ?? 0) : 0}`), 'badge-muted')}
+                            ${badge(escapeHtml(`Stock: ${isEdit ? (product.stock ?? product.stock_quantity ?? 0) : 0}`), isEdit && (product.stock ?? product.stock_quantity ?? 0) > 0 ? 'badge-success' : 'badge-danger')}
                         </div>
                     </div>
                 </div>
 
                 <form id="productForm" class="admin-form" enctype="multipart/form-data">
-                    <div class="detail-grid">
-                        <div class="form-group">
-                            <label>Nom *</label>
-                            <input class="form-input" type="text" name="name" value="${isEdit ? escapeHtml(product.name || '') : ''}" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Prix (FCFA) *</label>
-                            <input class="form-input" type="number" name="price" min="0" step="50" value="${isEdit ? (product.price ?? '') : ''}" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Catégorie</label>
-                            <input class="form-input" type="text" name="category" value="${isEdit ? escapeHtml(product.category || '') : ''}">
-                        </div>
-                        <div class="form-group">
-                            <label>Stock</label>
-                            <input class="form-input" type="number" name="stock" min="0" step="1" value="${isEdit ? (product.stock ?? product.stock_quantity ?? 0) : 0}">
-                        </div>
-                        <div class="form-group" style="grid-column: 1 / -1;">
-                            <label>Image</label>
-                            <div class="image-field" data-image-field="product">
-                                <div class="image-choice">
-                                    <label>
-                                        <input type="radio" name="image_mode" value="url" checked>
-                                        <span>Lien / Chemin</span>
-                                    </label>
-                                    <label>
-                                        <input type="radio" name="image_mode" value="file">
-                                        <span>Uploader depuis le disque</span>
-                                    </label>
+                    <div class="form-tabs">
+                        <button type="button" class="tab-btn active" data-tab="basic">Informations de base</button>
+                        <button type="button" class="tab-btn" data-tab="details">Détails</button>
+                        <button type="button" class="tab-btn" data-tab="image">Image</button>
+                    </div>
+
+                    <div class="tab-content active" data-tab="basic">
+                        <div class="detail-grid">
+                            <div class="form-group">
+                                <label>Nom du produit *</label>
+                                <input class="form-input" type="text" name="name" value="${isEdit ? escapeHtml(product.name || '') : ''}" required placeholder="Ex: Sauce Tomate Maison">
+                            </div>
+                            <div class="form-group">
+                                <label>Prix (FCFA) *</label>
+                                <input class="form-input" type="number" name="price" min="0" step="50" value="${isEdit ? (product.price ?? '') : ''}" required placeholder="Ex: 1500">
+                            </div>
+                            <div class="form-group">
+                                <label>Catégorie</label>
+                                <div class="category-input-group">
+                                    <select class="form-input" name="category" id="productCategorySelect">
+                                        <option value="">Sélectionner une catégorie</option>
+                                        <option value="Épicerie" ${isEdit && product.category === 'Épicerie' ? 'selected' : ''}>Épicerie</option>
+                                        <option value="Sauces" ${isEdit && product.category === 'Sauces' ? 'selected' : ''}>Sauces</option>
+                                        <option value="Boissons" ${isEdit && product.category === 'Boissons' ? 'selected' : ''}>Boissons</option>
+                                        <option value="Desserts" ${isEdit && product.category === 'Desserts' ? 'selected' : ''}>Desserts</option>
+                                        <option value="Produits locaux" ${isEdit && product.category === 'Produits locaux' ? 'selected' : ''}>Produits locaux</option>
+                                    </select>
+                                    <button type="button" class="btn btn-sm btn-outline" id="addNewProductCategoryBtn" title="Créer une nouvelle catégorie">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
                                 </div>
-                                <input class="form-input" type="text" name="image_url" value="${currentImg}" placeholder="https://... ou assets/uploads/...">
-                                <input class="form-input" type="file" name="image" accept="image/*" style="display:none;">
-                                <img class="image-preview" src="${previewSrc}" alt="Aperçu" onerror="this.onerror=null;this.src='../assets/images/default.jpg';">
+                                <div class="new-category-input" id="newProductCategoryInput">
+                                    <input class="form-input" type="text" id="newProductCategoryName" placeholder="Nom de la nouvelle catégorie" maxlength="50">
+                                    <button type="button" class="btn btn-sm btn-primary" id="confirmNewProductCategoryBtn">Ajouter</button>
+                                    <button type="button" class="btn btn-sm btn-outline" id="cancelNewProductCategoryBtn">Annuler</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Stock initial</label>
+                                <input class="form-input" type="number" name="stock" min="0" step="1" value="${isEdit ? (product.stock ?? product.stock_quantity ?? 0) : 0}" placeholder="Ex: 50">
+                            </div>
+                            <div class="form-group">
+                                <label>Disponible</label>
+                                <select class="form-input" name="active">
+                                    <option value="1" ${currentActive === 1 ? 'selected' : ''}>Oui</option>
+                                    <option value="0" ${currentActive === 0 ? 'selected' : ''}>Non</option>
+                                </select>
                             </div>
                         </div>
                     </div>
 
-                    <div class="detail-section">
-                        <div class="detail-section-title">Description</div>
-                        <textarea class="form-input" name="description" rows="3">${isEdit ? escapeHtml(product.description || '') : ''}</textarea>
+                    <div class="tab-content" data-tab="details">
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea class="form-input" name="description" rows="4" placeholder="Décrivez votre produit...">${isEdit ? escapeHtml(product.description || '') : ''}</textarea>
+                        </div>
+                        <div class="detail-grid">
+                            <div class="form-group">
+                                <label>Code SKU</label>
+                                <input class="form-input" type="text" name="sku" value="${isEdit ? escapeHtml(product.sku || '') : ''}" placeholder="Ex: PROD-001">
+                            </div>
+                            <div class="form-group">
+                                <label>Type de produit</label>
+                                <select class="form-input" name="type">
+                                    <option value="physical" ${!isEdit || product.type === 'physical' ? 'selected' : ''}>Produit physique</option>
+                                    <option value="digital" ${isEdit && product.type === 'digital' ? 'selected' : ''}>Produit digital</option>
+                                    <option value="service" ${isEdit && product.type === 'service' ? 'selected' : ''}>Service</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" data-tab="image">
+                        <div class="image-upload-section">
+                            <div class="image-field" data-image-field="product">
+                                <div class="image-choice">
+                                    <label>
+                                        <input type="radio" name="image_mode" value="url" ${!isEdit || !product.image_url ? 'checked' : ''}>
+                                        <span><i class="fas fa-link"></i> URL / Chemin</span>
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="image_mode" value="file" ${isEdit && product.image_url && product.image_url.startsWith('data:') ? 'checked' : ''}>
+                                        <span><i class="fas fa-upload"></i> Uploader</span>
+                                    </label>
+                                </div>
+                                <div class="image-input-group">
+                                    <input class="form-input" type="text" name="image_url" value="${currentImg}" placeholder="https://example.com/image.jpg ou assets/uploads/image.jpg">
+                                    <input class="form-input file-input-hidden" type="file" name="image" accept="image/*">
+                                </div>
+                                <div class="image-preview-wrapper">
+                                    <img class="image-preview" src="${previewSrc}" alt="Aperçu" />
+                                    <div class="image-preview-info">
+                                        <p class="small">Format recommandé: 800x600px, JPG/PNG, max 5MB</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <input type="hidden" name="id" value="${isEdit ? product.id : ''}">
@@ -1524,6 +2059,54 @@
 
         Modal.open(title, body, footer);
         initImageField('product');
+        initFormTabs();
+        
+        // Gestion dynamique des catégories pour produits
+        const addCatBtn = qs('#addNewProductCategoryBtn');
+        const newCatInput = qs('#newProductCategoryInput');
+        const newCatName = qs('#newProductCategoryName');
+        const confirmCatBtn = qs('#confirmNewProductCategoryBtn');
+        const cancelCatBtn = qs('#cancelNewProductCategoryBtn');
+        const categorySelect = qs('#productCategorySelect');
+        
+        if (addCatBtn && newCatInput && newCatName && confirmCatBtn && cancelCatBtn && categorySelect) {
+            addCatBtn.addEventListener('click', () => {
+                newCatInput.style.display = 'flex';
+                newCatName.focus();
+            });
+            
+            const hideNewCategoryInput = () => {
+                newCatInput.style.display = 'none';
+                newCatName.value = '';
+            };
+            
+            cancelCatBtn.addEventListener('click', hideNewCategoryInput);
+            
+            confirmCatBtn.addEventListener('click', () => {
+                const newCat = (newCatName.value || '').trim();
+                if (newCat) {
+                    // Vérifier si la catégorie existe déjà
+                    const exists = Array.from(categorySelect.options).some(opt => opt.value === newCat);
+                    if (!exists) {
+                        const option = new Option(newCat, newCat, false, true);
+                        categorySelect.add(option);
+                    } else {
+                        categorySelect.value = newCat;
+                    }
+                    hideNewCategoryInput();
+                }
+            });
+            
+            newCatName.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    confirmCatBtn.click();
+                } else if (e.key === 'Escape') {
+                    hideNewCategoryInput();
+                }
+            });
+        }
+        
         const btn = qs('#saveProductBtn');
         if (btn) {
             btn.addEventListener('click', async () => {
@@ -1550,6 +2133,15 @@
                 const file = fd.get('image');
                 if (!(file instanceof File) || !file || !file.name) {
                     fd.delete('image');
+                } else {
+                    try {
+                        const compressed = await compressImageFile(file, { maxW: 1400, maxH: 1400, quality: 0.82 });
+                        if (compressed instanceof File) {
+                            fd.set('image', compressed);
+                        }
+                    } catch (e) {
+                        // keep original file
+                    }
                 }
             }
             fd.delete('image_mode');
@@ -1682,8 +2274,8 @@
                     <tr class="clickable-row" data-entity="order" data-id="${o.id}">
                         <td>${o.id}</td>
                         <td>
-                            <div style="font-weight:700;">${escapeHtml(o.customer_name || '-') }</div>
-                            <div style="color:#666;font-size:12px;">${escapeHtml(o.customer_email || '')}</div>
+                            <div class="order-customer-name">${escapeHtml(o.customer_name || '-') }</div>
+                            <div class="order-customer-email">${escapeHtml(o.customer_email || '')}</div>
                         </td>
                         <td>${formatMoney(o.final_price ?? o.total_price)}</td>
                         <td>${badgeForOrderStatus(o.status)}</td>
@@ -1955,6 +2547,15 @@
         const driversSearch = qs('#driversSearch');
         const driversStatus = qs('#driversStatusFilter');
         const driversAvail = qs('#driversAvailableFilter');
+
+        // Gestion des suppléments
+        const addSupplementBtn = qs('#addSupplementBtn');
+        if (addSupplementBtn) {
+            addSupplementBtn.addEventListener('click', openSupplementForm);
+        }
+
+        loadSupplements();
+
         if (driversSearch) driversSearch.addEventListener('input', debounce(() => loadDrivers(), 250));
         if (driversStatus) driversStatus.addEventListener('change', () => loadDrivers());
         if (driversAvail) driversAvail.addEventListener('change', () => loadDrivers());
@@ -1962,12 +2563,170 @@
         // Initial section (hash)
         const hash = (window.location.hash || '').replace('#', '');
         let initial = hash || '';
-        if (!initial) {
-            try { initial = (localStorage.getItem('admin_last_section') || '').toString(); } catch (e) { initial = ''; }
-        }
         if (!initial) initial = 'dashboard';
         showSection(initial);
         loadSectionData(initial);
     });
+
+    // Fonctions de gestion des suppléments
+    async function loadSupplements() {
+        try {
+            const response = await fetch(`${API_BASE}admin/supplements.php?action=list`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                state.supplements = result.data;
+                renderSupplementsTable(result.data);
+            }
+        } catch (error) {
+            console.error('Erreur chargement suppléments:', error);
+        }
+    }
+
+    function renderSupplementsTable(supplements) {
+        const container = document.getElementById('supplementsTable');
+        if (!container) return;
+
+        const tbody = container.querySelector('tbody');
+        tbody.innerHTML = supplements.map(supplement => `
+            <tr>
+                <td>${supplement.id}</td>
+                <td>${supplement.name}</td>
+                <td>${formatMoney(supplement.price)}</td>
+                <td>${supplement.category}</td>
+                <td>${supplement.description || '-'}</td>
+                <td>
+                    <span class="status-badge ${supplement.available ? 'active' : 'inactive'}">
+                        ${supplement.available ? 'Disponible' : 'Indisponible'}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-primary" onclick="editSupplement(${supplement.id})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteSupplement(${supplement.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function openSupplementForm(supplement = null) {
+        const isEdit = !!supplement;
+        const title = isEdit ? 'Modifier le supplément' : 'Ajouter un supplément';
+        
+        const body = `
+            <div class="form-group">
+                <label>Nom du supplément *</label>
+                <input type="text" class="form-input" name="name" value="${supplement?.name || ''}" required>
+            </div>
+            <div class="form-group">
+                <label>Prix (FCFA) *</label>
+                <input type="number" class="form-input" name="price" value="${supplement?.price || ''}" required>
+            </div>
+            <div class="form-group">
+                <label>Catégorie</label>
+                <select class="form-input" name="category">
+                    <option value="protéines" ${supplement?.category === 'protéines' ? 'selected' : ''}>Protéines</option>
+                    <option value="sauces" ${supplement?.category === 'sauces' ? 'selected' : ''}>Sauces</option>
+                    <option value="légumes" ${supplement?.category === 'légumes' ? 'selected' : ''}>Légumes</option>
+                    <option value="accompagnements" ${supplement?.category === 'accompagnements' ? 'selected' : ''}>Accompagnements</option>
+                    <option value="boissons" ${supplement?.category === 'boissons' ? 'selected' : ''}>Boissons</option>
+                    <option value="desserts" ${supplement?.category === 'desserts' ? 'selected' : ''}>Desserts</option>
+                    <option value="général" ${supplement?.category === 'général' ? 'selected' : ''}>Général</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea class="form-input" name="description" rows="3">${supplement?.description || ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="available" ${supplement?.available ? 'checked' : ''}>
+                    Disponible à la vente
+                </label>
+            </div>
+        `;
+        
+        const footer = `
+            <button type="button" class="btn btn-outline" onclick="closeModal()">Annuler</button>
+            <button type="button" class="btn btn-primary" onclick="saveSupplement(${supplement?.id || null})">
+                ${isEdit ? 'Mettre à jour' : 'Ajouter'}
+            </button>
+        `;
+        
+        Modal.open(title, body, footer);
+    }
+
+    async function saveSupplement(id) {
+        const form = document.querySelector('.modal-body');
+        const data = {
+            name: form.querySelector('input[name="name"]').value,
+            price: parseFloat(form.querySelector('input[name="price"]').value),
+            category: form.querySelector('select[name="category"]').value,
+            description: form.querySelector('textarea[name="description"]').value,
+            available: form.querySelector('input[name="available"]').checked
+        };
+
+        try {
+            const url = id ? `${API_BASE}admin/supplements.php?id=${id}` : `${API_BASE}admin/supplements.php`;
+            const method = id ? 'PUT' : 'POST';
+            
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                showNotification(id ? 'Supplément mis à jour' : 'Supplément ajouté', 'success');
+                closeModal();
+                loadSupplements();
+            } else {
+                showNotification(result.message || 'Erreur', 'error');
+            }
+        } catch (error) {
+            console.error('Erreur sauvegarde supplément:', error);
+            showNotification('Erreur lors de la sauvegarde', 'error');
+        }
+    }
+
+    async function editSupplement(id) {
+        const supplement = state.supplements.find(s => s.id === id);
+        if (supplement) {
+            openSupplementForm(supplement);
+        }
+    }
+
+    async function deleteSupplement(id) {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer ce supplément ?')) return;
+
+        try {
+            const response = await fetch(`${API_BASE}admin/supplements.php?id=${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                showNotification('Supplément supprimé', 'success');
+                loadSupplements();
+            } else {
+                showNotification(result.message || 'Erreur', 'error');
+            }
+        } catch (error) {
+            console.error('Erreur suppression supplément:', error);
+            showNotification('Erreur lors de la suppression', 'error');
+        }
+    }
 
 })();

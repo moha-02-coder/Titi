@@ -1,42 +1,49 @@
-# Fichiers de configuration locaux
-database.php
-backend/config/database.php
-backend/config/websocket.php
+# Sync .project/sourceTexts/ folder (source text files)
 
-# Logs
-logs/
-*.log
+# Don't sync user-specific SQLite databases
+.project/*.sqlite
 
-# Uploads
-uploads/
-temp/
+# Don't sync SQLite auxiliary files
+.project/*.sqlite-wal
+.project/*.sqlite-shm
 
-# Fichiers de l'environnement
-.env
-.env.local
-.env.production
+# Don't sync user-specific files
+.project/complete_drafts.txt
+.project/localProjectSettings.json
+.project/localProjectSwap.json
+copilot-messages.log
 
-# Cache
-.cache/
-node_modules/
+# Archive formats
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.gz
+*.bz2
+*.xz
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
+# Windows executables and installers
+*.exe
+*.msi
+*.bat
+*.cmd
+*.com
+*.scr
+*.dll
 
-# OS
+# macOS executables and disk images
+*.dmg
+*.pkg
+
+# Disk images and virtual machine files
+*.iso
+*.img
+*.vhd
+*.vmdk
+
+# System files
 .DS_Store
-Thumbs.db
-
-# PHP
-composer.lock
-vendor/
-
-# Backup
-*.sql
-*.backup
-
-# Render
-.render/
+.project/attachments/files/**

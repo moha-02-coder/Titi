@@ -1,0 +1,23 @@
+# Gérer les images manquantes - rediriger vers une image par défaut
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Rediriger les images .jpg manquantes vers default-image.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} \.jpg$
+    RewriteRule ^(.*)\.jpg$ default-image.php [L]
+    
+    # Rediriger les autres images manquantes vers default-image.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} \.(png|gif|jpeg|webp)$
+    RewriteRule ^(.*)\.(png|gif|jpeg|webp)$ default-image.php [L]
+</IfModule>
+
+# Cache pour les images
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+</IfModule>

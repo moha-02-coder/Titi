@@ -75,6 +75,11 @@
                                 <i class="fas fa-star"></i> Menu du jour
                             </a>
                         </li>
+                        <li>
+                            <a href="#supplements" data-section="supplements">
+                                <i class="fas fa-plus-circle"></i> Suppléments
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
@@ -410,6 +415,35 @@
                             <i class="fas fa-sync"></i> Mettre à jour le statut
                         </button>
                     </div>
+                </div>
+            </section>
+
+            <!-- Supplements Management -->
+            <section id="supplements" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-plus-circle"></i> Gestion des suppléments</h2>
+                    <button class="btn" id="addSupplementBtn">
+                        <i class="fas fa-plus"></i> Ajouter un supplément
+                    </button>
+                </div>
+
+                <div class="data-table-container">
+                    <table id="supplementsTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nom</th>
+                                <th>Prix</th>
+                                <th>Catégorie</th>
+                                <th>Description</th>
+                                <th>Disponible</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Données chargées via JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
             </section>
 

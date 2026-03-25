@@ -1,13 +1,28 @@
-/* Central config for front-end globals
+﻿/* Central config for front-end globals
    - Prevents redeclaration of API base URLs
    - Must be included before other scripts in HTML
 */
 (function (w) {
-    w.API_BASE_URL = w.API_BASE_URL || 'backend/api';
+    function inferProjectBasePath() {
+        try {
+            const path = (w.location && w.location.pathname) ? w.location.pathname : '/';
+            const first = path.split('/').filter(Boolean)[0] || '';
+            if (!first || first.includes('.')) return '';
+            return '/' + first;
+        } catch (e) {
+            return '';
+        }
+    }
+
+    const projectBase = inferProjectBasePath();
+    const inferredApiBase = projectBase ? (projectBase + '/backend/api') : 'backend/api';
+    const inferredAssetsBase = projectBase ? (projectBase + '/assets') : '/assets';
+
+    w.API_BASE_URL = w.API_BASE_URL || inferredApiBase;
     w.ORDER_API_BASE_URL = w.ORDER_API_BASE_URL || (w.API_BASE_URL + '/orders');
-    w.ASSETS_BASE_URL = w.ASSETS_BASE_URL || '/assets';
+    w.ASSETS_BASE_URL = w.ASSETS_BASE_URL || inferredAssetsBase;
     // Expose a normalized default image path with proper base URL resolution
-    w.DEFAULT_IMAGE = (w.ASSETS_BASE_URL || '/assets') + '/images/default.jpg';
+    w.DEFAULT_IMAGE = (w.ASSETS_BASE_URL || inferredAssetsBase) + '/images/default.jpg';
     // Centralized DOM selectors and helpers for multi-page compatibility
     w.DOM_SELECTORS = w.DOM_SELECTORS || {
         headerContainer: '.header .container',

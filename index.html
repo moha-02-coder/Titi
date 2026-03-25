@@ -1,153 +1,94 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Titi Golden Taste - Restaurant Premium Bamako</title>
+    <title>Titi Golden Taste - Restaurant & Boutique Africaine</title>
+    
+    <!-- CSS essentiel uniquement -->
     <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/order.css">
+    <link rel="stylesheet" href="assets/css/order-enhanced.css">
+    <link rel="stylesheet" href="assets/css/responsive-improvements.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Leaflet map CSS (OpenStreetMap) -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        /* Styles temporaires pour éléments manquants */
-        .restaurant-map { height: 400px; width: 100%; border-radius: 10px; }
-        .location-content { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; margin-top: 30px; }
-        @media (max-width: 768px) { .location-content { grid-template-columns: 1fr; } }
-    </style>
-    <script>
-        // Correcteur léger des chemins d'images (sans override global)
-        (function() {
-            function inferBasePath() {
-                // Si le projet est servi depuis /titi-golden-taste/...
-                const p = (window.location && window.location.pathname) ? window.location.pathname : '/';
-                const m = p.match(/^(\/[^\/]+)(?:\/|$)/);
-                // On garde /titi-golden-taste si présent, sinon on ne force rien.
-                if (m && m[1] && m[1].toLowerCase().includes('titi-golden-taste')) return m[1];
-                return '';
-            }
-
-            const basePath = inferBasePath();
-            const defaultImage = (basePath || '') + '/assets/images/default.jpg';
-
-            function normalizeSrc(src) {
-                if (!src) return src;
-                // Ne pas toucher aux URLs absolues
-                if (/^https?:\/\//i.test(src) || src.startsWith('data:')) return src;
-                // Déjà préfixé
-                if (basePath && src.startsWith(basePath + '/')) return src;
-                // Normaliser /assets/... et assets/...
-                if (basePath && src.startsWith('/assets/')) return basePath + src;
-                if (basePath && src.startsWith('assets/')) return basePath + '/' + src;
-                return src;
-            }
-
-            // Corrige les images déjà présentes
-            document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('img[src]').forEach(function(img) {
-                    const src = img.getAttribute('src');
-                    const fixed = normalizeSrc(src);
-                    if (fixed && fixed !== src) img.setAttribute('src', fixed);
-                });
-            });
-
-            // Fallback images manquantes (capture)
-            document.addEventListener('error', function(e) {
-                const t = e.target;
-                if (t && t.tagName === 'IMG') {
-                    const current = t.getAttribute('src') || '';
-                    const fixed = normalizeSrc(current);
-                    if (fixed && fixed !== current) {
-                        t.setAttribute('src', fixed);
-                        return;
-                    }
-                    if (t.src !== defaultImage) {
-                        t.src = defaultImage;
-                        t.classList.add('image-fallback');
-                        t.alt = 'Image non disponible';
-                    }
-                }
-            }, true);
-        })();
-    </script>
-        
-        <style>
-        .image-fallback {
-            opacity: 0.7;
-            filter: grayscale(50%);
-            border: 2px dashed #ddd;
-            border-radius: 8px;
-            padding: 5px;
-            background: #f9f9f9;
+        /* Optimisation du chargement pour éviter le retard */
+        body {
+            background: linear-gradient(135deg, 
+                rgba(20, 20, 20, 0.95) 0%, 
+                rgba(40, 30, 20, 0.92) 25%, 
+                rgba(60, 40, 30, 0.90) 50%, 
+                rgba(40, 30, 20, 0.92) 75%, 
+                rgba(20, 20, 20, 0.95) 100%
+            );
+            background-attachment: fixed;
         }
-        </style>
+
+        .cart-empty .btn {
+            display: inline-flex;
+            width: auto;
+            max-width: 280px;
+            margin: 0 auto 12px;
+            padding: 12px 18px;
+            min-height: 44px;
+            font-size: 0.95rem;
+            border-radius: 16px;
+        }
+
+        .cart-empty .btn i {
+            font-size: 1.05em;
+        }
+
+        .cart-empty .btn.btn-outline {
+            background: transparent;
+            color: #111;
+            border: 2px solid rgba(17, 17, 17, 0.18);
+        }
+
+        .cart-empty .btn.btn-outline:hover {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: #111;
+        }
+    </style>
 </head>
 <body>
-    <!-- Recipes & Live script -->
-    <script src="assets/js/recipes-live.js"></script>
-    <!-- Header avec navigation -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo-container">
-                    <h1 class="logo">Titi Golden Taste</h1>
-                    <p class="slogan">L'excellence culinaire malienne</p>
-                </div>
-                
-                <!-- Live Status -->
-                <div class="status-container">
-                    <div id="live-status" class="status loading">
-                        <span class="status-indicator"></span>
-                        <span class="status-text">Chargement...</span>
-                    </div>
-                    <p class="status-message" id="status-message">Vérification de l'ouverture...</p>
-                </div>
-                
-                <!-- Navigation principale -->
-                <nav class="nav">
-                    <ul>
-                        <li><a href="#home" class="nav-link active"><i class="fas fa-home"></i> Accueil</a></li>
-                        <li><a href="#menu" class="nav-link"><i class="fas fa-utensils"></i> Menu</a></li>
-                        <li><a href="boutique.html" class="nav-link"><i class="fas fa-store"></i> Boutique</a></li>
-                        <li><a href="#order" class="nav-link"><i class="fas fa-shopping-cart"></i> Commander</a></li>
-                        <li><a href="#location" class="nav-link"><i class="fas fa-map-marker-alt"></i> Nous trouver</a></li>
-                        <li><a href="#contact" class="nav-link"><i class="fas fa-phone"></i> Contact</a></li>
-                        <li class="nav-auth">
-                            <a href="login.html" class="btn-login" data-login-modal="true"><i class="fas fa-user"></i> Connexion</a>
-                            <a href="register.html" class="btn-register">Inscription</a>
-                        </li>
-                    </ul>
-                </nav>
-                
-                <!-- Menu mobile -->
-                <button class="mobile-menu-btn" id="mobileMenuBtn">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-        </div>
-    </header>
-
+    <!-- Header injecté via assets/js/header-manager.js -->
+    <header class="header"></header>
     <!-- Mobile Navigation -->
-    <div class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav" id="mobileNav" aria-hidden="true">
         <div class="mobile-nav-header">
             <h3>Navigation</h3>
-            <button class="mobile-nav-close" id="mobileNavClose">
+            <button class="mobile-nav-close" id="mobileNavClose" type="button" aria-label="Fermer la navigation">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         <nav class="mobile-nav-links">
-            <a href="#home" class="mobile-nav-link active"><i class="fas fa-home"></i> Accueil</a>
-            <a href="#menu" class="mobile-nav-link"><i class="fas fa-utensils"></i> Menu</a>
+            <a href="index.html" class="mobile-nav-link"><i class="fas fa-home"></i> Accueil</a>
+            <a href="index.html#menu" class="mobile-nav-link"><i class="fas fa-utensils"></i> Menu</a>
             <a href="boutique.html" class="mobile-nav-link"><i class="fas fa-store"></i> Boutique</a>
-            <a href="#order" class="mobile-nav-link"><i class="fas fa-shopping-cart"></i> Commander</a>
-            <a href="#location" class="mobile-nav-link"><i class="fas fa-map-marker-alt"></i> Nous trouver</a>
-            <a href="#contact" class="mobile-nav-link"><i class="fas fa-phone"></i> Contact</a>
+            <a href="index.html#order" class="mobile-nav-link"><i class="fas fa-shopping-cart"></i> Commander</a>
+            <a href="index.html#location" class="mobile-nav-link"><i class="fas fa-map-marker-alt"></i> Nous trouver</a>
+            <a href="index.html#contact" class="mobile-nav-link"><i class="fas fa-phone"></i> Contact</a>
             <div class="mobile-auth">
                 <a href="login.html" class="btn-login" data-login-modal="true"><i class="fas fa-user"></i> Connexion</a>
                 <a href="register.html" class="btn-register">Inscription</a>
             </div>
         </nav>
+    </div>
+    <!-- Bannière promotionnelle -->
+    <div class="banner">
+        <div class="banner-content">
+            <h2>🔥 Offre Spéciale : -20% sur tous nos plats</h2>
+            <p>Dégustez nos spécialités maliennes authentiques avec une réduction exceptionnelle</p>
+            <a href="#menu" class="banner-cta">
+                <i class="fas fa-utensils"></i>
+                Découvrir le menu
+            </a>
+        </div>
     </div>
 
     <!-- Hero Section -->
@@ -190,23 +131,112 @@
     </section>
 
     <!-- Cart Sidebar -->
-    <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-sidebar" id="cartSidebar" style="display: none;">
         <div class="cart-header">
             <h3><i class="fas fa-shopping-cart"></i> Votre Panier</h3>
             <button class="cart-close" id="cartClose">
                 <i class="fas fa-times"></i>
             </button>
         </div>
+        
         <div class="cart-content" id="cartContent">
             <div class="cart-empty" id="cartEmpty">
-                <i class="fas fa-shopping-basket"></i>
-                <p>Votre panier est vide</p>
-                <a href="#menu" class="btn">Voir le menu</a>
+                <div class="cart-empty-icon">
+                    <i class="fas fa-shopping-basket"></i>
+                </div>
+                <h4>Votre panier est vide</h4>
+                <p>Découvrez nos plats et produits délicieux</p>
+                <a href="#menu" class="btn btn-primary">
+                    <i class="fas fa-utensils"></i> Voir le menu
+                </a>
+                <a href="boutique.html" class="btn btn-outline">
+                    <i class="fas fa-store"></i> Voir la boutique
+                </a>
             </div>
-            <div class="cart-items" id="cartItems" style="display: none;"></div>
+            
+            <div class="cart-items" id="cartItems" style="display: none;">
+                <!-- Articles chargés dynamiquement -->
+            </div>
         </div>
+        
         <div class="cart-footer" id="cartFooter" style="display: none;">
+            <!-- Options de livraison -->
+            <div class="cart-delivery-options">
+                <h4><i class="fas fa-truck"></i> Mode de livraison</h4>
+                <div class="delivery-options">
+                    <label class="delivery-option">
+                        <input type="radio" name="deliveryType" value="delivery" checked>
+                        <span class="option-icon">
+                            <i class="fas fa-home"></i>
+                        </span>
+                        <span class="option-content">
+                            <span class="option-title">Livraison à domicile</span>
+                            <span class="option-time">30-45 min</span>
+                        </span>
+                        <span class="option-price">1000 FCFA</span>
+                    </label>
+                    <label class="delivery-option">
+                        <input type="radio" name="deliveryType" value="pickup">
+                        <span class="option-icon">
+                            <i class="fas fa-store"></i>
+                        </span>
+                        <span class="option-content">
+                            <span class="option-title">Retrait sur place</span>
+                            <span class="option-time">15-25 min</span>
+                        </span>
+                        <span class="option-price">Gratuit</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Options de paiement -->
+            <div class="cart-payment-options">
+                <h4><i class="fas fa-credit-card"></i> Mode de paiement</h4>
+                <div class="payment-options">
+                    <label class="payment-option">
+                        <input type="radio" name="cartPaymentType" value="cash" checked>
+                        <span class="option-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </span>
+                        <span class="option-content">
+                            <span class="option-title">Paiement à la livraison</span>
+                            <span class="option-time">Espèces à réception</span>
+                        </span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="cartPaymentType" value="mobile_money">
+                        <span class="option-icon">
+                            <i class="fas fa-mobile-screen-button"></i>
+                        </span>
+                        <span class="option-content">
+                            <span class="option-title">Mobile Money</span>
+                            <span class="option-time">Orange Money / Moov / Wave</span>
+                        </span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="cartPaymentType" value="card">
+                        <span class="option-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </span>
+                        <span class="option-content">
+                            <span class="option-title">Carte bancaire</span>
+                            <span class="option-time">Visa / Mastercard</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+             
+            <!-- Récapitulatif -->
             <div class="cart-summary">
+                <h4><i class="fas fa-receipt"></i> Récapitulatif</h4>
+                <div class="summary-row meta">
+                    <span>Livraison</span>
+                    <span id="cartDeliveryModeLabel">Livraison à domicile</span>
+                </div>
+                <div class="summary-row meta">
+                    <span>Paiement</span>
+                    <span id="cartPaymentModeLabel">Paiement à la livraison</span>
+                </div>
                 <div class="summary-row">
                     <span>Sous-total</span>
                     <span id="cartSubtotal">0 FCFA</span>
@@ -215,53 +245,85 @@
                     <span>Frais de livraison</span>
                     <span id="cartDelivery">1000 FCFA</span>
                 </div>
+                <div class="summary-row discount" id="cartDiscountRow" style="display: none;">
+                    <span>Remise</span>
+                    <span id="cartDiscount">-0 FCFA</span>
+                </div>
                 <div class="summary-row total">
                     <span>Total</span>
                     <span id="cartTotal">1000 FCFA</span>
                 </div>
             </div>
-            <button class="btn btn-primary btn-block" id="checkoutBtn">
-                <i class="fas fa-lock"></i> Procéder au paiement
-            </button>
-            <button class="btn btn-outline btn-block" id="continueShopping">
-                Continuer mes achats
-            </button>
+            
+            <!-- Code promo -->
+            <div class="cart-promo">
+                <div class="promo-input-group">
+                    <input type="text" id="promoCode" placeholder="Code promo" class="promo-input">
+                    <button type="button" id="applyPromoBtn" class="promo-btn">
+                        <i class="fas fa-tag"></i>
+                    </button>
+                </div>
+                <div class="promo-message" id="promoMessage"></div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="cart-actions">
+                <button class="btn btn-primary btn-block" id="checkoutBtn">
+                    <i class="fas fa-lock"></i> Lancer la commande
+                </button>
+                <button class="btn btn-outline btn-block" id="continueShopping">
+                    <i class="fas fa-arrow-right"></i> Poursuivre ma commande
+                </button>
+            </div>
+            
+            <!-- Infos supplémentaires -->
+            <div class="cart-info">
+                <div class="info-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Paiement sécurisé</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-undo"></i>
+                    <span>Annulation gratuite</span>
+                </div>
+            </div>
         </div>
     </div>
     <div class="cart-overlay" id="cartOverlay"></div>
 
-    <!-- Cart Floating Button -->
-    <button class="cart-floating-btn" id="cartFloatingBtn">
-        <i class="fas fa-shopping-cart"></i>
-        <span class="cart-count" id="cartCount">0</span>
-    </button>
+    <!-- Menu du jour Hero Section -->
+    <section class="menu-of-the-day" id="menuContainer">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Chargement du menu...</p>
+        </div>
+    </section>
 
     <!-- Main Content -->
     <main class="container">
-        <!-- Menu du jour Section -->
+        <!-- Menu Section -->
         <section class="section" id="menu">
             <div class="section-header">
-                <h2 class="section-title"><i class="fas fa-utensils"></i> Menu du jour</h2>
-                <div class="section-subtitle">Découvrez notre spécialité du jour préparée avec soin</div>
+                <h2 class="section-title"><i class="fas fa-utensils"></i> Notre carte complète</h2>
+                <div class="section-subtitle">Découvrez toutes nos spécialités</div>
             </div>
             
-            <div class="menu-of-the-day" id="menuContainer">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Chargement du menu...</p>
-                </div>
-            </div>
-
-            <!-- Tous les plats -->
-            <div class="section-header">
-                <h3 class="section-subtitle">Notre carte complète</h3>
-                <div class="category-filter">
-                    <button class="category-btn active" data-category="all">Tous</button>
-                    <button class="category-btn" data-category="plats">Plats principaux</button>
-                    <button class="category-btn" data-category="entrees">Entrées</button>
-                    <button class="category-btn" data-category="desserts">Desserts</button>
-                    <button class="category-btn" data-category="boissons">Boissons</button>
-                </div>
+            <div class="category-filter">
+                <button class="category-btn active" data-category="all">
+                    <i class="fas fa-utensils"></i> Tous
+                </button>
+                <button class="category-btn" data-category="plats">
+                    <i class="fas fa-drumstick-bite"></i> Plats principaux
+                </button>
+                <button class="category-btn" data-category="entrees">
+                    <i class="fas fa-leaf"></i> Entrées
+                </button>
+                <button class="category-btn" data-category="desserts">
+                    <i class="fas fa-ice-cream"></i> Desserts
+                </button>
+                <button class="category-btn" data-category="boissons">
+                    <i class="fas fa-coffee"></i> Boissons
+                </button>
             </div>
 
             <div class="all-menu-items" id="allMenuContainer">
@@ -297,11 +359,22 @@
         <section class="section" id="location">
             <div class="section-header">
                 <h2 class="section-title"><i class="fas fa-map-marker-alt"></i> Nous trouver</h2>
-                <div class="section-subtitle">Retrouvez notre restaurant et horaires d'ouverture</div>
+                <div class="section-subtitle">Nous sommes à votre écoute</div>
             </div>
             
             <div class="location-content">
                 <div class="location-info">
+                    <div class="location-lead-card">
+                        <span class="location-kicker">Bamako, Mali</span>
+                        <h3>Une adresse pensée pour la dégustation, le retrait rapide et la livraison.</h3>
+                        <p>Retrouvez Titi Golden Taste dans un lieu simple à rejoindre, avec un service fluide sur place, en retrait ou en livraison.</p>
+                        <div class="location-tags">
+                            <span>Sur place</span>
+                            <span>Retrait express</span>
+                            <span>Livraison 7j/7</span>
+                        </div>
+                    </div>
+
                     <div class="info-card">
                         <div class="info-icon">
                             <i class="fas fa-clock"></i>
@@ -340,8 +413,205 @@
                     </div>
                 </div>
                 
-                <div class="map-wrapper">
-                    <div id="restaurantMap" class="restaurant-map"></div>
+                <div class="location-map-panel">
+                    <div class="location-map-head">
+                        <div>
+                            <span class="location-map-kicker">Point de repère</span>
+                            <h3>Titi Golden Taste</h3>
+                        </div>
+                        <a class="location-route-btn" href="https://www.google.com/maps/dir/?api=1&destination=12.6392,-8.0029" target="_blank" rel="noopener">
+                            <i class="fas fa-route"></i> Itinéraire
+                        </a>
+                    </div>
+                    <div class="map-wrapper location-map-wrapper">
+                        <div id="restaurantMap" class="restaurant-map"></div>
+                    </div>
+                    <div class="location-map-meta">
+                        <div class="location-meta-item">
+                            <strong>15-25 min</strong>
+                            <span>retrait sur place</span>
+                        </div>
+                        <div class="location-meta-item">
+                            <strong>30-45 min</strong>
+                            <span>livraison moyenne</span>
+                        </div>
+                        <div class="location-meta-item">
+                            <strong>Support 7j/7</strong>
+                            <span>assistance commande</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="section contact-section" id="contact">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-envelope"></i> Contactez-nous</h2>
+                <div class="section-subtitle">Nous sommes à votre écoute pour toute question ou suggestion</div>
+            </div>
+
+            <div class="contact-quick-strip">
+                <div class="contact-pill"><i class="fas fa-bolt"></i> Reponse sous 24h</div>
+                <div class="contact-pill"><i class="fas fa-headset"></i> Support humain</div>
+                <div class="contact-pill"><i class="fas fa-map-pin"></i> Bamako centre</div>
+            </div>
+            
+            <div class="contact-container">
+                <div class="contact-info">
+                    <div class="contact-lead-card">
+                        <span class="contact-kicker">Un seul point d'entrée</span>
+                        <h3>Commande, livraison, privatisation ou simple question : notre équipe locale vous répond.</h3>
+                        <p>Choisissez le canal le plus direct. Nous gardons le même niveau d'attention pour une question rapide comme pour une demande détaillée.</p>
+                        <div class="contact-lead-actions">
+                            <a href="tel:+22320212223" class="contact-link">
+                                <i class="fas fa-phone"></i> Appeler
+                            </a>
+                            <a href="mailto:contact@titigoldentaste.com" class="contact-link">
+                                <i class="fas fa-envelope"></i> Ecrire
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Adresse</h3>
+                            <p>Avenue de l'Indépendance</p>
+                            <p>Badalabougou, Bamako</p>
+                            <p>Mali</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Téléphone</h3>
+                            <p>+223 20 21 22 23</p>
+                            <p>+223 76 01 23 45</p>
+                            <p class="info-note">Service client 7j/7</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Email</h3>
+                            <p>contact@titigoldentaste.com</p>
+                            <p>support@titigoldentaste.com</p>
+                            <p class="info-note">Réponse sous 24h</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Horaires d'ouverture</h3>
+                            <p><strong>Lundi - Samedi</strong></p>
+                            <p>10h00 - 22h00</p>
+                            <p><strong>Dimanche</strong></p>
+                            <p>12h00 - 20h00</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-map-form">
+                    <!-- <div class="contact-map-card">
+                        <div class="contact-card-head">
+                            <div>
+                                <span class="contact-card-kicker">Carte interactive</span>
+                                <h3>Repérez-nous en un coup d'œil</h3>
+                            </div>
+                            <span class="contact-card-note">Ouvert aujourd'hui</span>
+                        </div>
+                        <div class="map-wrapper contact-map-shell">
+                            <div id="contactMap" class="contact-map"></div>
+                            <div class="map-controls">
+                            <button class="map-control-btn" type="button" onclick="zoomInMap()" aria-label="Zoomer">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="map-control-btn" type="button" onclick="zoomOutMap()" aria-label="Dézoomer">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button class="map-control-btn" type="button" onclick="resetMap()" aria-label="Recentrer la carte">
+                                <i class="fas fa-home"></i>
+                            </button>
+                            <button class="map-control-btn" type="button" onclick="getDirections()" aria-label="Obtenir l'itinéraire">
+                                <i class="fas fa-directions"></i>
+                            </button>
+                            </div>
+                        </div>
+                        <div class="contact-map-meta">
+                            <div class="contact-map-meta-item">
+                                <strong>Avenue de l'Indépendance</strong>
+                                <span>Badalabougou, Bamako</span>
+                            </div>
+                            <div class="contact-map-meta-item">
+                                <strong>Service client</strong>
+                                <span>+223 20 21 22 23</span>
+                            </div>
+                        </div>
+                    </div> -->
+                    
+                    <div class="">
+                        <form class="contact-form" id="contactForm">
+                            <div class="form-header">
+                                <h3>Envoyez-nous un message</h3>
+                                <p>Nous vous répondrons dans les plus brefs délais</p>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Nom complet *</label>
+                                    <input class="form-input" type="text" name="name" required placeholder="Votre nom et prénom">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Email *</label>
+                                    <input class="form-input" type="email" name="email" required placeholder="votre@email.com">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Telephone</label>
+                                <input class="form-input" type="tel" name="phone" placeholder="+223 XX XX XX XX">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Sujet *</label>
+                                <select class="form-input" name="subject" required>
+                                    <option value="">Choisissez un sujet</option>
+                                    <option value="commande">Question sur une commande</option>
+                                    <option value="menu">Information sur le menu</option>
+                                    <option value="boutique">Question sur la boutique</option>
+                                    <option value="livraison">Problème de livraison</option>
+                                    <option value="suggestion">Suggestion</option>
+                                    <option value="autre">Autre</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Message *</label>
+                                <textarea class="form-textarea" name="message" rows="5" required placeholder="Décrivez votre demande en détail..."></textarea>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Envoyer le message
+                                </button>
+                                <button type="button" class="btn btn-outline" onclick="resetContactForm()">
+                                    <i class="fas fa-redo"></i> Réinitialiser
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </section>
@@ -351,6 +621,28 @@
             <div class="section-header">
                 <h2 class="section-title"><i class="fas fa-shopping-cart"></i> Commander en ligne</h2>
                 <div class="section-subtitle">Commandez vos plats préférés en quelques clics</div>
+            </div>
+
+            <div class="order-showcase">
+                <div class="order-showcase-copy">
+                    <span class="order-kicker">Commande premium</span>
+                    <h3>Un parcours clair pour choisir, personnaliser, programmer et valider votre commande sans friction.</h3>
+                    <p>Chaque étape a été simplifiée pour que le client comprenne le total, le mode de livraison et le paiement avant confirmation.</p>
+                </div>
+                <div class="order-showcase-metrics">
+                    <div class="order-metric">
+                        <strong>4 étapes</strong>
+                        <span>du choix au paiement</span>
+                    </div>
+                    <div class="order-metric">
+                        <strong>30-45 min</strong>
+                        <span>livraison domicile</span>
+                    </div>
+                    <div class="order-metric">
+                        <strong>15-25 min</strong>
+                        <span>retrait sur place</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Order Steps -->
@@ -403,43 +695,121 @@
                     </div>
                 </div>
 
-                <!-- Step 2: Customization -->
+                <!-- Step 2: Personnalisation du plat -->
                 <div class="wizard-step" id="wizardStep2">
-                    <h3><i class="fas fa-cogs"></i> Personnalisez votre commande</h3>
-
-                    <div class="customize-layout">
-                        <div class="customize-left">
-                            <div class="customization-section">
-                                <h4>Accompagnements</h4>
-                                <div class="options-grid" id="sideDishesOptions">
-                                    <!-- Options chargées dynamiquement -->
-                                </div>
-                            </div>
-
-                            <div class="customization-section">
-                                <h4>Sauces</h4>
-                                <div class="options-grid" id="saucesOptions">
-                                    <!-- Options chargées dynamiquement -->
-                                </div>
-                            </div>
-
-                            <div class="customization-section">
-                                <h4>Instructions spéciales</h4>
-                                <textarea id="specialInstructions" rows="3" placeholder="Ajoutez des instructions spéciales pour votre commande..."></textarea>
+                    <h3><i class="fas fa-plus-circle"></i> Personnalisez votre plat</h3>
+                    
+                    <!-- Boutons d'action pour le plat sélectionné -->
+                    <div class="selected-dish-actions">
+                        <button class="btn btn-outline btn-sm" onclick="removeCurrentDish()">
+                            <i class="fas fa-times"></i> Retirer ce plat
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="addMoreDishes()">
+                            <i class="fas fa-plus"></i> Ajouter d'autres plats
+                        </button>
+                    </div>
+                    
+                    <div class="customization-options">
+                        <div class="customization-category">
+                            <h4><i class="fas fa-fire"></i> Suppléments</h4>
+                            <div class="option-list">
+                                <label class="custom-option">
+                                    <input type="checkbox" name="supplement" value="frites" data-price="500">
+                                    <span class="option-name">Frites</span>
+                                    <span class="option-price">+500 FCFA</span>
+                                </label>
+                                <label class="custom-option">
+                                    <input type="checkbox" name="supplement" value="riz" data-price="300">
+                                    <span class="option-name">Riz supplémentaire</span>
+                                    <span class="option-price">+300 FCFA</span>
+                                </label>
+                                <label class="custom-option">
+                                    <input type="checkbox" name="supplement" value="salade" data-price="400">
+                                    <span class="option-name">Salade verte</span>
+                                    <span class="option-price">+400 FCFA</span>
+                                </label>
                             </div>
                         </div>
-
-                        <aside class="customize-right">
-                            <div class="customize-summary">
-                                <div class="customize-summary-title">Votre sélection</div>
-                                <div class="customize-summary-sub">Plats sélectionnés (étape 1)</div>
-                                <div id="customizeSelectedItems" class="customize-selected-items"></div>
-                                <div class="customize-summary-sub" style="margin-top:12px">Options choisies</div>
-                                <div id="customizeSelectedOptions" class="customize-selected-options"></div>
+                        
+                        <div class="customization-category">
+                            <h4><i class="fas fa-pepper-hot"></i> Sauces</h4>
+                            <div class="option-list">
+                                <label class="custom-option">
+                                    <input type="radio" name="sauce" value="tomate" data-price="0" checked>
+                                    <span class="option-name">Sauce tomate</span>
+                                    <span class="option-price">Inclus</span>
+                                </label>
+                                <label class="custom-option">
+                                    <input type="radio" name="sauce" value="arachide" data-price="200">
+                                    <span class="option-name">Sauce arachide</span>
+                                    <span class="option-price">+200 FCFA</span>
+                                </label>
+                                <label class="custom-option">
+                                    <input type="radio" name="sauce" value="oignon" data-price="150">
+                                    <span class="option-name">Sauce oignon</span>
+                                    <span class="option-price">+150 FCFA</span>
+                                </label>
                             </div>
-                        </aside>
+                        </div>
+                        
+                        <div class="customization-category">
+                            <h4><i class="fas fa-drumstick-bite"></i> Viandes</h4>
+                            <div class="option-list">
+                                <label class="custom-option">
+                                    <input type="radio" name="viande" value="poulet" data-price="0" checked>
+                                    <span class="option-name">Poulet</span>
+                                    <span class="option-price">Inclus</span>
+                                </label>
+                                <label class="custom-option">
+                                    <input type="radio" name="viande" value="boeuf" data-price="800">
+                                    <span class="option-name">Bœuf</span>
+                                    <span class="option-price">+800 FCFA</span>
+                                </label>
+                                <label class="custom-option">
+                                    <input type="radio" name="viande" value="poisson" data-price="600">
+                                    <span class="option-name">Poisson</span>
+                                    <span class="option-price">+600 FCFA</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="customization-category">
+                            <h4><i class="fas fa-leaf"></i> Ingrédients</h4>
+                            <div class="option-list">
+                                <label class="custom-option">
+                                    <input type="checkbox" name="ingredients" value="piment" data-price="0">
+                                    <span class="option-name">Piment fort</span>
+                                    <span class="option-price">Gratuit</span>
+                                </label>
+                                <label class="custom-option">
+                                    <input type="checkbox" name="ingredients" value="oignons" data-price="0">
+                                    <span class="option-name">Oignons supplémentaires</span>
+                                    <span class="option-price">Gratuit</span>
+                                </label>
+                                <label class="custom-option">
+                                    <input type="checkbox" name="ingredients" value="herbes" data-price="100">
+                                    <span class="option-name">Herbes aromatiques</span>
+                                    <span class="option-price">+100 FCFA</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
-
+                    
+                    <div class="customization-summary" id="customizationSummary">
+                        <div class="summary-item">
+                            <span>Plat principal:</span>
+                            <span id="basePrice">0 FCFA</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Suppléments:</span>
+                            <span id="supplementPrice">0 FCFA</span>
+                        </div>
+                        <div class="summary-item total">
+                            <span>Total personnalisé:</span>
+                            <span id="totalCustomPrice">0 FCFA</span>
+                        </div>
+                    </div>
+                    
                     <div class="wizard-actions">
                         <button class="btn btn-prev" type="button" onclick="prevStep(1)">
                             <i class="fas fa-arrow-left"></i> Précédent
@@ -450,9 +820,9 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Delivery Options -->
+                <!-- Step 3: Livraison -->
                 <div class="wizard-step" id="wizardStep3">
-                    <h3><i class="fas fa-truck"></i> Options de livraison</h3>
+                    <h3><i class="fas fa-truck"></i> Choisissez la livraison</h3>
                     
                     <div class="delivery-options">
                         <div class="delivery-option selected" data-type="delivery">
@@ -777,170 +1147,7 @@
                 </div>
             </div>
         </section>
-
-        <!-- Contact Section -->
-        <section class="section" id="contact">
-            <div class="section-header">
-                <h2 class="section-title"><i class="fas fa-phone-alt"></i> Contactez-nous</h2>
-                <div class="section-subtitle">Nous sommes à votre écoute</div>
-            </div>
-
-            <div class="contact-container">
-                <div class="contact-info">
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <div class="info-content">
-                            <h3>Notre adresse</h3>
-                            <p>Avenue de l'Indépendance</p>
-                            <p>Badalabougou, Bamako</p>
-                            <p>Mali</p>
-                        </div>
-                    </div>
-
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <i class="fas fa-phone"></i>
-                        </div>
-                        <div class="info-content">
-                            <h3>Téléphone</h3>
-                            <p>+223 20 21 22 23</p>
-                            <p>+223 76 01 23 45</p>
-                            <p class="info-note">Service client 7j/7</p>
-                        </div>
-                    </div>
-
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="info-content">
-                            <h3>Horaires d'ouverture</h3>
-                            <p><strong>Lundi - Samedi</strong></p>
-                            <p>10h00 - 22h00</p>
-                            <p><strong>Dimanche</strong></p>
-                            <p>12h00 - 20h00</p>
-                        </div>
-                    </div>
-
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <div class="info-content">
-                            <h3>Email</h3>
-                            <p>contact@titigoldentaste.ml</p>
-                            <p>reservation@titigoldentaste.ml</p>
-                            <p class="info-note">Réponse sous 24h</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="contact-form-container">
-                    <h3><i class="fas fa-paper-plane"></i> Envoyez-nous un message</h3>
-                    <form id="contactForm" class="contact-form">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <input type="text" id="contactName" placeholder="Votre nom" required>
-                            </div>
-                            <div class="form-group">
-                                <input type="email" id="contactEmail" placeholder="Votre email" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" id="contactSubject" placeholder="Sujet" required>
-                        </div>
-                        <div class="form-group">
-                            <textarea id="contactMessage" rows="5" placeholder="Votre message..." required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-paper-plane"></i> Envoyer le message
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </section>
     </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h3>Titi Golden Taste</h3>
-                    <p class="footer-description">
-                        Restaurant premium spécialisé dans la cuisine malienne authentique. 
-                        Qualité, tradition et innovation depuis 2024.
-                    </p>
-                    <div class="footer-social">
-                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-tiktok"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
-                    </div>
-                </div>
-
-                <div class="footer-col">
-                    <h4>Liens rapides</h4>
-                    <ul class="footer-links">
-                        <li><a href="#home">Accueil</a></li>
-                        <li><a href="#menu">Notre menu</a></li>
-                        <li><a href="boutique.html">Boutique</a></li>
-                        <li><a href="#order">Commander</a></li>
-                        <li><a href="#location">Nous trouver</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-col">
-                    <h4>Informations</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">À propos de nous</a></li>
-                        <li><a href="#">Nos valeurs</a></li>
-                        <li><a href="#">Carrières</a></li>
-                        <li><a href="#">Blog culinaire</a></li>
-                        <li><a href="#">Recettes</a></li>
-                        <li><a href="#">FAQ</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-col">
-                    <h4>Newsletter</h4>
-                    <p class="newsletter-text">
-                        Inscrivez-vous pour recevoir nos offres exclusives et nouveautés.
-                    </p>
-                    <form class="newsletter-form">
-                        <input type="email" placeholder="Votre email" required>
-                        <button type="submit" class="btn">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </form>
-                    <div class="payment-methods">
-                        <i class="fas fa-money-bill-wave"></i>
-                        <i class="fas fa-mobile-alt"></i>
-                        <i class="fab fa-cc-visa"></i>
-                        <i class="fab fa-cc-mastercard"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="footer-bottom">
-                <div class="footer-bottom-content">
-                    <p class="copyright">
-                        &copy; 2024 Titi Golden Taste, Bamako - Mali. Tous droits réservés.
-                    </p>
-                    <div class="footer-legal">
-                        <a href="#">Mentions légales</a>
-                        <a href="#">Politique de confidentialité</a>
-                        <a href="#">Conditions d'utilisation</a>
-                        <a href="#">Cookies</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
 
     <!-- Login Modal -->
     <div class="modal" id="loginModal">
@@ -965,97 +1172,141 @@
                 </form>
                 <div class="modal-footer">
                     <p>Pas encore de compte ? <a href="register.html">S'inscrire</a></p>
-                    <p><a href="#">Mot de passe oublié ?</a></p>
+                    <p><a href="#">Mot de passe oublie ?</a></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript: load config first to avoid duplicate base URL declarations -->
+
+    <!-- Notification Modal -->
+    <div class="modal notification-modal" id="notificationModal" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-bell"></i> Notifications</h3>
+                <button class="modal-close" id="notificationModalClose" type="button" aria-label="Fermer les notifications">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="notification-role" id="notificationRoleLabel"></div>
+                <div class="notification-list" id="notificationList"></div>
+                <div class="notification-empty" id="notificationEmpty" style="display: none;">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>Aucune notification pour le moment.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer"></footer>
+    <!-- JavaScript essentiel uniquement -->
     <script src="assets/js/config.js"></script>
-    <script src="assets/js/app.js"></script>
-    <script src="assets/js/order.js"></script>
+    <script src="assets/js/header-manager.js"></script>
+    <script src="assets/js/order-enhanced.js"></script>
     <script src="assets/js/cart.js"></script>
-    <!-- Leaflet JS (maps) -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Front-end glue: products renderer, map init, mobile menu -->
+    <script src="assets/js/notifications.js"></script>
+    <script src="assets/js/contact-map.js"></script>
+    <script src="assets/js/premium-interactions.js"></script>
     <script src="assets/js/frontend.js"></script>
-    <link rel="stylesheet" href="assets/css/customize-order.css">
-    <script src="assets/js/customize-order.js"></script>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function(){
-        // Render menu customization in the menu selection grid
-        try{
-            if (window.TGTCustomize && typeof window.TGTCustomize.render === 'function'){
-                window.TGTCustomize.render('#menuSelectionGrid', {
-                    source: 'all',
-                    addText: 'Ajouter au panier',
-                    onDone: function(items){
-                        // update mini list
-                        renderSelectedItems(items);
-                        // dispatch to cart flow
-                        window.dispatchEvent(new CustomEvent('tgt:add-items-to-cart', { detail: { items } }));
-                    }
-                }).catch(console.error);
-            }
-        }catch(e){console.error(e)}
-
-        // also listen to global event
-        window.addEventListener('tgt:customization:done', function(e){ renderSelectedItems(e.detail.items || []); });
-
-        function renderSelectedItems(items){
-            const list = document.getElementById('selectedItemsList');
-            if (!list) return;
-            if (!items || items.length === 0){ list.innerHTML = '<em>Aucun plat sélectionné</em>'; return; }
-            list.innerHTML = items.map(it=>`<div class="item"><div><div class="name">${it.name}</div><div class="meta">Quantité: ${it.qty} • Prix unité: ${it.unit_price} FCFA</div></div><div class="price">${(it.qty*it.unit_price)||0} FCFA</div></div>`).join('');
-        }
-    });
-    </script>
-
-    <script>
-    // Initialisation supplémentaire si nécessaire (tolérant aux différents IDs)
+    
+    <!-- <script>
+    // Script simple pour les dropdowns
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Page index.html chargée');
-        // Accept multiple possible IDs used across templates
-        const menuContainer = document.getElementById('menu-container') || document.getElementById('menuContainer') || document.getElementById('menu-of-the-day') || document.getElementById('menuContainer');
-        const productsContainer = document.getElementById('products-container') || document.getElementById('productsContainer') || document.getElementById('products-container');
-        console.log('Menu container exists:', !!menuContainer);
-        console.log('Products container exists:', !!productsContainer);
-
-        if (typeof loadMenu === 'function' && menuContainer) {
-            try { loadMenu(); } catch (e) { console.error(e); }
-        }
-
-        if (typeof loadProducts === 'function' && productsContainer) {
-            try { loadProducts(); } catch (e) { console.error(e); }
-        }
-
-        if (typeof updateLiveStatus === 'function') {
-            console.log('updateLiveStatus function exists');
+        console.log('Page loaded');
+        
+        // Dropdown profil
+        const profileBtn = document.getElementById('profileToggleBtn');
+        const profileMenu = document.getElementById('profileDropdownMenu');
+        
+        if (profileBtn && profileMenu) {
+            profileBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                profileMenu.style.display = profileMenu.style.display === 'block' ? 'none' : 'block';
+            });
         }
         
-        // Initialisation de la carte
-        if (typeof initMap === 'function') {
-            try { initMap(); } catch (e) { console.error(e); }
-        } else {
-            // Fallback simple pour la carte
-            const mapContainer = document.getElementById('restaurantMap');
-            if (mapContainer) {
-                try {
-                    const map = L.map('restaurantMap').setView([12.6392, -8.0029], 15); // Coordonnées de Bamako
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    }).addTo(map);
-                    L.marker([12.6392, -8.0029]).addTo(map)
-                        .bindPopup('Titi Golden Taste<br>Avenue de l\'Indépendance, Badalabougou')
-                        .openPopup();
-                } catch (e) {
-                    console.error('Erreur lors de l\'initialisation de la carte:', e);
+        // Dropdown panier
+        const cartBtn = document.getElementById('cartToggleBtn');
+        const cartSidebar = document.getElementById('cartSidebar');
+        const cartOverlay = document.getElementById('cartOverlay');
+        
+        if (cartBtn && cartSidebar) {
+            cartBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                cartSidebar.style.display = cartSidebar.style.display === 'block' ? 'none' : 'block';
+                if (cartOverlay) {
+                    cartOverlay.style.display = cartSidebar.style.display;
                 }
-            }
+            });
         }
+        
+        // Dropdown notifications
+        const notifBtn = document.getElementById('notificationToggleBtn');
+        const notifModal = document.getElementById('notificationModal');
+        
+        if (notifBtn && notifModal) {
+            notifBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                notifModal.style.display = notifModal.style.display === 'block' ? 'none' : 'block';
+            });
+        }
+        
+        // Click outside pour fermer
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.nav-profile') && profileMenu) {
+                profileMenu.style.display = 'none';
+            }
+            if (!e.target.closest('.nav-cart') && cartSidebar) {
+                cartSidebar.style.display = 'none';
+                if (cartOverlay) cartOverlay.style.display = 'none';
+            }
+            if (!e.target.closest('.nav-notifications') && notifModal) {
+                notifModal.style.display = 'none';
+            }
+        });
     });
     </script>
+
+    <!-- Menu Modal -->
+    <div id="menuModal" class="modal-universal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="menuModalTitle">Détails du plat</h3>
+                <button class="modal-close" onclick="closeMenuModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="menuModalBody">
+                <!-- Contenu chargé dynamiquement -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeMenuModal()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button class="btn btn-secondary" onclick="toggleLike()">
+                    <i class="fas fa-heart"></i> Favoris
+                </button>
+                <button class="btn btn-primary" onclick="orderMenu()">
+                    <i class="fas fa-shopping-cart"></i> Commander
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dark overlay for menu modal -->
+    <div id="menuModalOverlay" class="menu-modal-overlay"></div>
 </body>
 </html>
+
+
+
+
+
+
+
+

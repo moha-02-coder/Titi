@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemples de Modaux - Titi Golden Taste</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/modal-universal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .demo-header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        
+        .demo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .demo-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .demo-card p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .btn-demo {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-demo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+        
+        .code-example {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 35px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1><i class="fas fa-window-restore"></i> Système de Modal Universel</h1>
+            <p>Démonstration des différentes utilisations du système de modal réutilisable</p>
+        </div>
+
+        <div class="demo-grid">
+            <!-- Modal Simple -->
+            <div class="demo-card">
+                <h3><i class="fas fa-info-circle"></i> Modal Simple</h3>
+                <p>Affiche un message simple avec bouton OK</p>
+                <button class="btn-demo" onclick="showSimpleModal()">
+                    <i class="fas fa-play"></i> Voir l'exemple
+                </button>
+                <div class="code-example">
+universalModal.alert({
+    title: 'Information',
+    message: 'Ceci est un message d\'information simple.',
+    icon: 'fa-info-circle'
+});
+                </div>
+            </div>
+
+            <!-- Modal Confirmation -->
+            <div class="demo-card">
+                <h3><i class="fas fa-question-circle"></i> Modal Confirmation</h3>
+                <p>Demande une confirmation avant une action</p>
+                <button class="btn-demo" onclick="showConfirmModal()">
+                    <i class="fas fa-play"></i> Voir l'exemple
+                </button>
+                <div class="code-example">
+universalModal.confirm({
+    title: 'Confirmation',
+    message: 'Êtes-vous sûr de vouloir supprimer cet élément ?',
+    icon: 'fa-exclamation-triangle',
+    onConfirm: function() {
+        console.log('Action confirmée');
+    }
+});
+                </div>
+            </div>
+
+            <!-- Modal Succès -->
+            <div class="demo-card">
+                <h3><i class="fas fa-check-circle"></i> Modal Succès</h3>
+                <p>Affiche un message de succès</p>
+                <button class="btn-demo" onclick="showSuccessModal()">
+                    <i class="fas fa-play"></i> Voir l'exemple
+                </button>
+                <div class="code-example">
+universalModal.success({
+    title: 'Succès !',
+    message: 'L\'opération a été effectuée avec succès.',
+    icon: 'fa-check-circle'
+});
+                </div>
+            </div>
+
+            <!-- Modal Erreur -->
+            <div class="demo-card">
+                <h3><i class="fas fa-exclamation-circle"></i> Modal Erreur</h3>
+                <p>Affiche un message d'erreur</p>
+                <button class="btn-demo" onclick="showErrorModal()">
+                    <i class="fas fa-play"></i> Voir l'exemple
+                </button>
+                <div class="code-example">
+universalModal.error({
+    title: 'Erreur',
+    message: 'Une erreur est survenue. Veuillez réessayer.',
+    icon: 'fa-exclamation-circle'
+});
+                </div>
+            </div>
+
+            <!-- Modal Formulaire -->
+            <div class="demo-card">
+                <h3><i class="fas fa-edit"></i> Modal Formulaire</h3>
+                <p>Affiche un formulaire personnalisé</p>
+                <button class="btn-demo" onclick="showFormModal()">
+                    <i class="fas fa-play"></i> Voir l'exemple
+                </button>
+                <div class="code-example">
+universalModal.form({
+    title: 'Ajouter un utilisateur',
+    icon: 'fa-user-plus',
+    content: '... formulaire HTML ...',
+    onSubmit: function() {
+        console.log('Formulaire soumis');
+    }
+});
+                </div>
+            </div>
+
+            <!-- Modal avec Onglets -->
+            <div class="demo-card">
+                <h3><i class="fas fa-tabs"></i> Modal avec Onglets</h3>
+                <p>Affiche un modal avec plusieurs onglets</p>
+                <button class="btn-demo" onclick="showTabsModal()">
+                    <i class="fas fa-play"></i> Voir l'exemple
+                </button>
+                <div class="code-example">
+universalModal.withTabs({
+    title: 'Paramètres avancés',
+    tabs: ['Général', 'Sécurité', 'Notifications'],
+    content: '... contenu avec onglets ...'
+});
+                </div>
+            </div>
+
+            <!-- Modal Chargement -->
+            <div class="demo-card">
+                <h3><i class="fas fa-spinner"></i> Modal Chargement</h3>
+                <p>Affiche un indicateur de chargement</p>
+                <button class="btn-demo" onclick="showLoadingModal()">
+                    <i class="fas fa-play"></i> Voir l'exemple
+                </button>
+                <div class="code-example">
+const modal = universalModal.loading({
+    title: 'Traitement en cours',
+    message: 'Veuillez patienter...'
+});
+
+// Fermer après traitement
+setTimeout(() => universalModal.close(modal), 3000);
+                </div>
+            </div>
+
+            <!-- Modal Personnalisé -->
+            <div class="demo-card">
+                <h3><i class="fas fa-palette"></i> Modal Personnalisé</h3>
+                <p>Modal entièrement personnalisé</p>
+                <button class="btn-demo" onclick="showCustomModal()">
+                    <i class="fas fa-play"></i> Voir l'exemple
+                </button>
+                <div class="code-example">
+universalModal.open({
+    title: 'Modal personnalisé',
+    size: 'large',
+    type: 'success',
+    content: '... contenu HTML personnalisé ...',
+    buttons: [
+        { text: 'Annuler', type: 'secondary' },
+        { text: 'Valider', type: 'primary' }
+    ]
+});
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-header">
+            <h2><i class="fas fa-code"></i> Documentation API</h2>
+            <p>Référence complète des méthodes et options disponibles</p>
+        </div>
+
+        <div class="demo-grid">
+            <!-- Méthodes principales -->
+            <div class="demo-card">
+                <h3><i class="fas fa-method"></i> Méthodes principales</h3>
+                <div class="code-example">
+// Ouvrir un modal
+universalModal.open(options)
+
+// Fermer un modal
+universalModal.close(modal)
+
+// Fermer tous les modaux
+universalModal.closeAll()
+                </div>
+            </div>
+
+            <!-- Types de modaux -->
+            <div class="demo-card">
+                <h3><i class="fas fa-shapes"></i> Types prédéfinis</h3>
+                <div class="code-example">
+universalModal.alert(options)
+universalModal.confirm(options)
+universalModal.success(options)
+universalModal.error(options)
+universalModal.loading(options)
+universalModal.form(options)
+universalModal.withTabs(options)
+                </div>
+            </div>
+
+            <!-- Options disponibles -->
+            <div class="demo-card">
+                <h3><i class="fas fa-cog"></i> Options principales</h3>
+                <div class="code-example">
+{
+    title: 'Titre',
+    subtitle: 'Sous-titre',
+    icon: 'fa-icon',
+    type: 'default|success|error|warning|info',
+    size: 'small|medium|large|fullscreen',
+    content: 'HTML content',
+    message: 'Text message',
+    buttons: [...],
+    onOpen: function() {},
+    onClose: function() {},
+    onConfirm: function() {}
+}
+                </div>
+            </div>
+
+            <!-- Boutons -->
+            <div class="demo-card">
+                <h3><i class="fas fa-mouse-pointer"></i> Configuration des boutons</h3>
+                <div class="code-example">
+buttons: [
+    {
+        text: 'Texte du bouton',
+        type: 'primary|secondary|success|danger|outline',
+        icon: 'fa-icon',
+        onclick: 'javascript',
+        disabled: false
+    }
+]
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/modal-universal.js"></script>
+    
+    <script>
+        // Fonctions de démonstration
+        function showSimpleModal() {
+            universalModal.alert({
+                title: 'Information',
+                message: 'Ceci est un message d\'information simple.',
+                icon: 'fa-info-circle'
+            });
+        }
+
+        function showConfirmModal() {
+            universalModal.confirm({
+                title: 'Confirmation de suppression',
+                message: 'Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible.',
+                icon: 'fa-exclamation-triangle',
+                onConfirm: function() {
+                    universalModal.success({
+                        title: 'Supprimé',
+                        message: 'L\'élément a été supprimé avec succès.'
+                    });
+                }
+            });
+        }
+
+        function showSuccessModal() {
+            universalModal.success({
+                title: 'Opération réussie !',
+                message: 'L\'opération a été effectuée avec succès.',
+                icon: 'fa-check-circle'
+            });
+        }
+
+        function showErrorModal() {
+            universalModal.error({
+                title: 'Erreur survenue',
+                message: 'Une erreur est survenue. Veuillez réessayer plus tard.',
+                icon: 'fa-exclamation-circle'
+            });
+        }
+
+        function showFormModal() {
+            universalModal.form({
+                title: 'Ajouter un utilisateur',
+                icon: 'fa-user-plus',
+                content: `
+                    <div class="modal-form">
+                        <div class="modal-form-row">
+                            <div class="modal-form-group">
+                                <label class="modal-form-label">Nom *</label>
+                                <input type="text" class="modal-form-input" placeholder="Entrez le nom">
+                            </div>
+                            <div class="modal-form-group">
+                                <label class="modal-form-label">Email *</label>
+                                <input type="email" class="modal-form-input" placeholder="Entrez l'email">
+                            </div>
+                        </div>
+                        <div class="modal-form-group">
+                            <label class="modal-form-label">Rôle</label>
+                            <select class="modal-form-select">
+                                <option value="user">Utilisateur</option>
+                                <option value="admin">Administrateur</option>
+                                <option value="delivery">Livreur</option>
+                            </select>
+                        </div>
+                    </div>
+                `,
+                onSubmit: function() {
+                    universalModal.loading({
+                        title: 'Création en cours',
+                        message: 'Ajout de l\'utilisateur...'
+                    });
+                    
+                    setTimeout(() => {
+                        universalModal.close();
+                        universalModal.success({
+                            title: 'Utilisateur ajouté',
+                            message: 'L\'utilisateur a été créé avec succès.'
+                        });
+                    }, 2000);
+                }
+            });
+        }
+
+        function showTabsModal() {
+            universalModal.open({
+                title: 'Paramètres avancés',
+                icon: 'fa-cogs',
+                size: 'large',
+                content: `
+                    <div class="modal-tabs">
+                        <button class="modal-tab active">Général</button>
+                        <button class="modal-tab">Sécurité</button>
+                        <button class="modal-tab">Notifications</button>
+                    </div>
+                    
+                    <div class="modal-tab-content active">
+                        <h4>Paramètres généraux</h4>
+                        <div class="modal-form">
+                            <div class="modal-form-group">
+                                <label class="modal-form-label">Nom de l'application</label>
+                                <input type="text" class="modal-form-input" value="Titi Golden Taste">
+                            </div>
+                            <div class="modal-form-group">
+                                <label class="modal-form-label">Langue par défaut</label>
+                                <select class="modal-form-select">
+                                    <option value="fr">Français</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-tab-content">
+                        <h4>Sécurité</h4>
+                        <div class="modal-form">
+                            <div class="modal-form-group">
+                                <label class="modal-form-label">Mot de passe</label>
+                                <input type="password" class="modal-form-input" placeholder="Nouveau mot de passe">
+                            </div>
+                            <div class="modal-form-group">
+                                <label class="modal-form-label">Confirmation</label>
+                                <input type="password" class="modal-form-input" placeholder="Confirmer le mot de passe">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-tab-content">
+                        <h4>Notifications</h4>
+                        <div class="modal-form">
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" checked> Email notifications
+                                </label>
+                                <label>
+                                    <input type="checkbox" checked> Push notifications
+                                </label>
+                                <label>
+                                    <input type="checkbox"> SMS notifications
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                buttons: [
+                    {
+                        text: 'Annuler',
+                        type: 'secondary',
+                        onclick: 'universalModal.close()'
+                    },
+                    {
+                        text: 'Enregistrer',
+                        type: 'primary',
+                        onclick: 'saveSettings()'
+                    }
+                ]
+            });
+        }
+
+        function showLoadingModal() {
+            const modal = universalModal.loading({
+                title: 'Traitement en cours',
+                message: 'Veuillez patienter pendant le traitement...'
+            });
+
+            setTimeout(() => {
+                universalModal.close(modal);
+                universalModal.success({
+                    title: 'Terminé',
+                    message: 'Le traitement a été effectué avec succès.'
+                });
+            }, 3000);
+        }
+
+        function showCustomModal() {
+            universalModal.open({
+                title: 'Modal entièrement personnalisé',
+                subtitle: 'Ceci est un exemple de modal avec toutes les options',
+                icon: 'fa-palette',
+                type: 'info',
+                size: 'large',
+                content: `
+                    <div style="text-align: center; padding: 35px;">
+                        <i class="fas fa-star" style="font-size: 4rem; color: gold; margin-bottom: 20px;"></i>
+                        <h3 style="color: var(--primary-color); margin-bottom: 15px;">Modal Personnalisé</h3>
+                        <p style="color: #666; margin-bottom: 20px;">
+                            Ce modal démontre toutes les possibilités de personnalisation :
+                            taille, type, icône, contenu HTML personnalisé, etc.
+                        </p>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                            <strong>Caractéristiques :</strong>
+                            <ul style="text-align: left; margin-top: 10px;">
+                                <li>🎨 Design moderne et responsive</li>
+                                <li>📱 Adaptation mobile automatique</li>
+                                <li>⚡ Animations fluides</li>
+                                <li>🔧 Gestion du focus et accessibilité</li>
+                                <li>🎯 Types prédéfinis disponibles</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                buttons: [
+                    {
+                        text: 'Fermer',
+                        type: 'secondary',
+                        icon: 'fa-times',
+                        onclick: 'universalModal.close()'
+                    },
+                    {
+                        text: 'Super !',
+                        type: 'primary',
+                        icon: 'fa-thumbs-up',
+                        onclick: 'showSuccessModal()'
+                    }
+                ]
+            });
+        }
+
+        function saveSettings() {
+            universalModal.loading({
+                title: 'Sauvegarde',
+                message: 'Enregistrement des paramètres...'
+            });
+            
+            setTimeout(() => {
+                universalModal.close();
+                universalModal.success({
+                    title: 'Paramètres sauvegardés',
+                    message: 'Vos paramètres ont été enregistrés avec succès.'
+                });
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

@@ -1,45 +1,31 @@
 services:
-  # Service PHP principal avec Docker
   - type: web
     name: titi
     env: docker
     plan: free
     buildCommand: |
-      # Installation des dépendances PHP si nécessaire
       composer install --no-dev --optimize-autoloader 2>/dev/null || true
     startCommand: |
-      # Configuration du serveur PHP
       php -S 0.0.0.0:$PORT -t .
     healthCheckPath: /
     envVars:
       - key: ENVIRONMENT
         value: production
       - key: DB_HOST
-        fromDatabase:
-          name: titi-db
-          property: host
+        value: localhost
       - key: DB_PORT
-        fromDatabase:
-          name: titi-db
-          property: port
+        value: 3306
       - key: DB_NAME
-        fromDatabase:
-          name: titi-db
-          property: database
+        value: titi
       - key: DB_USER
-        fromDatabase:
-          name: titi-db
-          property: user
+        value: root
       - key: DB_PASS
-        fromDatabase:
-          name: titi-db
-          property: password
+        value: ""
       - key: JWT_SECRET
         generateValue: true
       - key: APP_URL
         value: https://titi-golden-taste.onrender.com
 
-  # Service WebSocket (optionnel)
   - type: pserv
     name: titi-websocket
     env: php
@@ -47,29 +33,12 @@ services:
     startCommand: php -q backend/websocket-server/server.php
     envVars:
       - key: DB_HOST
-        fromDatabase:
-          name: titi-db
-          property: host
+        value: localhost
       - key: DB_PORT
-        fromDatabase:
-          name: titi-db
-          property: port
+        value: 3306
       - key: DB_NAME
-        fromDatabase:
-          name: titi-db
-          property: database
+        value: titi
       - key: DB_USER
-        fromDatabase:
-          name: titi-db
-          property: user
+        value: root
       - key: DB_PASS
-        fromDatabase:
-          name: titi-db
-          property: password
-
-databases:
-  # Base de données PostgreSQL
-  - name: titi-db
-    databaseName: titi
-    user: titi_user
-    plan: free
+        value: ""

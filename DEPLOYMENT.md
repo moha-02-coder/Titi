@@ -41,7 +41,6 @@ git push -u origin main
 
 Render créera automatiquement :
 - ✅ **Service web PHP** avec votre application
-- ✅ **Base de données PostgreSQL** 
 - ✅ **Variables d'environnement** sécurisées
 - ✅ **Déploiement automatique** à chaque push
 

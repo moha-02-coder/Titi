@@ -66,6 +66,13 @@ function requireAdmin(PDO $pdo) {
     return $user;
 }
 
+function getTableColumnsLocal(PDO $pdo, $table) {
+    $stmt = $pdo->prepare("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table");
+    $stmt->execute(['table' => $table]);
+    $cols = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    return $cols;
+}
+
 // Handle OPTIONS preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -123,6 +130,10 @@ try {
         $price = isset($_POST['price']) ? (int)$_POST['price'] : null;
         $category = $_POST['category'] ?? null;
         $stock = isset($_POST['stock']) ? (int)$_POST['stock'] : 0;
+        $active = null;
+        if (isset($_POST['active'])) $active = (int)$_POST['active'];
+        if ($active === null && isset($_POST['is_active'])) $active = (int)$_POST['is_active'];
+        if ($active === null && isset($_POST['is_available'])) $active = (int)$_POST['is_available'];
 
         if (!$name || !$price) {
             http_response_code(400);
@@ -146,10 +157,36 @@ try {
             $imageUrl = $_POST['image_url'] ?? null;
         }
 
-        $ins = "INSERT INTO products (name, description, price, category, stock, images, active, created_at) VALUES (:name, :desc, :price, :cat, :stock, :images, 1, NOW())";
-        $stmt = $pdo->prepare($ins);
+        $cols = getTableColumnsLocal($pdo, 'products');
+        $typeCol = null;
+        if (in_array('type', $cols, true)) $typeCol = 'type';
+        if (!$typeCol && in_array('product_type', $cols, true)) $typeCol = 'product_type';
+
+        $insertCols = ['name', 'description', 'price', 'category', 'stock', 'images', 'created_at'];
+        $insertVals = [':name', ':desc', ':price', ':cat', ':stock', ':images', 'NOW()'];
+        $params = ['name'=>$name, 'desc'=>$description, 'price'=>$price, 'cat'=>$category, 'stock'=>$stock];
         $imagesJson = $imageUrl ? json_encode([$imageUrl]) : json_encode([]);
-        $stmt->execute(['name'=>$name, 'desc'=>$description, 'price'=>$price, 'cat'=>$category, 'stock'=>$stock, 'images'=>$imagesJson]);
+        $params['images'] = $imagesJson;
+
+        $activeCol = null;
+        if (in_array('active', $cols, true)) $activeCol = 'active';
+        if (!$activeCol && in_array('is_active', $cols, true)) $activeCol = 'is_active';
+        if (!$activeCol && in_array('is_available', $cols, true)) $activeCol = 'is_available';
+        if ($activeCol) {
+            $insertCols[] = $activeCol;
+            $insertVals[] = ':active';
+            $params['active'] = ($active === null) ? 1 : (int)($active ? 1 : 0);
+        }
+
+        if ($typeCol) {
+            $insertCols[] = $typeCol;
+            $insertVals[] = ':type';
+            $params['type'] = 'boutique';
+        }
+
+        $ins = "INSERT INTO products (" . implode(', ', $insertCols) . ") VALUES (" . implode(', ', $insertVals) . ")";
+        $stmt = $pdo->prepare($ins);
+        $stmt->execute($params);
         $id = $pdo->lastInsertId();
         echo json_encode(['success'=>true, 'message'=>'Produit créé', 'data'=>['id'=>$id]]);
         exit;
@@ -189,6 +226,32 @@ try {
             if (isset($_POST['stock'])) { $fields[] = 'stock = :stock'; $params['stock'] = (int)$_POST['stock']; }
             if (isset($_POST['category'])) { $fields[] = 'category = :category'; $params['category'] = (string)$_POST['category']; }
             if ($imageUrl !== null) { $fields[] = 'images = :images'; $params['images'] = json_encode([$imageUrl]); }
+
+            $cols = getTableColumnsLocal($pdo, 'products');
+            $activeCol = null;
+            if (in_array('active', $cols, true)) $activeCol = 'active';
+            if (!$activeCol && in_array('is_active', $cols, true)) $activeCol = 'is_active';
+            if (!$activeCol && in_array('is_available', $cols, true)) $activeCol = 'is_available';
+            if ($activeCol) {
+                if (isset($_POST['active']) || isset($_POST['is_active']) || isset($_POST['is_available'])) {
+                    $val = null;
+                    if (isset($_POST['active'])) $val = (int)$_POST['active'];
+                    if ($val === null && isset($_POST['is_active'])) $val = (int)$_POST['is_active'];
+                    if ($val === null && isset($_POST['is_available'])) $val = (int)$_POST['is_available'];
+                    if ($val !== null) {
+                        $fields[] = $activeCol . ' = :active';
+                        $params['active'] = (int)($val ? 1 : 0);
+                    }
+                }
+            }
+
+            $typeCol = null;
+            if (in_array('type', $cols, true)) $typeCol = 'type';
+            if (!$typeCol && in_array('product_type', $cols, true)) $typeCol = 'product_type';
+            if ($typeCol) {
+                $fields[] = $typeCol . ' = :type';
+                $params['type'] = 'boutique';
+            }
 
             if (empty($fields)) { echo json_encode(['success'=>false,'message'=>'Aucun champ à mettre à jour']); exit; }
 

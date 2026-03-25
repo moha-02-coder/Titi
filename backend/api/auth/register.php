@@ -351,7 +351,7 @@ try {
             'phone' => $posted['phone'],
             'address' => $posted['address'],
             'city' => $posted['city'] ?? 'Bamako',
-            'quarter' => $posted['quarter'] ?? null,
+            'quartier' => $posted['quartier'] ?? null,
             'birth_date' => !empty($posted['birth_date']) ? $posted['birth_date'] : null,
             'avatar' => $avatarUrl,
             'newsletter' => isset($posted['newsletter']) && $posted['newsletter'] ? 1 : 0,

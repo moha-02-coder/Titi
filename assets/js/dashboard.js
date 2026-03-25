@@ -344,7 +344,7 @@ function showOrderDetailsModal(order) {
             
             .order-total {
                 background: #F8F9FA;
-                padding: 20px;
+                padding: 35px;
                 border-radius: 10px;
                 margin-top: 20px;
             }
@@ -897,7 +897,7 @@ function displayOrderDetailsModal(order) {
         }
         
         .modal-header {
-            padding: 20px;
+            padding: 35px;
             border-bottom: 1px solid #e0e0e0;
             display: flex;
             justify-content: space-between;
@@ -918,7 +918,7 @@ function displayOrderDetailsModal(order) {
         }
         
         .modal-body {
-            padding: 20px;
+            padding: 35px;
         }
         
         .info-row {

@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Titi Golden Taste</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Styles pour le dashboard amélioré */
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .admin-header {
+            position: fixed;
+            top: 0;
+            left: 280px;
+            right: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, white 0%, #f8f9fa 100%);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand-logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #1976d2, #d4af37);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .brand-text h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .brand-text span {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            color: #666;
+        }
+
+        .search-box input {
+            padding: 8px 12px 8px 36px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+            width: 250px;
+            font-size: 14px;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            color: #1a1a1a;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: #f8f9fa;
+            border-color: #1976d2;
+        }
+
+        .live-btn {
+            background: linear-gradient(135deg, #ff4757, #ff6b7a);
+            color: white;
+            border: none;
+        }
+
+        .live-btn:hover {
+            background: linear-gradient(135deg, #ff3838, #ff5252);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+        }
+
+        .user-menu img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-info strong {
+            display: block;
+            font-size: 14px;
+            color: #1a1a1a;
+        }
+
+        .user-info small {
+            display: block;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 1px;
+            background: #e9ecef;
+            padding: 1px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: #f8f9fa;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #1976d2, #d4af37);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .admin-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            border-right: 1px solid #e9ecef;
+            overflow-y: auto;
+            z-index: 999;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #1a1a1a;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: #f8f9fa;
+            color: #1976d2;
+        }
+
+        .nav-link.active {
+            background: rgba(25, 118, 210, 0.1);
+            color: #1976d2;
+            border-left: 3px solid #1976d2;
+        }
+
+        .sidebar-footer {
+            padding: 35px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .quick-action {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            background: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-action:hover {
+            background: #1565c0;
+        }
+
+        .admin-content {
+            margin-left: 280px;
+            margin-top: 180px;
+            padding: 24px;
+            background: #f8f9fa;
+            min-height: calc(100vh - 180px);
+        }
+
+        .content-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .page-title h2 {
+            margin: 0 0 4px 0;
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .page-title p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .page-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .period-selector {
+            padding: 8px 12px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            background: white;
+            color: #1a1a1a;
+        }
+
+        .btn-primary {
+            background: #1976d2;
+            color: white;
+            border-color: #1976d2;
+        }
+
+        .btn-primary:hover {
+            background: #1565c0;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #1a1a1a;
+        }
+
+        .btn-outline:hover {
+            background: #f8f9fa;
+            border-color: #1976d2;
+            color: #1976d2;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-icon {
+            padding: 8px;
+            background: transparent;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .btn-icon:hover {
+            background: #f8f9fa;
+            color: #1976d2;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .card.large {
+            grid-column: span 2;
+        }
+
+        .card-header {
+            padding: 35px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .card-body {
+            padding: 35px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 35px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin-top: 8px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .stat-trend.positive {
+            color: #4caf50;
+        }
+
+        .stat-trend.negative {
+            color: #f44336;
+        }
+
+        .orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .order-item:hover {
+            background: #e9ecef;
+        }
+
+        .order-id {
+            font-weight: 600;
+            color: #1976d2;
+        }
+
+        .order-customer {
+            font-weight: 500;
+            color: #1a1a1a;
+            margin: 4px 0;
+        }
+
+        .order-time {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .order-amount {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .order-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .order-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .order-status.preparing {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .order-status.delivering {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .order-status.delivered {
+            background: #d1e7dd;
+            color: #0c5460;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .product-card {
+            position: relative;
+            background: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .product-rank {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: #d4af37;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+            z-index: 1;
+        }
+
+        .product-image {
+            height: 120px;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 12px;
+        }
+
+        .product-info h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .product-stats {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .product-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .product-price {
+            font-size: 16px;
+            font-weight: 600;
+            color: #d4af37;
+        }
+
+        .activity-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.order {
+            background: #1976d2;
+        }
+
+        .activity-icon.user {
+            background: #4caf50;
+        }
+
+        .activity-icon.like {
+            background: #e91e63;
+        }
+
+        .activity-content p {
+            margin: 0 0 4px 0;
+            color: #1a1a1a;
+            font-size: 14px;
+        }
+
+        .activity-content small {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e9ecef;
+            border-top: 3px solid #1976d2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        /* Live Modal Styles */
+        .live-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .live-modal.show {
+            display: flex;
+        }
+
+        .live-modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .live-modal-content {
+            position: relative;
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .live-modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #ff4757, #ff6b7a);
+            color: white;
+        }
+
+        .live-modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .live-modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .live-modal-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .live-modal-body {
+            padding: 24px;
+            max-height: calc(90vh - 140px);
+            overflow-y: auto;
+        }
+
+        .live-setup {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .live-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .form-input {
+            padding: 10px 12px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+        }
+
+        .source-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .source-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 8px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .source-btn:hover {
+            background: #e9ecef;
+            border-color: #1976d2;
+        }
+
+        .source-btn.active {
+            background: #1976d2;
+            color: white;
+            border-color: #1976d2;
+        }
+
+        .source-btn i {
+            font-size: 20px;
+        }
+
+        .source-btn span {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .live-preview {
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .live-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-placeholder {
+            text-align: center;
+            color: #666;
+        }
+
+        .preview-placeholder i {
+            font-size: 48px;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        .live-modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: #f8f9fa;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            border-left: 4px solid #4caf50;
+            color: #4caf50;
+        }
+
+        .toast.error {
+            border-left: 4px solid #f44336;
+            color: #f44336;
+        }
+
+        .toast.info {
+            border-left: 4px solid #1976d2;
+            color: #1976d2;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-header {
+                left: 0;
+            }
+            
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .admin-content {
+                margin-left: 0;
+                margin-top: 140px;
+                padding: 16px;
+            }
+            
+            .header-top {
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .search-box input {
+                width: 180px;
+            }
+            
+            .header-stats {
+                flex-wrap: wrap;
+            }
+            
+            .stat-card {
+                flex: 1;
+                min-width: calc(50% - 1px);
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .card.large {
+                grid-column: span 1;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .live-setup {
+                grid-template-columns: 1fr;
+            }
+            
+            .source-options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout" id="adminLayout">
+        <!-- Header -->
+        <header class="admin-header" id="adminHeader">
+            <div class="header-top">
+                <div class="header-brand">
+                    <div class="brand-logo">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div class="brand-text">
+                        <h1>Titi Golden Taste</h1>
+                        <span>Admin Dashboard</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Rechercher..." id="globalSearch">
+                    </div>
+                    <button class="action-btn" onclick="window.adminDashboard.refreshAllData()" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Actualiser</span>
+                    </button>
+                    <button class="action-btn live-btn" onclick="window.adminDashboard.startLiveWithCamera()" id="liveBtn">
+                        <i class="fas fa-broadcast-tower"></i>
+                        <span>Live</span>
+                    </button>
+                    <button class="action-btn" onclick="window.adminDashboard.openSite()">
+                        <i class="fas fa-external-link-alt"></i>
+                        <span>Site</span>
+                    </button>
+                    <div class="user-menu">
+                        <img src="/Titi/assets/images/default.jpg" alt="Admin">
+                        <div class="user-info">
+                            <strong>Administrateur</strong>
+                            <small>admin@titigoldentaste.ml</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="statOrders">0</div>
+                        <div class="stat-label">Commandes</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="statUsers">0</div>
+                        <div class="stat-label">Clients</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="statProducts">0</div>
+                        <div class="stat-label">Produits</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="statLikes">0</div>
+                        <div class="stat-label">Likes</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="statRevenue">0</div>
+                        <div class="stat-label">Revenu</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <h3>Navigation</h3>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-link active" data-section="overview">
+                    <i class="fas fa-th-large"></i>
+                    <span>Tableau de bord</span>
+                </a>
+                <a href="#" class="nav-link" data-section="menu">
+                    <i class="fas fa-book-open"></i>
+                    <span>Menu</span>
+                </a>
+                <a href="#" class="nav-link" data-section="orders">
+                    <i class="fas fa-receipt"></i>
+                    <span>Commandes</span>
+                </a>
+                <a href="#" class="nav-link" data-section="products">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Boutique</span>
+                </a>
+                <a href="#" class="nav-link" data-section="customers">
+                    <i class="fas fa-user-friends"></i>
+                    <span>Clients</span>
+                </a>
+                <a href="#" class="nav-link" data-section="analytics">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Statistiques</span>
+                </a>
+                <a href="#" class="nav-link" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Paramètres</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="quick-action" onclick="window.adminDashboard.openSite()">
+                    <i class="fas fa-external-link-alt"></i>
+                    <span>Voir le site</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content" id="adminContent">
+            <div class="content-header">
+                <div class="page-title">
+                    <h2 id="pageTitle">Tableau de bord</h2>
+                    <p id="pageSubtitle">Vue d'ensemble de votre restaurant</p>
+                </div>
+                <div class="page-actions">
+                    <select class="period-selector" id="periodSelector">
+                        <option value="today">Aujourd'hui</option>
+                        <option value="week">Cette semaine</option>
+                        <option value="month">Ce mois</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="window.adminDashboard.exportData()">
+                        <i class="fas fa-download"></i> Exporter
+                    </button>
+                </div>
+            </div>
+            <div class="content-body" id="contentBody">
+                <!-- Overview Section -->
+                <section class="content-section active" id="overviewSection">
+                    <div class="dashboard-grid">
+                        <div class="card large">
+                            <div class="card-header">
+                                <h3>Statistiques principales</h3>
+                                <button class="btn-icon" onclick="window.adminDashboard.refreshStats()">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="stats-grid">
+                                    <div class="stat-item">
+                                        <div class="stat-value" id="revenueValue">0 FCFA</div>
+                                        <div class="stat-label">Chiffre d'affaires</div>
+                                        <div class="stat-trend positive">
+                                            <i class="fas fa-arrow-up"></i>
+                                            <span>+12.5%</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value" id="ordersValue">0</div>
+                                        <div class="stat-label">Commandes totales</div>
+                                        <div class="stat-trend positive">
+                                            <i class="fas fa-arrow-up"></i>
+                                            <span>+8.3%</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value" id="usersValue">0</div>
+                                        <div class="stat-label">Utilisateurs actifs</div>
+                                        <div class="stat-trend positive">
+                                            <i class="fas fa-arrow-up"></i>
+                                            <span>+15.2%</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value" id="ratingValue">4.8</div>
+                                        <div class="stat-label">Note moyenne</div>
+                                        <div class="stat-trend positive">
+                                            <i class="fas fa-arrow-up"></i>
+                                            <span>+0.2</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Commandes récentes</h3>
+                                <button class="btn btn-sm btn-outline" onclick="window.adminDashboard.showSection('orders')">
+                                    Voir tout
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="orders-list" id="recentOrdersList">
+                                    <div class="loading-state">
+                                        <div class="spinner"></div>
+                                        <p>Chargement des commandes...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Produits populaires</h3>
+                                <button class="btn btn-sm btn-outline" onclick="window.adminDashboard.showSection('menu')">
+                                    Voir tout
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="products-grid" id="popularProductsGrid">
+                                    <div class="loading-state">
+                                        <div class="spinner"></div>
+                                        <p>Chargement des produits...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Activité récente</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="activity-timeline" id="activityTimeline">
+                                    <div class="loading-state">
+                                        <div class="spinner"></div>
+                                        <p>Chargement de l'activité...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Other sections will be loaded dynamically -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Live Camera Modal -->
+    <div class="live-modal" id="liveModal">
+        <div class="live-modal-backdrop" onclick="window.adminDashboard.closeLiveModal()"></div>
+        <div class="live-modal-content">
+            <div class="live-modal-header">
+                <h3><i class="fas fa-broadcast-tower"></i> Démarrer un Live</h3>
+                <button class="live-modal-close" onclick="window.adminDashboard.closeLiveModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="live-modal-body">
+                <div class="live-setup">
+                    <div class="live-form">
+                        <div class="form-group">
+                            <label>Titre du live</label>
+                            <input type="text" id="liveTitle" placeholder="Live Culinaire - Titi Golden Taste" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="liveDescription" placeholder="Rejoignez notre session de cuisine en direct !" class="form-input" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Type de source</label>
+                            <div class="source-options">
+                                <button class="source-btn active" data-source="camera" onclick="window.adminDashboard.selectSource('camera')">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Caméra</span>
+                                </button>
+                                <button class="source-btn" data-source="screen" onclick="window.adminDashboard.selectSource('screen')">
+                                    <i class="fas fa-desktop"></i>
+                                    <span>Écran</span>
+                                </button>
+                                <button class="source-btn" data-source="external" onclick="window.adminDashboard.selectSource('external')">
+                                    <i class="fas fa-link"></i>
+                                    <span>URL externe</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group" id="cameraGroup">
+                            <label>Caméra</label>
+                            <select id="cameraSelect" class="form-input">
+                                <option value="">Sélectionner une caméra...</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="externalUrlGroup" style="display: none;">
+                            <label>URL du flux</label>
+                            <input type="url" id="externalUrl" placeholder="rtmp://example.com/live/key" class="form-input">
+                        </div>
+                    </div>
+                    <div class="live-preview" id="livePreview">
+                        <video id="cameraPreview" autoplay muted style="display: none;"></video>
+                        <div class="preview-placeholder" id="previewPlaceholder">
+                            <i class="fas fa-camera"></i>
+                            <p>Aperçu de la caméra</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="live-modal-footer">
+                <button class="btn btn-outline" onclick="window.adminDashboard.closeLiveModal()">
+                    Annuler
+                </button>
+                <button class="btn btn-primary" id="startLiveBtn" onclick="window.adminDashboard.startLiveStream()">
+                    <i class="fas fa-broadcast-tower"></i> Démarrer le live
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="../assets/js/config.js"></script>
+    <script src="../assets/js/admin.js"></script>
+    <script src="../assets/js/live-streaming.js"></script>
+    <script src="../assets/js/menu-videos.js"></script>
+    <script src="../assets/js/social-sync.js"></script>
+    <script src="../assets/js/menu-likes.js"></script>
+    <script src="../assets/js/menu-media.js"></script>
+    <script src="../assets/js/admin-dashboard-live.js"></script>
+    
+    <script>
+        // Initialisation du dashboard amélioré
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard Admin avec Live - Initialisation...');
+            
+            // S'assurer que le dashboard est correctement initialisé
+            if (window.adminDashboard) {
+                console.log('Dashboard avec live caméra initialisé avec succès');
+                window.adminDashboard.showToast('Dashboard prêt !', 'success');
+            } else {
+                console.error('Dashboard non trouvé');
+            }
+        });
+    </script>
+</body>
+</html>

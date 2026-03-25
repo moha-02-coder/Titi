@@ -1,0 +1,153 @@
+:root {
+    --ui-btn-gap: 10px;
+    --ui-btn-padding: clamp(12px, 3vw, 16px) clamp(25px, 4vw, 35px);
+    --ui-btn-radius: 50px;
+    --ui-btn-font-family: 'Montserrat', sans-serif;
+    --ui-btn-font-size: 1rem;
+    --ui-btn-font-weight: 600;
+    --ui-btn-line-height: 1.2;
+    --ui-btn-transition: var(--transition, all 0.3s ease);
+    --ui-btn-white-space: normal;
+
+    --ui-btn-primary-bg: linear-gradient(135deg, var(--gold, #d4af37) 0%, var(--dark-gold, #b8860b) 100%);
+    --ui-btn-primary-color: var(--black, #1a1a1a);
+    --ui-btn-primary-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    --ui-btn-primary-hover-bg: var(--ui-btn-primary-bg);
+    --ui-btn-primary-hover-color: var(--ui-btn-primary-color);
+    --ui-btn-primary-hover-transform: translateY(-3px);
+    --ui-btn-primary-hover-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+
+    --ui-btn-outline-bg: transparent;
+    --ui-btn-outline-color: var(--white, #ffffff);
+    --ui-btn-outline-border: 2px solid rgba(255, 255, 255, 0.3);
+    --ui-btn-outline-hover-bg: transparent;
+    --ui-btn-outline-hover-color: var(--gold, #d4af37);
+    --ui-btn-outline-hover-border: 2px solid var(--gold, #d4af37);
+    --ui-btn-outline-hover-transform: translateY(-3px);
+
+    --ui-btn-sm-padding: 8px 16px;
+    --ui-btn-sm-font-size: 0.85rem;
+
+    --ui-form-group-margin: 0 0 20px;
+    --ui-form-group-gap: 8px;
+    --ui-form-label-color: rgba(255, 255, 255, 0.9);
+    --ui-form-label-size: 0.95rem;
+    --ui-form-label-weight: 500;
+
+    --ui-form-control-padding: 14px 16px;
+    --ui-form-control-border: 2px solid rgba(212, 175, 55, 0.2);
+    --ui-form-control-radius: 12px;
+    --ui-form-control-bg: rgba(255, 255, 255, 0.08);
+    --ui-form-control-color: rgba(255, 255, 255, 0.9);
+    --ui-form-control-font-family: 'Montserrat', sans-serif;
+    --ui-form-control-font-size: 1rem;
+    --ui-form-control-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --ui-form-control-placeholder: rgba(255, 255, 255, 0.5);
+    --ui-form-control-focus-bg: rgba(255, 255, 255, 0.12);
+    --ui-form-control-focus-border: var(--gold, #d4af37);
+    --ui-form-control-focus-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-btn-gap);
+    padding: var(--ui-btn-padding);
+    border: none;
+    border-radius: var(--ui-btn-radius);
+    font-family: var(--ui-btn-font-family);
+    font-size: var(--ui-btn-font-size);
+    font-weight: var(--ui-btn-font-weight);
+    line-height: var(--ui-btn-line-height);
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--ui-btn-transition);
+    white-space: var(--ui-btn-white-space);
+}
+
+.btn-primary {
+    background: var(--ui-btn-primary-bg);
+    color: var(--ui-btn-primary-color);
+    box-shadow: var(--ui-btn-primary-shadow);
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+    background: var(--ui-btn-primary-hover-bg);
+    color: var(--ui-btn-primary-hover-color);
+    transform: var(--ui-btn-primary-hover-transform);
+    box-shadow: var(--ui-btn-primary-hover-shadow);
+}
+
+.btn-outline {
+    background: var(--ui-btn-outline-bg);
+    color: var(--ui-btn-outline-color);
+    border: var(--ui-btn-outline-border);
+}
+
+.btn-outline:hover,
+.btn-outline:focus-visible {
+    background: var(--ui-btn-outline-hover-bg);
+    color: var(--ui-btn-outline-hover-color);
+    border: var(--ui-btn-outline-hover-border);
+    transform: var(--ui-btn-outline-hover-transform);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-sm {
+    padding: var(--ui-btn-sm-padding);
+    font-size: var(--ui-btn-sm-font-size);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-form-group-gap);
+    margin: var(--ui-form-group-margin);
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    display: block;
+    color: var(--ui-form-label-color);
+    font-size: var(--ui-form-label-size);
+    font-weight: var(--ui-form-label-weight);
+}
+
+.form-input,
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: var(--ui-form-control-padding);
+    border: var(--ui-form-control-border);
+    border-radius: var(--ui-form-control-radius);
+    background: var(--ui-form-control-bg);
+    color: var(--ui-form-control-color);
+    font-family: var(--ui-form-control-font-family);
+    font-size: var(--ui-form-control-font-size);
+    transition: var(--ui-form-control-transition);
+}
+
+.form-input::placeholder,
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--ui-form-control-placeholder);
+}
+
+.form-input:focus,
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--ui-form-control-focus-border);
+    background: var(--ui-form-control-focus-bg);
+    box-shadow: var(--ui-form-control-focus-shadow);
+}

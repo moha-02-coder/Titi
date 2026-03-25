@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commander - Titi Golden Taste</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/order-enhanced.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header"></header>
+
+    <main class="container">
+        <section class="order-wizard-section">
+            <div class="order-wizard">
+                <!-- Header du wizard -->
+                <div class="wizard-header">
+                    <div class="wizard-progress">
+                        <div class="step-indicator">Étape 1 sur 4</div>
+                        <div class="step-number active">1</div>
+                    </div>
+                    <h1 class="wizard-title">Passer votre commande</h1>
+                </div>
+
+                <!-- Navigation -->
+                <div class="wizard-navigation">
+                    <button class="nav-btn prev" onclick="previousStep()" disabled>
+                        <i class="fas fa-arrow-left"></i> Précédent
+                    </button>
+                    <button class="nav-btn next" onclick="nextStep()" disabled>
+                        Suivant <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Étape 1: Sélection des plats -->
+                <div class="wizard-step active" id="wizardStep1">
+                    <div class="step-header">
+                        <h2><i class="fas fa-utensils"></i> Choisissez vos plats</h2>
+                        <p>Sélectionnez les articles que vous souhaitez commander</p>
+                    </div>
+                    
+                    <div class="menu-selection-container">
+                        <div id="menuSelectionGrid" class="menu-grid">
+                            <!-- Les plats seront chargés ici -->
+                        </div>
+                    </div>
+
+                    <div class="selected-items-container">
+                        <div id="selectedItemsList">
+                            <!-- Articles sélectionnés -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Étape 2: Personnalisations -->
+                <div class="wizard-step" id="wizardStep2">
+                    <div class="step-header">
+                        <h2><i class="fas fa-sliders-h"></i> Personnalisez votre commande</h2>
+                        <p>Ajoutez des suppléments et choisissez vos préférences</p>
+                    </div>
+                    
+                    <div class="customization-container">
+                        <div class="customization-section">
+                            <h3>Suppléments disponibles</h3>
+                            <div class="supplements-list">
+                                <label class="supplement-item">
+                                    <input type="checkbox" name="supplement" data-price="500" value="extra_viande">
+                                    <span>Viande supplémentaire</span>
+                                    <span class="supplement-price">+500 FCFA</span>
+                                </label>
+                                <label class="supplement-item">
+                                    <input type="checkbox" name="supplement" data-price="300" value="extra_sauce">
+                                    <span>Sauce supplémentaire</span>
+                                    <span class="supplement-price">+300 FCFA</span>
+                                </label>
+                                <label class="supplement-item">
+                                    <input type="checkbox" name="supplement" data-price="200" value="extra_legumes">
+                                    <span>Légumes supplémentaires</span>
+                                    <span class="supplement-price">+200 FCFA</span>
+                                </label>
+                                <label class="supplement-item">
+                                    <input type="checkbox" name="supplement" data-price="400" value="extra_fromage">
+                                    <span>Fromage supplémentaire</span>
+                                    <span class="supplement-price">+400 FCFA</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="customization-section">
+                            <h3>Choix de sauce</h3>
+                            <div class="sauce-options">
+                                <label class="sauce-option">
+                                    <input type="radio" name="sauce" data-price="0" value="sans" checked>
+                                    <span>Sans sauce</span>
+                                </label>
+                                <label class="sauce-option">
+                                    <input type="radio" name="sauce" data-price="100" value="pimente">
+                                    <span>Sauce pimentée</span>
+                                    <span class="sauce-price">+100 FCFA</span>
+                                </label>
+                                <label class="sauce-option">
+                                    <input type="radio" name="sauce" data-price="100" value="arachide">
+                                    <span>Sauce arachide</span>
+                                    <span class="sauce-price">+100 FCFA</span>
+                                </label>
+                                <label class="sauce-option">
+                                    <input type="radio" name="sauce" data-price="150" value="oignon">
+                                    <span>Sauce oignon</span>
+                                    <span class="sauce-price">+150 FCFA</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="customization-summary">
+                            <div class="customization-price">
+                                Total personnalisations: <span id="customizationTotal">0 FCFA</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Étape 3: Informations de livraison -->
+                <div class="wizard-step" id="wizardStep3">
+                    <div class="step-header">
+                        <h2><i class="fas fa-truck"></i> Informations de livraison</h2>
+                        <p>Précisez où et comment vous souhaitez recevoir votre commande</p>
+                    </div>
+                    
+                    <div class="delivery-form-container">
+                        <form class="delivery-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nom complet *</label>
+                                    <input type="text" name="name" required placeholder="Votre nom et prénom">
+                                </div>
+                                <div class="form-group">
+                                    <label>Téléphone *</label>
+                                    <input type="tel" name="phone" required placeholder="Votre numéro de téléphone">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Adresse de livraison *</label>
+                                <input type="text" name="address" required placeholder="Quartier, rue, numéro...">
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Ville</label>
+                                    <input type="text" name="city" value="Bamako" placeholder="Ville">
+                                </div>
+                                <div class="form-group">
+                                    <label>Type de livraison</label>
+                                    <div class="delivery-type-options">
+                                        <label class="delivery-type">
+                                            <input type="radio" name="delivery_type" value="delivery" checked>
+                                            <span><i class="fas fa-truck"></i> Livraison à domicile</span>
+                                            <span class="delivery-price">+1000 FCFA</span>
+                                        </label>
+                                        <label class="delivery-type">
+                                            <input type="radio" name="delivery_type" value="pickup">
+                                            <span><i class="fas fa-store"></i> Retrait sur place</span>
+                                            <span class="delivery-price">Gratuit</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Instructions spéciales</label>
+                                <textarea name="notes" rows="3" placeholder="Ex: Appeler à l'arrivée, code d'accès, etc."></textarea>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Étape 4: Paiement -->
+                <div class="wizard-step" id="wizardStep4">
+                    <div class="step-header">
+                        <h2><i class="fas fa-credit-card"></i> Mode de paiement</h2>
+                        <p>Choisissez comment vous souhaitez régler votre commande</p>
+                    </div>
+                    
+                    <div class="payment-container">
+                        <div class="payment-methods">
+                            <label class="payment-method">
+                                <input type="radio" name="payment_method" value="cash" checked>
+                                <div class="payment-method-content">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Paiement à la livraison</span>
+                                    <small>Payez en espèces ou par mobile money à la réception</small>
+                                </div>
+                            </label>
+                            
+                            <label class="payment-method">
+                                <input type="radio" name="payment_method" value="mobile_money">
+                                <div class="payment-method-content">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <span>Mobile Money</span>
+                                    <small>Paiement instantané par mobile money</small>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="mobile-money-details" id="mobileMoneyDetails" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Opérateur</label>
+                                    <select name="mobile_money_provider">
+                                        <option value="">Sélectionner...</option>
+                                        <option value="orange">Orange Money</option>
+                                        <option value="mtn">MTN Mobile Money</option>
+                                        <option value="moov">Moov Money</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Numéro</label>
+                                    <input type="tel" name="mobile_money_number" placeholder="Votre numéro mobile money">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="order-summary">
+                            <h3>Récapitulatif de la commande</h3>
+                            <div id="orderSummaryContent">
+                                <!-- Le récapitulatif sera généré ici -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer"></footer>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/header-manager.js"></script>
+    <script src="assets/js/order-enhanced.js"></script>
+    <script>
+        // Afficher/masquer les détails mobile money
+        document.addEventListener('change', function(e) {
+            if (e.target.name === 'payment_method') {
+                const mobileMoneyDetails = document.getElementById('mobileMoneyDetails');
+                if (e.target.value === 'mobile_money') {
+                    mobileMoneyDetails.style.display = 'block';
+                } else {
+                    mobileMoneyDetails.style.display = 'none';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

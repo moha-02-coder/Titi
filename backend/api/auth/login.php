@@ -280,10 +280,14 @@ try {
     
     // Vérifier si le compte est en attente de validation (livreurs)
     if ($user['verified'] == 0) {
-        // Vérifier si c'est un livreur
-        $driverStmt = $pdo->prepare("SELECT status FROM drivers WHERE user_id = :user_id");
-        $driverStmt->execute(['user_id' => $user['id']]);
-        $driver = $driverStmt->fetch();
+        // Vérifier si c'est un livreur (table drivers optionnelle selon l'instance locale)
+        try {
+            $driverStmt = $pdo->prepare("SELECT status FROM drivers WHERE user_id = :user_id");
+            $driverStmt->execute(['user_id' => $user['id']]);
+            $driver = $driverStmt->fetch();
+        } catch (Exception $e) {
+            $driver = null;
+        }
         
         if ($driver) {
             $status = $driver['status'] ?? 'pending';
@@ -306,16 +310,22 @@ try {
         
         // Notifier l'utilisateur de l'échec si email valide
         if (isValidEmail($identifier)) {
-            $notifyStmt = $pdo->prepare("
-                INSERT INTO notifications (
-                    user_id, type, title, message, created_at
-                ) VALUES (
-                    :user_id, 'login_failed', 'Tentative de connexion échouée',
-                    'Une tentative de connexion a échoué pour votre compte.',
-                    NOW()
-                )
-            ");
-            $notifyStmt->execute(['user_id' => $user['id']]);
+            try {
+                // Compatibilité schéma local: notifications.content (et non notifications.message)
+                $notifyStmt = $pdo->prepare("
+                    INSERT INTO notifications (
+                        user_id, type, title, content, created_at
+                    ) VALUES (
+                        :user_id, 'login_failed', 'Tentative de connexion échouée',
+                        'Une tentative de connexion a échoué pour votre compte.',
+                        NOW()
+                    )
+                ");
+                $notifyStmt->execute(['user_id' => $user['id']]);
+            } catch (Exception $e) {
+                // Ne pas interrompre la réponse 401 en cas d'échec de notification
+                error_log('Login notification error: ' . $e->getMessage());
+            }
         }
         
         jsonResponse(false, 'Identifiant ou mot de passe incorrect', null, 'INVALID_CREDENTIALS', 401);
@@ -325,7 +335,10 @@ try {
     trackLoginAttempt($identifier, true, $pdo);
     
     // Mettre à jour la dernière connexion
-    $updateQuery = "UPDATE users SET last_login = NOW(), login_count = COALESCE(login_count, 0) + 1 WHERE id = :id";
+    // login_count n'existe pas dans tous les schémas locaux
+    $updateQuery = tableHasColumn($pdo, 'users', 'login_count')
+        ? "UPDATE users SET last_login = NOW(), login_count = COALESCE(login_count, 0) + 1 WHERE id = :id"
+        : "UPDATE users SET last_login = NOW() WHERE id = :id";
     $updateStmt = $pdo->prepare($updateQuery);
     $updateStmt->execute(['id' => $user['id']]);
     
@@ -457,6 +470,8 @@ try {
     }
     
     // === RÉPONSE DE SUCCÈS ===
+    $loginCount = isset($user['login_count']) ? (int)$user['login_count'] : 0;
+
     $responseData = [
         'user' => $userData,
         'token' => $authToken,
@@ -464,7 +479,7 @@ try {
         'expires_in' => 7 * 24 * 60 * 60, // 7 jours en secondes
         'session_id' => session_id(),
         'permissions' => [], // À remplir selon les rôles/permissions
-        'welcome_message' => $user['login_count'] <= 1 
+        'welcome_message' => $loginCount <= 1
             ? 'Bienvenue sur Titi Golden Taste !' 
             : 'Content de vous revoir !'
     ];

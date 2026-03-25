@@ -2,6 +2,31 @@
  * Styles pour le Dashboard Livreur
  */
 
+:root {
+    --ui-btn-padding: 12px 24px;
+    --ui-btn-radius: 5px;
+    --ui-btn-font-size: 14px;
+    --ui-btn-primary-bg: #d4af37;
+    --ui-btn-primary-color: #ffffff;
+    --ui-btn-primary-hover-bg: #b8941f;
+    --ui-btn-primary-hover-transform: translateY(-2px);
+    --ui-btn-primary-hover-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+    --ui-form-group-margin: 0 0 20px;
+    --ui-form-label-color: #333333;
+    --ui-form-label-size: 14px;
+    --ui-form-label-weight: 600;
+    --ui-form-control-padding: 12px;
+    --ui-form-control-border: 1px solid #dddddd;
+    --ui-form-control-radius: 5px;
+    --ui-form-control-bg: #ffffff;
+    --ui-form-control-color: #333333;
+    --ui-form-control-font-size: 14px;
+    --ui-form-control-placeholder: #777777;
+    --ui-form-control-focus-bg: #ffffff;
+    --ui-form-control-focus-border: #d4af37;
+    --ui-form-control-focus-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
 /* Layout principal */
 .driver-layout {
     display: flex;
@@ -24,7 +49,7 @@
 }
 
 .driver-logo {
-    padding: 20px;
+    padding: 35px;
     text-align: center;
     border-bottom: 1px solid #333;
     margin-bottom: 20px;
@@ -86,7 +111,7 @@
 .driver-content {
     margin-left: 280px;
     flex: 1;
-    padding: 20px;
+    padding: 35px;
     min-height: 100vh;
 }
 
@@ -171,7 +196,7 @@
     font-size: 32px;
     font-weight: bold;
     color: #333;
-    margin: 10px 0;
+    margin: 20px 0;
 }
 
 .stat-card .label {
@@ -251,60 +276,6 @@
 .message-item small {
     color: #999;
     font-size: 12px;
-}
-
-/* Formulaires */
-.form-input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-top: 5px;
-    font-size: 14px;
-    transition: border-color 0.3s;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: #d4af37;
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
-    color: #333;
-    font-size: 14px;
-}
-
-/* Boutons */
-.btn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s;
-    font-size: 14px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.btn-primary {
-    background: #d4af37;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #b8941f;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
 }
 
 /* Loading */

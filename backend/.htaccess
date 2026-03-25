@@ -21,12 +21,15 @@ RewriteRule ^api/auth/check-auth/?$ api/auth/check-auth.php [L,QSA]
 # Routes API Menu
 # -------------------------------
 RewriteRule ^api/menu/du-jour/?$ api/menu/menu-du-jour.php [L,QSA]
+RewriteRule ^api/menu/menu-du-jour/?$ api/menu/menu-du-jour.php [L,QSA]
+RewriteRule ^api/menu/all/?$ api/menu/all.php [L,QSA]
 RewriteRule ^api/menu/([0-9]+)/?$ api/menu/details.php?id=$1 [L,QSA]
 
 # -------------------------------
 # Routes API Shop
 # -------------------------------
 RewriteRule ^api/shop/products/?$ api/shop/index.php [L,QSA]
+RewriteRule ^api/shop/boutique/?$ api/shop/boutique.php [L,QSA]
 RewriteRule ^api/shop/products/([0-9]+)/?$ api/shop/details.php?id=$1 [L,QSA]
 
 # -------------------------------

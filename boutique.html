@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -26,7 +26,7 @@
         .menu-of-week {
             background: #f8f9fa;
             padding: 40px 0;
-            margin: 30px 0;
+            margin: 20px 0;
         }
         .menu-of-week-card {
             background: white;
@@ -45,7 +45,7 @@
             display: flex;
             gap: 15px;
             justify-content: center;
-            margin: 30px 0;
+            margin: 20px 0;
             flex-wrap: wrap;
         }
         .quick-nav-btn {
@@ -67,41 +67,38 @@
             background: #d4af37;
             color: white;
         }
+
+        .cart-empty .btn {
+            display: inline-flex;
+            width: auto;
+            max-width: 280px;
+            margin: 0 auto 12px;
+            padding: 12px 18px;
+            min-height: 44px;
+            font-size: 0.95rem;
+            border-radius: 16px;
+        }
+
+        .cart-empty .btn i {
+            font-size: 1.05em;
+        }
+
+        .cart-empty .btn.btn-outline {
+            background: transparent;
+            color: #111;
+            border: 2px solid rgba(17, 17, 17, 0.18);
+        }
+
+        .cart-empty .btn.btn-outline:hover {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: #111;
+        }
     </style>
 </head>
 <body>
     <!-- Header avec navigation -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo-container">
-                    <h1 class="logo">Titi Golden Taste</h1>
-                    <p class="slogan">L'excellence culinaire malienne</p>
-                </div>
-                
-                <!-- Navigation principale -->
-                <nav class="nav">
-                    <ul>
-                        <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i> Accueil</a></li>
-                        <li><a href="index.html#menu" class="nav-link"><i class="fas fa-utensils"></i> Menu</a></li>
-                        <li><a href="boutique.html" class="nav-link active"><i class="fas fa-store"></i> Boutique</a></li>
-                        <li><a href="index.html#order" class="nav-link"><i class="fas fa-shopping-cart"></i> Commander</a></li>
-                        <li><a href="index.html#location" class="nav-link"><i class="fas fa-map-marker-alt"></i> Nous trouver</a></li>
-                        <li><a href="index.html#contact" class="nav-link"><i class="fas fa-phone"></i> Contact</a></li>
-                        <li class="nav-auth">
-                            <a href="login.html" class="btn-login"><i class="fas fa-user"></i> Connexion</a>
-                            <a href="register.html" class="btn-register">Inscription</a>
-                        </li>
-                    </ul>
-                </nav>
-                
-                <!-- Menu mobile -->
-                <button class="mobile-menu-btn" id="mobileMenuBtn">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-        </div>
-    </header>
+    <header class="header"></header>
 
     <!-- Mobile Navigation -->
     <div class="mobile-nav" id="mobileNav">
@@ -245,10 +242,10 @@
                 </div>
             </div>
             <button class="btn btn-primary btn-block" id="checkoutBtn">
-                <i class="fas fa-lock"></i> Procéder au paiement
+                <i class="fas fa-lock"></i> Lancer la commande
             </button>
             <button class="btn btn-outline btn-block" id="continueShopping">
-                Continuer mes achats
+                Poursuivre ma commande
             </button>
         </div>
     </div>
@@ -257,48 +254,26 @@
     <!-- Cart Floating Button -->
     <button class="cart-floating-btn" id="cartFloatingBtn">
         <i class="fas fa-shopping-cart"></i>
-        <span class="cart-count" id="cartCount">0</span>
+        <span class="cart-count" id="cartCountFloating" data-cart-count>0</span>
     </button>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h3>Titi Golden Taste</h3>
-                    <p class="footer-description">
-                        Restaurant premium et boutique spécialisés dans la cuisine et les produits maliennes authentiques.
-                    </p>
-                </div>
-                <div class="footer-col">
-                    <h4>Liens rapides</h4>
-                    <ul class="footer-links">
-                        <li><a href="index.html">Accueil</a></li>
-                        <li><a href="index.html#menu">Notre menu</a></li>
-                        <li><a href="boutique.html">Boutique</a></li>
-                        <li><a href="index.html#order">Commander</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <div class="footer-bottom-content">
-                    <p class="copyright">
-                        &copy; 2024 Titi Golden Taste, Bamako - Mali. Tous droits réservés.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <footer class="footer"></footer>
 
     <!-- JavaScript -->
     <script src="assets/js/config.js"></script>
-    <script src="assets/js/app.js"></script>
+    <script src="assets/js/header-manager.js"></script>
     <script src="assets/js/cart.js"></script>
     <script src="assets/js/frontend.js"></script>
     
     <script>
     // Initialisation spécifique à la page boutique
     document.addEventListener('DOMContentLoaded', function() {
+        // Forcer l'injection du header/footer
+        if (typeof injectSharedHeaderFooter === 'function') {
+            injectSharedHeaderFooter();
+        }
+        
         // Charger le menu du jour dans le conteneur spécifique
         const menuContainer = document.getElementById('menuOfTheDayContainer');
         if (menuContainer && typeof loadMenuOfTheDay === 'function') {
@@ -324,7 +299,7 @@
                     
                     // Créer une carte de menu simplifiée
                     const menuCard = document.createElement('div');
-                    menuCard.style.cssText = 'text-align: center; padding: 20px;';
+                    menuCard.style.cssText = 'text-align: center; padding: 35px;';
                     menuCard.innerHTML = `
                         <h4 style="color: #d4af37; margin-bottom: 10px;">${menu.name || 'Menu du jour'}</h4>
                         <p style="color: #666; margin-bottom: 15px;">${menu.description || ''}</p>
@@ -350,24 +325,10 @@
         if (typeof loadBoutiqueProducts === 'function') {
             loadBoutiqueProducts();
         }
-        
-        // Initialiser le menu mobile
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const mobileNav = document.getElementById('mobileNav');
-        const mobileNavClose = document.getElementById('mobileNavClose');
-        
-        if (mobileMenuBtn && mobileNav) {
-            mobileMenuBtn.addEventListener('click', () => {
-                mobileNav.classList.add('open');
-            });
-        }
-        
-        if (mobileNavClose) {
-            mobileNavClose.addEventListener('click', () => {
-                mobileNav.classList.remove('open');
-            });
-        }
     });
     </script>
 </body>
 </html>
+
+
+

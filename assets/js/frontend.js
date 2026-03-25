@@ -1,10 +1,63 @@
-/*
+﻿/*
  Frontend glue for Titi Golden Taste
  - mobile menu toggle
  - products fetch + render with loader and error handling
  - initialize Leaflet map with a marker for the restaurant
  - lightweight helpers only (keeps responsibilities small)
 */
+
+// Gestionnaire d'erreurs global pour les extensions tierces
+window.addEventListener('error', function(e) {
+    // Ignorer les erreurs spÃƒÂ©cifiques aux extensions (Bybit, etc.)
+    if (e.filename && (
+        e.filename.includes('frame_start.js') ||
+        e.filename.includes('bybit') ||
+        e.filename.includes('extension') ||
+        e.filename.includes('chrome-extension') ||
+        e.filename.includes('moz-extension')
+    )) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.warn('Extension error blocked:', e.message);
+        return false;
+    }
+    
+    // Ignorer les erreurs de removeChild sur des nÃ…â€œuds non existants
+    if (e.message && e.message.includes('removeChild') && e.message.includes('not a child of this node')) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.warn('DOM manipulation error blocked:', e.message);
+        return false;
+    }
+}, true);
+
+// Protection supplÃƒÂ©mentaire pour les manipulations DOM
+const originalRemoveChild = Node.prototype.removeChild;
+Node.prototype.removeChild = function(child) {
+    try {
+        return originalRemoveChild.call(this, child);
+    } catch (e) {
+        if (e.message && e.message.includes('not a child of this node')) {
+            console.warn('removeChild error prevented:', e.message);
+            return child;
+        }
+        throw e;
+    }
+};
+
+// Protection pour removeChild sur Element
+const originalElementRemoveChild = Element.prototype.removeChild;
+Element.prototype.removeChild = function(child) {
+    try {
+        return originalElementRemoveChild.call(this, child);
+    } catch (e) {
+        if (e.message && e.message.includes('not a child of this node')) {
+            console.warn('Element.removeChild error prevented:', e.message);
+            return child;
+        }
+        throw e;
+    }
+};
 
 (function () {
     'use strict';
@@ -29,7 +82,7 @@
                         const t = document.createElement('div');
                         t.style.cssText = 'background:#fff;padding:10px 12px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.12);border-left:4px solid #D4AF37;position:relative;';
                         t.innerHTML = `<div style="font-weight:700;margin-bottom:4px;">${title||''}</div><div style="font-size:13px;color:#333;">${message||''}</div>`;
-                        const btn = document.createElement('button'); btn.textContent = '×'; btn.style.cssText = 'position:absolute;right:6px;top:6px;border:none;background:transparent;font-size:14px;cursor:pointer;';
+                        const btn = document.createElement('button'); btn.textContent = 'x'; btn.style.cssText = 'position:absolute;right:6px;top:6px;border:none;background:transparent;font-size:14px;cursor:pointer;';
                         btn.addEventListener('click', ()=>{ try{ t.remove(); }catch(e){} });
                         t.appendChild(btn);
                         c.appendChild(t);
@@ -63,51 +116,139 @@
         });
     }
 
-    // Normalize image URLs to absolute paths and provide robust fallback
+    // Normalize image URLs to absolute paths without fallback
     function normalizeImageUrl(src) {
-        if (!src) return (window.ASSETS_BASE_URL || '/assets') + '/images/default.jpg';
-        // If already absolute from webroot
-        if (src.startsWith('/')) {
-            // Check if the file exists by using the correct base path
-            if (src.includes('/assets/images/default.jpg')) {
-                return (window.ASSETS_BASE_URL || '/assets') + '/images/default.jpg';
+        if (!src) return '';
+
+        const value = String(src).trim();
+        if (!value) return '';
+
+        if (/^https?:\/\//i.test(value) || value.startsWith('data:')) {
+            return value;
+        }
+
+        const assetsBase = (window.ASSETS_BASE_URL || '/assets').replace(/\/+$/, '');
+
+        if (value === 'default.jpg') {
+            return assetsBase + '/images/default.jpg';
+        }
+
+        if (value.startsWith('/')) {
+            if (value.startsWith('/assets/') && assetsBase !== '/assets') {
+                return assetsBase + value.slice('/assets'.length);
             }
-            return src;
+            return value;
         }
-        // If starts with assets or images, prefix with webroot assets
-        if (src.startsWith('assets/') || src.startsWith('images/')) {
-            return (window.ASSETS_BASE_URL || '/assets') + '/' + src;
+
+        if (value.startsWith('assets/')) {
+            return assetsBase + value.slice('assets'.length);
         }
-        // Otherwise treat as relative to assets
-        return (window.ASSETS_BASE_URL || '/assets') + '/images/' + src;
+
+        if (value.startsWith('images/')) {
+            return assetsBase + '/' + value;
+        }
+
+        return assetsBase + '/images/' + value;
     }
 
-    // Create an img element with fallback handling (prevents infinite loops)
+    function withCacheBust(url, bust) {
+        const cleanUrl = (url || '').toString().trim();
+        if (!cleanUrl) return '';
+        const b = (bust || '').toString().trim();
+        if (!b) return cleanUrl;
+        const sep = cleanUrl.includes('?') ? '&' : '?';
+        return cleanUrl + sep + 'v=' + encodeURIComponent(b);
+    }
+
+    async function parseJsonSafely(response, contextLabel) {
+        const text = await response.text();
+        if (!text || !text.trim()) return null;
+        try {
+            return JSON.parse(text);
+        } catch (err) {
+            const snippet = text.slice(0, 180);
+            throw new Error((contextLabel || 'API') + ' JSON invalide: ' + snippet);
+        }
+    }
+
+    function startOrderFromItem(rawItem) {
+        const item = (rawItem && typeof rawItem === 'object') ? rawItem : null;
+        if (!item) return;
+
+        const id = item.id ?? item.menu_id ?? item.product_id ?? null;
+        if (!id) return;
+
+        const qty = Math.max(1, parseInt(item.qty ?? item.quantity ?? 1, 10) || 1);
+        const price = parseInt(item.price ?? item.unit_price ?? 0, 10) || 0;
+
+        const selectedItem = {
+            id,
+            name: item.name || item.title || 'Article',
+            qty,
+            quantity: qty,
+            unit_price: price,
+            price,
+            image_url: item.image_url || item.image || '',
+            type: String(item.type || (item.is_product ? 'product' : 'menu') || 'menu')
+        };
+
+        try {
+            localStorage.setItem('tgt_selected_menus', JSON.stringify([selectedItem]));
+            localStorage.setItem('tgt_order_autostep', JSON.stringify({
+                step: 2,
+                source: 'commander',
+                item_id: id
+            }));
+        } catch (e) {}
+
+        const hasOrderSection = !!document.getElementById('order');
+        if (hasOrderSection && typeof window.nextStep === 'function') {
+            try { window.location.hash = '#order'; } catch (e) {}
+            setTimeout(() => {
+                try { window.nextStep(2); } catch (e) {}
+            }, 120);
+            return;
+        }
+
+        window.location.href = 'index.html#order';
+    }
+
+    window.startOrderFromItem = startOrderFromItem;
+    // Create an img element without fallback
     function createImgWithFallback(src, alt) {
         const img = document.createElement('img');
         img.alt = alt || '';
-        const normalized = normalizeImageUrl(src);
-        img.src = normalized;
-        // mark to avoid replacing more than once
-        img.dataset.tgtFallback = '0';
-        img.addEventListener('error', function () {
-            if (img.dataset.tgtFallback === '1') return; // already applied
-            img.dataset.tgtFallback = '1';
-            const def = window.DEFAULT_IMAGE || ((window.ASSETS_BASE_URL || '/assets') + '/images/default.jpg');
-            // Only set fallback if it's different from current src to prevent loops
-            if (img.src !== def && !img.src.includes('default.jpg')) {
-                console.warn('Image not found, using default:', img.src);
-                img.src = def;
-            }
-        });
+        
+        // Ne crÃƒÂ©er l'image que si src existe
+        if (src && src.trim() !== '') {
+            const normalized = normalizeImageUrl(src);
+            img.src = normalized;
+            img.dataset.tgtFallback = '0';
+            img.addEventListener('error', function () {
+                if (img.dataset.tgtFallback === '1') {
+                    img.style.display = 'none';
+                    return;
+                }
+                img.dataset.tgtFallback = '1';
+                const fallback = window.DEFAULT_IMAGE || normalizeImageUrl('default.jpg');
+                if (fallback && fallback !== img.src) {
+                    img.src = fallback;
+                } else {
+                    img.style.display = 'none';
+                }
+            });
+        } else {
+            // Cacher l'image si pas de source
+            img.style.display = 'none';
+        }
+        
         return img;
     }
 
     // Create a product-card DOM node
     function createProductCard(product) {
-        // Vérifier que le produit existe et a un ID
+        // VÃƒÂ©rifier que le produit existe et a un ID
         if (!product || !product.id) {
-            console.warn('Produit invalide ou sans ID:', product);
             return null;
         }
 
@@ -119,11 +260,11 @@
         card.dataset.name = product.name || '';
         card.dataset.price = product.price || 0;
         
-        // Gestion simplifiée des images
-        let imageUrl = '/assets/images/default.jpg';
+        // Gestion des images sans fallback par dÃƒÂ©faut
+        let imageUrl = '';
         if (product.image_url) {
             if (Array.isArray(product.image_url)) {
-                imageUrl = product.image_url[0] || imageUrl;
+                imageUrl = product.image_url[0] || '';
             } else if (typeof product.image_url === 'string') {
                 try {
                     const parsed = JSON.parse(product.image_url);
@@ -136,7 +277,7 @@
             }
         } else if (product.images) {
             if (Array.isArray(product.images)) {
-                imageUrl = product.images[0] || imageUrl;
+                imageUrl = product.images[0] || '';
             } else if (typeof product.images === 'string') {
                 try {
                     const parsed = JSON.parse(product.images);
@@ -148,7 +289,15 @@
                 }
             }
         }
-        card.dataset.image = normalizeImageUrl(imageUrl);
+        
+        // Ne mettre l'image que si elle existe
+        if (imageUrl) {
+            const normalized = normalizeImageUrl(imageUrl);
+            const bust = product.updated_at || product.updatedAt || product.id || '';
+            card.dataset.image = withCacheBust(normalized, bust);
+        } else {
+            card.dataset.image = '';
+        }
 
         const imgWrap = document.createElement('div');
         imgWrap.className = 'product-image';
@@ -170,7 +319,7 @@
 
         const price = document.createElement('div');
         price.className = 'product-price';
-        price.textContent = (product.price ? product.price + ' FCFA' : '—');
+        price.textContent = (product.price ? product.price + ' FCFA' : '-');
 
         const meta = document.createElement('div');
         meta.className = 'product-meta';
@@ -200,7 +349,7 @@
         orderBtn.textContent = 'Commander';
         orderBtn.addEventListener('click', (ev) => {
             ev.stopPropagation();
-            showOrderModal({ id: card.dataset.id, name: card.dataset.name, price: Number(card.dataset.price), image: card.dataset.image, type: 'product' });
+            startOrderFromItem({ id: card.dataset.id, name: card.dataset.name, price: Number(card.dataset.price), image_url: card.dataset.image, type: 'product' });
         });
 
         actions.appendChild(addBtn);
@@ -241,7 +390,7 @@
         modal.id = 'tgtProductModal';
         modal.className = 'tgt-modal';
 
-        // Build gallery using safe img elements with normalized URLs
+        // Build gallery using safe img elements without fallback
         const galleryEl = document.createElement('div');
         galleryEl.className = 'tgt-modal-gallery';
         (function buildGallery() {
@@ -250,14 +399,16 @@
                     const arr = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
                     if (Array.isArray(arr) && arr.length) {
                         arr.forEach(src => {
-                            const img = createImgWithFallback(normalizeImageUrl(src), product.name || '');
-                            galleryEl.appendChild(img);
+                            if (src && src.trim() !== '') {
+                                const img = createImgWithFallback(normalizeImageUrl(src), product.name || '');
+                                galleryEl.appendChild(img);
+                            }
                         });
                         return;
                     }
                 } catch (e) {}
             }
-            if (product.image_url) {
+            if (product.image_url && product.image_url.trim() !== '') {
                 const img = createImgWithFallback(normalizeImageUrl(product.image_url), product.name || '');
                 galleryEl.appendChild(img);
                 return;
@@ -270,7 +421,7 @@
 
         const typeLabelRaw = product.type || product.source || (product.is_product ? 'boutique' : 'restaurant') || 'restaurant';
         const priceVal = parseInt(product.price ?? 0, 10) || 0;
-        const priceLabel = (window.App && typeof window.App.formatMoney === 'function') ? window.App.formatMoney(priceVal) : (priceVal ? (priceVal + ' FCFA') : '—');
+        const priceLabel = (window.App && typeof window.App.formatMoney === 'function') ? window.App.formatMoney(priceVal) : (priceVal ? (priceVal + ' FCFA') : '-');
         const isInStock = (product.in_stock === true) || (String(product.in_stock).toLowerCase() === '1') || ((parseInt(product.stock ?? product.stock_quantity ?? 0, 10) || 0) > 0);
         const stockLabel = isInStock ? 'En stock' : 'Rupture';
         const categoryLabel = (product.category || product.category_name || '').toString().trim();
@@ -307,7 +458,7 @@
 
                         <div class="tgt-modal-actions">
                             <div class="tgt-qty">
-                                <label for="tgtModalQty">Quantité</label>
+                                <label for="tgtModalQty">Quantite</label>
                                 <input id="tgtModalQty" type="number" min="1" value="1" />
                             </div>
                             <button class="btn btn-primary modal-add" ${!isInStock ? 'disabled' : ''}>Ajouter au panier</button>
@@ -319,10 +470,16 @@
         `;
 
         document.body.appendChild(modal);
+        if (typeof lockPageScroll === 'function') lockPageScroll();
+
+        const closeModal = () => {
+            modal.remove();
+            if (typeof syncPageScrollLock === 'function') syncPageScrollLock();
+        };
 
         // Event listeners
-        modal.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', () => modal.remove()));
-        modal.querySelector('.tgt-modal-backdrop').addEventListener('click', () => modal.remove());
+        modal.querySelectorAll('.modal-close, .tgt-modal-close').forEach((btn) => btn.addEventListener('click', closeModal));
+        modal.querySelector('.tgt-modal-backdrop').addEventListener('click', closeModal);
         const addBtn = modal.querySelector('.modal-add');
         if (addBtn) addBtn.addEventListener('click', () => {
             if (addBtn.disabled) return;
@@ -336,11 +493,11 @@
                 image_url: product.image_url || product.main_image || product.image || ''
             };
             if (typeof window.addToCartFromHome === 'function') {
-                window.addToCartFromHome(item);
+                window.addToCartFromHome(item.id || null, item);
             } else {
                 document.dispatchEvent(new CustomEvent('tgt:add-to-cart', { detail: item }));
             }
-            modal.remove();
+            closeModal();
         });
     }
 
@@ -355,7 +512,7 @@
         modal.className = 'tgt-modal';
 
         modal.innerHTML = `
-            <div class="tgt-modal-backdrop"></div>
+        <div class="tgt-modal-backdrop">
             <div class="tgt-modal-panel">
                 <button class="tgt-modal-close" aria-label="Fermer">&times;</button>
                 <div class="tgt-modal-body order-modal">
@@ -366,7 +523,7 @@
                         <h3 class="order-title"></h3>
                         <p class="order-price"></p>
                         <div class="form-row">
-                            <label>Quantité</label>
+                            <label>Quantite</label>
                             <input type="number" id="orderQty" value="1" min="1" />
                         </div>
                         <div class="form-row">
@@ -375,7 +532,7 @@
                         </div>
                         <div class="form-row">
                             <label>Adresse de livraison</label>
-                            <input type="text" id="orderAddress" placeholder="Rue et numéro" />
+                            <input type="text" id="orderAddress" placeholder="Rue et numero" />
                         </div>
                         <div class="form-row">
                             <label>Quartier</label>
@@ -392,9 +549,16 @@
                     </div>
                 </div>
             </div>
+        </div>
         `;
 
         document.body.appendChild(modal);
+        if (typeof lockPageScroll === 'function') lockPageScroll();
+
+        const closeOrderModal = () => {
+            modal.remove();
+            if (typeof syncPageScrollLock === 'function') syncPageScrollLock();
+        };
 
         // Fill content
         const imgContainer = modal.querySelector('.order-image');
@@ -404,7 +568,7 @@
         imgEl.style.objectFit = 'cover';
         imgContainer.appendChild(imgEl);
         modal.querySelector('.order-title').textContent = item.name || '';
-        modal.querySelector('.order-price').textContent = (item.price ? item.price + ' FCFA' : '—');
+        modal.querySelector('.order-price').textContent = (item.price ? item.price + ' FCFA' : '-');
 
         const qty = modal.querySelector('#orderQty');
         const total = modal.querySelector('#orderTotal');
@@ -416,8 +580,8 @@
         updateTotal();
 
         // Event listeners (support both generic .modal-close and our .tgt-modal-close)
-        modal.querySelectorAll('.modal-close, .tgt-modal-close').forEach(b => b.addEventListener('click', () => modal.remove()));
-        modal.querySelector('.tgt-modal-backdrop').addEventListener('click', () => modal.remove());
+        modal.querySelectorAll('.modal-close, .tgt-modal-close').forEach(b => b.addEventListener('click', closeOrderModal));
+        modal.querySelector('.tgt-modal-backdrop').addEventListener('click', closeOrderModal);
 
         const confirmBtn = modal.querySelector('#confirmOrderBtn');
         confirmBtn.addEventListener('click', async () => {
@@ -430,6 +594,7 @@
                     if (loginModal) {
                         loginModal.style.display = 'flex';
                         loginModal.setAttribute('aria-hidden','false');
+                        if (typeof lockPageScroll === 'function') lockPageScroll();
                     } else {
                         alert('Veuillez vous connecter pour passer commande.');
                     }
@@ -447,18 +612,18 @@
                     payment_method: 'cash'
                 };
 
-                (window.LoadingSystem || { show: ()=>{}, hide: ()=>{} }).show('Création de la commande...');
+                (window.LoadingSystem || { show: ()=>{}, hide: ()=>{} }).show('Creation de la commande...');
                 // Use existing createOrder helper
                 const res = await createOrder(orderData);
                 (window.LoadingSystem || { show: ()=>{}, hide: ()=>{} }).hide();
                 // Support API shape: { success, data: { order | id }, message }
                 const orderObj = res && (res.data?.order || (res.data && (res.data.id ? res.data : null)) || res.order || null);
                 if (res && res.success && orderObj) {
-                    ToastSystem.show('success', 'Commande créée', 'Votre commande a été créée');
+                    ToastSystem.show('success', 'Commande creee', 'Votre commande a ete creee');
                     // Optionally open order details or show id
-                    modal.remove();
+                    closeOrderModal();
                 } else {
-                    ToastSystem.show('error', 'Erreur', (res && (res.message || (res.data && res.data.message))) || 'Impossible de créer la commande');
+                    ToastSystem.show('error', 'Erreur', (res && (res.message || (res.data && res.data.message))) || 'Impossible de creer la commande');
                     confirmBtn.disabled = false;
                 }
             } catch (err) {
@@ -475,7 +640,7 @@
         const root = document.getElementById('productsContainer');
         if (!root) return;
         
-        // Si on a déjà les produits en cache et que c'est "all", filtrer côté client
+        // Si on a dÃƒÂ©jÃƒÂ  les produits en cache et que c'est "all", filtrer cÃƒÂ´tÃƒÂ© client
         if (Array.isArray(__tgt_products) && __tgt_products.length && category === 'all') {
             renderProducts(__tgt_products, 'productsContainer');
             return;
@@ -489,7 +654,7 @@
     let __tgt_products = []; // Produits boutique
     let __tgt_menu_items = []; // Plats du menu
 
-    // Fonction pour créer une carte de menu (plats du restaurant)
+    // Fonction pour crÃƒÂ©er une carte de menu (plats du restaurant)
     function createMenuCard(menuItem) {
         const card = document.createElement('div');
         card.className = 'product-card';
@@ -497,7 +662,11 @@
         card.dataset.id = menuItem.id || '';
         card.dataset.name = menuItem.name || '';
         card.dataset.price = menuItem.price || 0;
-        card.dataset.image = normalizeImageUrl(menuItem.image_url || menuItem.image || '');
+        {
+            const normalized = normalizeImageUrl(menuItem.image_url || menuItem.image || '');
+            const bust = menuItem.updated_at || menuItem.updatedAt || menuItem.id || '';
+            card.dataset.image = withCacheBust(normalized, bust);
+        }
 
         const imgWrap = document.createElement('div');
         imgWrap.className = 'product-image';
@@ -519,7 +688,7 @@
 
         const price = document.createElement('div');
         price.className = 'product-price';
-        price.textContent = (menuItem.price ? menuItem.price + ' FCFA' : '—');
+        price.textContent = (menuItem.price ? menuItem.price + ' FCFA' : '-');
 
         const meta = document.createElement('div');
         meta.className = 'product-meta';
@@ -548,7 +717,7 @@
         orderBtn.textContent = 'Commander';
         orderBtn.addEventListener('click', (ev) => {
             ev.stopPropagation();
-            showOrderModal({ id: card.dataset.id, name: card.dataset.name, price: Number(card.dataset.price), image: card.dataset.image, type: 'menu' });
+            startOrderFromItem({ id: card.dataset.id, name: card.dataset.name, price: Number(card.dataset.price), image_url: card.dataset.image, type: 'menu' });
         });
 
         actions.appendChild(addBtn);
@@ -579,37 +748,33 @@
         return card;
     }
 
-    function renderProducts(items, containerId) {
-        const root = document.getElementById(containerId);
+    function renderProducts(items, targetId) {
+        const root = document.getElementById(targetId);
         if (!root) return;
 
-        if (!Array.isArray(items)) items = [];
-
-        if (items.length === 0) {
-            root.innerHTML = '<div class="menu-card"><p>Aucun élément disponible pour le moment.</p></div>';
+        if (!Array.isArray(items) || !items.length) {
+            root.innerHTML = '<div class="menu-card"><p>Aucun produit disponible.</p></div>';
             return;
         }
 
-        const grid = document.createElement('div');
-        grid.className = 'products-grid';
+        const targetIsGrid = root.classList && root.classList.contains('products-grid');
+        const container = targetIsGrid ? root : document.createElement('div');
+        if (!targetIsGrid) {
+            container.className = 'products-grid';
+        }
+
+        container.innerHTML = '';
 
         items.forEach(item => {
             // Utiliser createMenuCard pour les plats du menu, createProductCard pour les produits boutique
-            let card;
-            if (item.type === 'menu' || containerId === 'allMenuContainer') {
-                card = createMenuCard(item);
-            } else {
-                card = createProductCard(item);
-            }
-            
-            // Ajouter la carte seulement si elle n'est pas null
-            if (card) {
-                grid.appendChild(card);
-            }
+            const card = item && (item.type === 'menu' || item.is_menu) ? createMenuCard(item) : createProductCard(item);
+            if (card) container.appendChild(card);
         });
 
-        root.innerHTML = '';
-        root.appendChild(grid);
+        if (!targetIsGrid) {
+            root.innerHTML = '';
+            root.appendChild(container);
+        }
     }
 
     // Charger le menu du jour
@@ -620,7 +785,7 @@
 
         try {
             const res = await fetch(`${API_BASE_URL}/menu/menu-du-jour.php`);
-            const json = await res.json();
+            const json = await parseJsonSafely(res, 'menu/menu-du-jour.php');
 
             let menu = null;
             if (json && json.success && json.data) {
@@ -634,61 +799,24 @@
                 return;
             }
 
-            // Afficher le menu du jour avec mise en page gourmet
-            const container = document.createElement('div');
-            container.className = 'menu-of-day-card';
-
-            const imgWrap = document.createElement('div');
-            imgWrap.className = 'menu-of-day-image';
-            const rawImg = (menu.image_url || menu.image || '').toString();
-            const bust = (menu.updated_at || menu.id || '').toString();
-            const sep = rawImg.includes('?') ? '&' : '?';
-            const imgSrc = rawImg ? `${rawImg}${bust ? `${sep}v=${encodeURIComponent(bust)}` : ''}` : '';
-            const img = createImgWithFallback(imgSrc, menu.name || '');
-            img.style.width = '100%';
-            img.style.height = '100%';
-            img.style.objectFit = 'cover';
-            imgWrap.appendChild(img);
-
-            const info = document.createElement('div');
-            info.className = 'menu-of-day-info';
-            const title = document.createElement('h2');
-            title.textContent = menu.name || '';
-            const desc = document.createElement('p');
-            desc.className = 'menu-of-day-desc';
-            desc.textContent = menu.description || '';
-            const meta = document.createElement('div');
-            meta.className = 'menu-of-day-meta';
-            const price = document.createElement('div');
-            price.className = 'menu-of-day-price';
-            price.textContent = (menu.price ? menu.price + ' FCFA' : '—');
-
-            const actions = document.createElement('div');
-            actions.className = 'menu-of-day-actions';
-            const orderBtn = document.createElement('button');
-            orderBtn.className = 'btn btn-primary';
-            orderBtn.textContent = 'Commander ce menu';
-            orderBtn.addEventListener('click', () => showOrderModal({ id: menu.id, name: menu.name, price: menu.price, image: menu.image_url || menu.image || '', type: 'menu' }));
-            actions.appendChild(orderBtn);
-
-            info.appendChild(title);
-            info.appendChild(desc);
-            meta.appendChild(price);
-            info.appendChild(meta);
-            info.appendChild(actions);
-
-            container.appendChild(imgWrap);
-            container.appendChild(info);
-
+            // Afficher le menu du jour avec le nouveau design compact et animé
+            const menuCard = createMenuCard(menu);
+            
+            // Ajouter le badge spécial "Menu du jour"
+            const badgeSpecial = document.createElement('div');
+            badgeSpecial.className = 'badge-special';
+            badgeSpecial.textContent = 'Menu du jour';
+            menuCard.appendChild(badgeSpecial);
+            
             root.innerHTML = '';
-            root.appendChild(container);
+            root.appendChild(menuCard);
         } catch (err) {
             console.error('Erreur chargement menu du jour:', err);
             root.innerHTML = '<div class="menu-card"><p>Impossible de charger le menu du jour.</p></div>';
         }
     }
 
-    // Charger tous les plats du menu avec filtres par catégorie
+    // Charger tous les plats du menu avec filtres par catÃƒÂ©gorie
     async function loadAllMenuItems(category = 'all') {
         const root = document.getElementById('allMenuContainer');
         if (!root) return;
@@ -698,7 +826,7 @@
         try {
             const url = `${API_BASE_URL}/menu/all.php` + (category && category !== 'all' ? `?category=${encodeURIComponent(category)}` : '');
             const res = await fetch(url);
-            const json = await res.json();
+            const json = await parseJsonSafely(res, 'menu/all.php');
 
             let items = [];
             if (json && json.success && Array.isArray(json.data)) {
@@ -707,7 +835,7 @@
                 items = json;
             }
 
-            // Ajouter le type 'menu' à chaque élément
+            // Ajouter le type 'menu' ÃƒÂ  chaque ÃƒÂ©lÃƒÂ©ment
             items = items.map(item => ({ ...item, type: 'menu' }));
 
             __tgt_menu_items = items;
@@ -728,7 +856,7 @@
         try {
             const url = `${API_BASE_URL}/shop/boutique.php` + (category && category !== 'all' ? `?category=${encodeURIComponent(category)}` : '');
             const res = await fetch(url);
-            const json = await res.json();
+            const json = await parseJsonSafely(res, 'shop/boutique.php');
 
             let items = [];
             if (json && json.success && Array.isArray(json.data)) {
@@ -746,8 +874,8 @@
     }
 
     async function loadProducts() {
-        // Cette fonction est conservée pour compatibilité mais ne charge plus automatiquement
-        // Les fonctions spécifiques sont appelées séparément
+        // Cette fonction est conservÃƒÂ©e pour compatibilitÃƒÂ© mais ne charge plus automatiquement
+        // Les fonctions spÃƒÂ©cifiques sont appelÃƒÂ©es sÃƒÂ©parÃƒÂ©ment
         const allMenuContainer = document.getElementById('allMenuContainer');
         const productsContainer = document.getElementById('productsContainer');
         
@@ -767,25 +895,25 @@
         
         if (!allButtons || !allButtons.length) return;
 
-        // Gestion des boutons de catégorie du menu
+        // Gestion des boutons de catÃƒÂ©gorie du menu
         menuButtons.forEach(btn => {
             btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 const category = (this.dataset.category || 'all').toString().toLowerCase();
                 
-                // Mettre à jour l'état visuel
+                // Mettre ÃƒÂ  jour l'ÃƒÂ©tat visuel
                 menuButtons.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
 
-                // Mapping des catégories pour le filtrage
+                // Mapping des catÃƒÂ©gories pour le filtrage
                 const categoryMap = {
                     'plats': ['plat', 'plats', 'plats principaux'],
-                    'entrees': ['entrée', 'entrées', 'entrees'],
+                    'entrees': ['entree', 'entrees', 'entrée', 'entrées'],
                     'desserts': ['dessert', 'desserts'],
                     'boissons': ['boisson', 'boissons']
                 };
 
-                // Filtrer côté client si on a déjà les données, sinon charger depuis l'API
+                // Filtrer cÃƒÂ´tÃƒÂ© client si on a dÃƒÂ©jÃƒÂ  les donnÃƒÂ©es, sinon charger depuis l'API
                 if (Array.isArray(__tgt_menu_items) && __tgt_menu_items.length && category !== 'all') {
                     const validCategories = categoryMap[category] || [category];
                     const filtered = __tgt_menu_items.filter(item => {
@@ -796,19 +924,19 @@
                 } else if (category === 'all' && Array.isArray(__tgt_menu_items) && __tgt_menu_items.length) {
                     renderProducts(__tgt_menu_items, 'allMenuContainer');
                 } else {
-                    // Charger depuis l'API si on n'a pas les données ou si on veut recharger
+                    // Charger depuis l'API si on n'a pas les donnÃƒÂ©es ou si on veut recharger
                     loadAllMenuItems(category);
                 }
             });
         });
 
-        // Gestion des boutons de catégorie de la boutique
+        // Gestion des boutons de catÃƒÂ©gorie de la boutique
         shopButtons.forEach(btn => {
             btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 const category = (this.dataset.category || 'all').toString().toLowerCase();
                 
-                // Mettre à jour l'état visuel
+                // Mettre ÃƒÂ  jour l'ÃƒÂ©tat visuel
                 shopButtons.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
 
@@ -827,12 +955,12 @@
             try {
                 const res = await fetch(`${API_BASE_URL}/live.php`);
                 if (!res.ok) return;
-                const json = await res.json();
+                const json = await parseJsonSafely(res, 'live.php');
                 // update UI non-blocking
                 if (json && json.status) {
                     liveEl.className = 'status ' + (json.status || 'loading');
                     const txt = liveEl.querySelector('.status-text');
-                    if (txt) txt.textContent = json.message || (json.status === 'open' ? 'Ouvert' : 'Fermé');
+                    if (txt) txt.textContent = json.message || (json.status === 'open' ? 'Ouvert' : 'Ferme');
                 }
             } catch (e) {
                 console.warn('Live status fetch failed:', e);
@@ -856,7 +984,7 @@
         }
 
         // Create map and store reference on the element to avoid double-init errors
-        const map = L.map(el, { scrollWheelZoom: false, zoomControl: false }).setView([RESTAURANT_COORDS.lat, RESTAURANT_COORDS.lng], 13);
+        const map = L.map(el, { scrollWheelZoom: false, zoomControl: false }).setView([RESTAURANT_COORDS.lat, RESTAURANT_COORDS.lng], 14);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
@@ -866,8 +994,32 @@
         // Add zoom control positioned at bottom-left and vertical
         L.control.zoom({ position: 'bottomleft' }).addTo(map);
 
-        const marker = L.marker([RESTAURANT_COORDS.lat, RESTAURANT_COORDS.lng]).addTo(map);
-        marker.bindPopup('<strong>Titi Golden Taste</strong><br>123 Avenue de la Gastronomie, Abidjan').openPopup();
+        const markerIcon = L.divIcon({
+            className: 'tgt-map-marker',
+            iconSize: [54, 54],
+            iconAnchor: [27, 27],
+            popupAnchor: [0, -22],
+            html: '<div class="tgt-map-marker-pin"><i class="fas fa-location-dot"></i></div>'
+        });
+
+        L.circle([RESTAURANT_COORDS.lat, RESTAURANT_COORDS.lng], {
+            radius: 180,
+            color: '#d4af37',
+            weight: 1.5,
+            fillColor: '#d4af37',
+            fillOpacity: 0.08
+        }).addTo(map);
+
+        const marker = L.marker([RESTAURANT_COORDS.lat, RESTAURANT_COORDS.lng], { icon: markerIcon }).addTo(map);
+        marker.bindPopup(
+            '<div class="tgt-map-popup">' +
+                '<div class="tgt-map-popup-title">Titi Golden Taste</div>' +
+                '<div class="tgt-map-popup-line">Avenue de l\'Indépendance</div>' +
+                '<div class="tgt-map-popup-line">Badalabougou, Bamako</div>' +
+                '<div class="tgt-map-popup-line">Mali</div>' +
+                '<a class="tgt-map-popup-action" href="https://www.google.com/maps/dir/?api=1&destination=12.6392,-8.0029" target="_blank" rel="noopener">Itinéraire</a>' +
+            '</div>'
+        ).openPopup();
 
         el.__tgt_map = map;
 
@@ -887,11 +1039,11 @@
             // Charger seulement 6 produits en vedette
             const url = `${API_BASE_URL}/shop/boutique.php?limit=6`;
             const res = await fetch(url);
-            const json = await res.json();
+            const json = await parseJsonSafely(res, 'shop/boutique.php?limit=6');
 
             let items = [];
             if (json && json.success && Array.isArray(json.data)) {
-                items = json.data.slice(0, 6); // Limiter à 6 produits
+                items = json.data.slice(0, 6); // Limiter ÃƒÂ  6 produits
             } else if (Array.isArray(json)) {
                 items = json.slice(0, 6);
             }
@@ -902,8 +1054,7 @@
             }
 
             const grid = document.createElement('div');
-            grid.className = 'products-grid';
-            grid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;';
+            grid.className = 'products-grid featured-products-list';
 
             items.forEach(p => {
                 grid.appendChild(createProductCard(p));
@@ -943,7 +1094,7 @@
         
         initCategoryFilter();
         
-        // Initialiser la carte seulement si l'élément existe
+        // Initialiser la carte seulement si l'ÃƒÂ©lÃƒÂ©ment existe
         if (document.getElementById('restaurantMap')) {
             initMap();
         }
@@ -991,6 +1142,7 @@
         // show modal
         modal.style.display = 'flex';
         modal.setAttribute('aria-hidden', 'false');
+        if (typeof lockPageScroll === 'function') lockPageScroll();
     });
 
     // Wire header profile behavior: when logged in, convert login button into profile/dashboard shortcut
@@ -1087,8 +1239,14 @@
                 // Only show dashboard for admin and livreur roles, not for clients
                 if (role === 'admin') return `<a href="admin/dashboard.html" class="dropdown-item" data-action="dashboard"><i class="fas fa-tachometer-alt"></i> Aller au dashboard</a>`;
                 if (role === 'livreur') return `<a href="delivery/dashboard.html" class="dropdown-item" data-action="dashboard"><i class="fas fa-tachometer-alt"></i> Aller au dashboard</a>`;
-                return ''; // No dashboard for clients
+                return '';
             })();
+            const path = (window.location.pathname || '').toLowerCase();
+            const onBoutique = path.endsWith('/boutique.html') || path.endsWith('boutique.html');
+            const switchHref = onBoutique ? 'index.html' : 'boutique.html';
+            const switchLabel = onBoutique ? 'Acceder au restaurant' : 'Acceder a la boutique';
+            const switchIcon = onBoutique ? 'fa-utensils' : 'fa-store';
+
             dropdown.innerHTML = `
                 <div class="profile-header">
                     <img src="${userAvatar || (window.ASSETS_BASE_URL || '/assets') + '/images/default.jpg'}" alt="Profile" class="dropdown-avatar">
@@ -1099,10 +1257,10 @@
                 </div>
                 <div class="dropdown-divider"></div>
                 ${dashboardItem}
-                <a href="#" class="dropdown-item" data-action="profile"><i class="fas fa-user"></i> Profil</a>
-                <a href="boutique.html" class="dropdown-item" data-action="shop"><i class="fas fa-store"></i> Accéder à la boutique</a>
+                <a href="profile.html" class="dropdown-item" data-action="profile"><i class="fas fa-user"></i> Profil</a>
+                <a href="${switchHref}" class="dropdown-item" data-action="switch"><i class="fas ${switchIcon}"></i> ${switchLabel}</a>
                 <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item text-danger" data-action="logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+                <a href="#" class="dropdown-item text-danger" data-action="logout"><i class="fas fa-sign-out-alt"></i> Deconnexion</a>
             `;
 
             wrapper.appendChild(profileBtn);
@@ -1136,9 +1294,9 @@
                     window.location.href = 'login.html';
                 } else if (action === 'profile') {
                     e.preventDefault();
-                    openProfileModal();
-                } else if (action === 'shop') {
-                    // Allow normal navigation to boutique
+                    window.location.href = 'profile.html';
+                } else if (action === 'switch') {
+                    // Allow normal navigation to the contextual page
                     return;
                 }
             });
@@ -1146,29 +1304,30 @@
     }
 
     // Close login modal handlers
-    document.addEventListener('DOMContentLoaded', function () {
-        const modal = document.getElementById('loginModal');
-        if (!modal) return;
-        const closeBtn = document.getElementById('loginModalClose') || modal.querySelector('.modal-close');
-        function hideModal(el) {
-            try {
-                const active = document.activeElement;
-                if (active && el.contains(active)) {
-                    try { active.blur(); } catch (e) {}
-                }
-            } catch (e) {}
-            el.style.display = 'none';
-            el.setAttribute('aria-hidden', 'true');
-        }
+    // document.addEventListener('DOMContentLoaded', function () {
+    //     const modal = document.getElementById('loginModal');
+    //     if (!modal) return;
+    //     const closeBtn = document.getElementById('loginModalClose') || modal.querySelector('.modal-close');
+    //     function hideModal(el) {
+    //         try {
+    //             const active = document.activeElement;
+    //             if (active && el.contains(active)) {
+    //                 try { active.blur(); } catch (e) {}
+    //             }
+    //         } catch (e) {}
+    //         el.style.display = 'none';
+    //         el.setAttribute('aria-hidden', 'true');
+    //         if (typeof unlockPageScroll === 'function') unlockPageScroll();
+    //     }
 
-        if (closeBtn) closeBtn.addEventListener('click', () => { hideModal(modal); });
-        // click outside to close
-        modal.addEventListener('click', function (e) {
-            if (e.target === modal) { hideModal(modal); }
-        });
-        // hidden by default
-        hideModal(modal);
-    });
+    //     if (closeBtn) closeBtn.addEventListener('click', () => { hideModal(modal); });
+    //     // click outside to close
+    //     modal.addEventListener('click', function (e) {
+    //         if (e.target === modal) { hideModal(modal); }
+    //     });
+    //     // hidden by default
+    //     hideModal(modal);
+    // });
 
     // Expose key functions globally so inline scripts can reuse them and avoid duplicate initialization
     try { window.initMap = initMap; } catch (e) {}
@@ -1178,12 +1337,169 @@
 
 })();
 
+// Modal scroll management
+const __modalLockState = {
+    locked: false,
+    scrollY: 0,
+    bodyPaddingRight: ''
+};
+
+function isModalNodeVisible(node) {
+    if (!node) return false;
+    if (node.classList.contains('show') || node.classList.contains('open') || node.classList.contains('active')) return true;
+    if (node.getAttribute('aria-hidden') === 'false') return true;
+
+    const inlineDisplay = (node.style && node.style.display) ? node.style.display.toLowerCase() : '';
+    if (inlineDisplay === 'flex' || inlineDisplay === 'block' || inlineDisplay === 'grid') return true;
+
+    const computed = window.getComputedStyle(node);
+    if (!computed) return false;
+    return computed.display !== 'none' && computed.visibility !== 'hidden' && computed.opacity !== '0';
+}
+
+function hasActiveModalLayer() {
+    const selector = '.modal, .tgt-modal, .product-modal, .login-prompt-modal, .terms-modal, .modal-overlay, .video-player-modal, .batch-sync-modal, .live-modal, .media-modal, .video-modal, .order-details-modal, .cart-sidebar.open, .cart-overlay.open, .cart-overlay.active';
+    return Array.from(document.querySelectorAll(selector)).some(isModalNodeVisible);
+}
+
+function lockPageScroll() {
+    if (__modalLockState.locked) return;
+    __modalLockState.scrollY = window.scrollY || window.pageYOffset || 0;
+    __modalLockState.bodyPaddingRight = document.body.style.paddingRight || '';
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+    document.body.style.top = `-${__modalLockState.scrollY}px`;
+    document.body.classList.add('modal-open');
+    document.documentElement.classList.add('modal-open');
+    __modalLockState.locked = true;
+}
+
+// function unlockPageScroll(force = false) {
+//     if (!force && hasActiveModalLayer()) return;
+//     if (!__modalLockState.locked) return;
+
+//     const restoreY = __modalLockState.scrollY || 0;
+//     document.body.classList.remove('modal-open');
+//     document.documentElement.classList.remove('modal-open');
+//     document.body.style.top = '';
+//     document.body.style.paddingRight = __modalLockState.bodyPaddingRight;
+//     __modalLockState.locked = false;
+    
+//     // Utiliser requestAnimationFrame pour éviter la récursion
+//     requestAnimationFrame(() => {
+//         window.scrollTo(0, restoreY);
+//     });
+// }
+
+// function syncPageScrollLock() {
+//     if (hasActiveModalLayer()) lockPageScroll();
+//     else unlockPageScroll(true);
+// }
+
+// window.lockPageScroll = lockPageScroll;
+// window.unlockPageScroll = (force = false) => unlockPageScroll(force);
+// window.syncPageScrollLock = syncPageScrollLock;
+
+// document.addEventListener('DOMContentLoaded', function () {
+//     let __tgtScrollLockSyncing = false;
+//     let __tgtScrollLockSyncQueued = false;
+
+//     function guardedSyncScrollLock() {
+//         if (__tgtScrollLockSyncing) return;
+//         __tgtScrollLockSyncing = true;
+//         try {
+//             syncPageScrollLock();
+//         } finally {
+//             setTimeout(() => {
+//                 __tgtScrollLockSyncing = false;
+//             }, 0);
+//         }
+//     }
+
+//     guardedSyncScrollLock();
+//     if (!document.body) return;
+//     const modalObserver = new MutationObserver(() => {
+//         if (__tgtScrollLockSyncQueued) return;
+//         __tgtScrollLockSyncQueued = true;
+//         window.requestAnimationFrame(() => {
+//             __tgtScrollLockSyncQueued = false;
+//             guardedSyncScrollLock();
+//         });
+//     });
+//     modalObserver.observe(document.body, {
+//         childList: true,
+//         subtree: true,
+//         attributes: true,
+//         attributeFilter: ['class', 'style', 'aria-hidden']
+//     });
+// });
+
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden', 'false');
+    lockPageScroll();
+    
+    // Focus management
+    setTimeout(() => {
+        const firstFocusable = modal.querySelector('button, input, select, textarea, a[href]');
+        if (firstFocusable) firstFocusable.focus();
+    }, 100);
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+    unlockPageScroll();
+}
+
 // Quick login modal handler (works when auths.js is not included)
 document.addEventListener('DOMContentLoaded', function () {
     try {
         const quickForm = document.getElementById('quickLoginForm');
         const modal = document.getElementById('loginModal');
+        const closeBtn = document.getElementById('loginModalClose');
+        
         if (!quickForm) return;
+
+        // Close modal handlers
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeModal('loginModal');
+            });
+        }
+        
+        // Close on backdrop click
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal('loginModal');
+                }
+            });
+        }
+        
+        // Close on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.style.display === 'flex') {
+                closeModal('loginModal');
+            }
+        });
+
+        // Open modal for login links
+        document.querySelectorAll('[data-login-modal="true"]').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                openModal('loginModal');
+            });
+        });
 
         quickForm.addEventListener('submit', async function (ev) {
             ev.preventDefault();
@@ -1215,13 +1531,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         localStorage.setItem('token_expiry', expiry.toString());
                     } catch (e) { console.warn('Could not persist session to localStorage', e); }
 
-                    // Close modal (blur focused element inside first to avoid ARIA focus warnings)
+                    // Close modal
                     quickForm.reset();
-                    if (modal) {
-                        try { const active = document.activeElement; if (active && modal.contains(active)) try{active.blur();}catch(e){} } catch(e){}
-                        modal.style.display = 'none';
-                        modal.setAttribute('aria-hidden','true');
-                    }
+                    closeModal('loginModal');
 
                     // Call auth controller or update header
                     try {
@@ -1275,7 +1587,7 @@ async function openProfileModal() {
         const url = (window.API_BASE_URL || 'backend/api') + '/auth/profile.php';
         const resp = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
         const json = await resp.json();
-        if (!json || !json.success) { alert(json.message || 'Impossible de récupérer le profil'); return; }
+        if (!json || !json.success) { alert(json.message || 'Impossible de recuperer le profil'); return; }
         const user = json.data.user;
 
         // Build modal
@@ -1288,7 +1600,7 @@ async function openProfileModal() {
                 <div class="tgt-modal-body product-modal">
                     <div class="tgt-modal-gallery">
                         <div class="profile-avatar-section">
-                            <img src="${user.avatar || (window.DEFAULT_IMAGE||'/assets/images/default.jpg')}" 
+                            <img src="${user.avatar || (window.DEFAULT_IMAGE||'/Titi/assets/images/default.jpg')}" 
                                  alt="Profile Avatar" id="modalAvatar" class="profile-modal-avatar">
                             <div class="avatar-upload-overlay">
                                 <i class="fas fa-camera"></i>
@@ -1300,7 +1612,7 @@ async function openProfileModal() {
                         <div class="tgt-modal-head">
                             <h3 class="tgt-modal-title">${(user.first_name && user.last_name) ? `${user.first_name} ${user.last_name}` : (user.name || user.full_name || 'Utilisateur')}</h3>
                             <div class="tgt-modal-badges">
-                                <span class="tgt-badge tgt-badge-success">Compte vérifié</span>
+                                <span class="tgt-badge tgt-badge-success">Compte verifie</span>
                                 <span class="tgt-badge tgt-badge-muted">${userRole}</span>
                             </div>
                             <div class="tgt-modal-email">${userEmail}</div>
@@ -1310,7 +1622,7 @@ async function openProfileModal() {
                             <div class="tgt-section-title">Informations personnelles</div>
                             <div class="profile-form-grid">
                                 <div class="form-group">
-                                    <label for="editFirstName">Prénom</label>
+                                    <label for="editFirstName">Prenom</label>
                                     <input type="text" id="editFirstName" name="first_name" value="${user.first_name || ''}" class="profile-input">
                                 </div>
                                 <div class="form-group">
@@ -1322,7 +1634,7 @@ async function openProfileModal() {
                                     <input type="email" id="editEmail" name="email" value="${userEmail}" readonly class="profile-input readonly">
                                 </div>
                                 <div class="form-group">
-                                    <label for="editPhone">Téléphone</label>
+                                    <label for="editPhone">Telephone</label>
                                     <input type="tel" id="editPhone" name="phone" value="${user.phone || ''}" class="profile-input" placeholder="+223 XX XX XX XX">
                                 </div>
                             </div>
@@ -1333,7 +1645,7 @@ async function openProfileModal() {
                             <div class="profile-form-grid">
                                 <div class="form-group full-width">
                                     <label for="editAddress">Adresse</label>
-                                    <input type="text" id="editAddress" name="address" value="${user.address || ''}" class="profile-input" placeholder="Rue et numéro">
+                                    <input type="text" id="editAddress" name="address" value="${user.address || ''}" class="profile-input" placeholder="Rue et numero">
                                 </div>
                                 <div class="form-group">
                                     <label for="editCity">Ville</label>
@@ -1347,12 +1659,12 @@ async function openProfileModal() {
                         </div>
 
                         <div class="tgt-modal-section">
-                            <div class="tgt-section-title">Sécurité</div>
+                            <div class="tgt-section-title">Securite</div>
                             <div class="profile-form-grid">
                                 <div class="form-group full-width">
                                     <label for="editPassword">Nouveau mot de passe</label>
                                     <input type="password" id="editPassword" name="password" placeholder="Laisser vide pour ne pas changer" class="profile-input">
-                                    <small class="form-hint">Minimum 8 caractères, incluant majuscules, chiffres et caractères spéciaux</small>
+                                    <small class="form-hint">Minimum 8 caracteres, incluant majuscules, chiffres et caracteres speciaux</small>
                                 </div>
                             </div>
                         </div>
@@ -1368,8 +1680,15 @@ async function openProfileModal() {
             </div>
         `;
         document.body.appendChild(modal);
-        modal.querySelectorAll('.modal-close, .tgt-modal-close').forEach(b=>b.addEventListener('click', ()=>modal.remove()));
-        modal.querySelector('.tgt-modal-backdrop').addEventListener('click', ()=>modal.remove());
+        if (typeof lockPageScroll === 'function') lockPageScroll();
+
+        const closeProfileModal = () => {
+            modal.remove();
+            if (typeof syncPageScrollLock === 'function') syncPageScrollLock();
+        };
+
+        modal.querySelectorAll('.modal-close, .tgt-modal-close').forEach((b) => b.addEventListener('click', closeProfileModal));
+        modal.querySelector('.tgt-modal-backdrop').addEventListener('click', closeProfileModal);
 
         // Save profile functionality
         modal.querySelector('#saveProfileBtn').addEventListener('click', async () => {
@@ -1387,18 +1706,23 @@ async function openProfileModal() {
                 const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(payload) });
                 const j = await r.json();
                 if (j && j.success) {
-                    ToastSystem.show('success', 'Profil mis à jour', 'Vos informations ont été enregistrées');
+                    ToastSystem.show('success', 'Profil mis a jour', 'Vos informations ont ete enregistrees');
                     // refresh localStorage user_data
                     const updated = Object.assign({}, user, payload);
                     delete updated.password;
                     localStorage.setItem('user_data', JSON.stringify(updated));
                     try { initAuthProfile(); } catch (e) {}
-                    modal.remove();
+                    closeProfileModal();
                 } else {
-                    ToastSystem.show('error', 'Erreur', j.message || 'Impossible de mettre à jour');
+                    ToastSystem.show('error', 'Erreur', j.message || 'Impossible de mettre a jour');
                 }
-            } catch (err) { console.error(err); ToastSystem.show('error','Erreur','Erreur réseau'); }
+            } catch (err) { console.error(err); ToastSystem.show('error','Erreur','Erreur reseau'); }
         });
 
     } catch (e) { console.error('openProfileModal error', e); alert('Impossible d\'ouvrir le profil'); }
 }
+
+
+
+
+

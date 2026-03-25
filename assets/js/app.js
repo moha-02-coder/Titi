@@ -1,24 +1,35 @@
-/**
+﻿/**
  * Application principale Titi Golden Taste
  */
 
 // Create App namespace
 window.App = window.App || {};
 
-// Fonction utilitaire pour faire des requêtes API
+function parseApiJson(text, endpoint) {
+    if (!text || !text.trim()) return null;
+    try {
+        return JSON.parse(text);
+    } catch (err) {
+        const snippet = text.slice(0, 180);
+        throw new Error(`Reponse JSON invalide pour ${endpoint}: ${snippet}`);
+    }
+}
+// Fonction utilitaire pour faire des requÃƒÂªtes API
 async function fetchAPI(endpoint) {
     const base = window.API_BASE_URL || 'backend/api';
     try {
         console.log(`Fetching: ${base}/${endpoint}`);
         const response = await fetch(`${base}/${endpoint}`);
+        const rawText = await response.text();
         
         console.log(`Response status: ${response.status} for ${endpoint}`);
         
         if (!response.ok) {
-            throw new Error(`Erreur HTTP: ${response.status}`);
+            const snippet = (rawText || '').slice(0, 180);
+            throw new Error(`Erreur HTTP: ${response.status} (${snippet})`);
         }
         
-        const json = await response.json();
+        const json = parseApiJson(rawText, endpoint);
         console.log(`JSON received for ${endpoint}:`, json);
         // Normalize API response shape: { success, data, message }
         if (json && typeof json === 'object' && json.hasOwnProperty('success')) {
@@ -29,26 +40,23 @@ async function fetchAPI(endpoint) {
         }
         return json;
     } catch (error) {
-        console.error(`Erreur lors de la récupération de ${endpoint}:`, error);
+        console.error(`Erreur lors de la rÃƒÂ©cupÃƒÂ©ration de ${endpoint}:`, error);
         throw error;
     }
 }
 
-// Fonction pour mettre à jour le statut live (DÉFINIE GLOBALEMENT)
+// Fonction pour mettre ÃƒÂ  jour le statut live (DÃƒâ€°FINIE GLOBALEMENT)
 window.updateLiveStatus = async function() {
     const statusElement = document.getElementById('live-status');
     const messageElement = document.getElementById('status-message');
     
-    if (!statusElement) {
-        console.error('Element live-status non trouvé');
-        return;
-    }
+    if (!statusElement) { return; }
     
     try {
         statusElement.className = 'status loading';
         const statusText = statusElement.querySelector('.status-text');
         if (statusText) {
-            statusText.textContent = 'Vérification...';
+            statusText.textContent = 'VÃƒÂ©rification...';
         }
         
         if (messageElement) {
@@ -58,28 +66,28 @@ window.updateLiveStatus = async function() {
         const data = await fetchAPI('live.php');
         console.log('Live status data:', data);
         
-        // Mettre à jour le statut
+        // Mettre ÃƒÂ  jour le statut
         statusElement.className = `status ${data.status}`;
         if (statusText) {
             statusText.textContent = 
                 data.status === 'open' ? 'Ouvert' : 
-                data.status === 'closed' ? 'Fermé' : 'En attente';
+                data.status === 'closed' ? 'FermÃƒÂ©' : 'En attente';
         }
         
-        // Mettre à jour le message
+        // Mettre ÃƒÂ  jour le message
         if (messageElement) {
             messageElement.textContent = data.message || '';
         }
         
     } catch (error) {
-        console.error('Erreur lors de la vérification du statut:', error);
+        console.error('Erreur lors de la vÃƒÂ©rification du statut:', error);
         statusElement.className = 'status closed';
         const statusText = statusElement.querySelector('.status-text');
         if (statusText) {
             statusText.textContent = 'Hors ligne';
         }
         if (messageElement) {
-            messageElement.textContent = 'Impossible de vérifier le statut';
+            messageElement.textContent = 'Impossible de vÃƒÂ©rifier le statut';
         }
     }
 }
@@ -118,12 +126,12 @@ App.loadMenu = async function() {
         console.error('Erreur lors du chargement du menu:', error);
         menuContainer.innerHTML = `
             <div class="menu-card-fallback">
-                <h3>Poulet braisé</h3>
+                <h3>Poulet braisÃƒÂ©</h3>
                 <p class="menu-description">Servi avec alloco et sauce maison</p>
                 <div class="menu-price">3500 FCFA <span>(TTC)</span></div>
                 <button class="btn" onclick="addToCartFromHome({
                     id: 1,
-                    name: 'Poulet braisé',
+                    name: 'Poulet braisÃƒÂ©',
                     price: 3500,
                     type: 'menu'
                 })">
@@ -199,7 +207,7 @@ App.loadProducts = async function() {
                         <h3>Sauce piment maison</h3>
                         <div class="product-price">1500 FCFA</div>
                         <span class="in-stock">En stock</span>
-                        <p class="product-description">Sauce pimentée préparée avec des ingrédients frais</p>
+                        <p class="product-description">Sauce pimentÃƒÂ©e prÃƒÂ©parÃƒÂ©e avec des ingrÃƒÂ©dients frais</p>
                         <button class="btn" style="margin-top: 15px; width: 100%;" 
                                 onclick="addToCartFromHome({
                                     id: 1,
@@ -217,14 +225,14 @@ App.loadProducts = async function() {
                         <i class="fas fa-utensils"></i>
                     </div>
                     <div class="product-content">
-                        <h3>Attiéké traditionnel</h3>
+                        <h3>AttiÃƒÂ©kÃƒÂ© traditionnel</h3>
                         <div class="product-price">2000 FCFA</div>
                         <span class="in-stock">En stock</span>
-                        <p class="product-description">Paquet de 1kg d'attieké frais</p>
+                        <p class="product-description">Paquet de 1kg d'attiekÃƒÂ© frais</p>
                         <button class="btn" style="margin-top: 15px; width: 100%;" 
                                 onclick="addToCartFromHome({
                                     id: 2,
-                                    name: 'Attiéké traditionnel',
+                                    name: 'AttiÃƒÂ©kÃƒÂ© traditionnel',
                                     price: 2000,
                                     type: 'product'
                                 })">
@@ -237,80 +245,67 @@ App.loadProducts = async function() {
     }
 }
 
-// Obtenir l'icône du produit
+// Obtenir l'icÃƒÂ´ne du produit
 function getProductIcon(category) {
     const icons = {
         'sauce': 'wine-bottle',
         'accompagnement': 'utensils',
         'condiment': 'oil-can',
-        'épice': 'mortar-pestle',
+        'ÃƒÂ©pice': 'mortar-pestle',
         'snack': 'cookie-bite',
         'boisson': 'wine-glass-alt'
     };
     return icons[category] || 'shopping-bag';
 }
 
-// Fonction pour simuler l'ajout au panier depuis la page d'accueil
-App.addToCartFromHome = function(item) {
-    // Vérifier si l'utilisateur est connecté
+// Fonction fallback pour ajouter au panier depuis la page d'accueil
+App.addToCartFromHome = function(idOrItem, product) {
+    const item = (product && typeof product === 'object')
+        ? product
+        : ((idOrItem && typeof idOrItem === 'object')
+            ? idOrItem
+            : (idOrItem !== null && idOrItem !== undefined && idOrItem !== '' ? { id: idOrItem } : null));
+
+    if (!item) return false;
+
+    // Prefer the shared cart implementation when available
+    if (typeof window.addToCart === 'function') {
+        return window.addToCart(item);
+    }
+
     const token = localStorage.getItem('auth_token');
-    
     if (!token) {
-        // Stocker l'article et rediriger vers la connexion
         localStorage.setItem('pending_cart_item', JSON.stringify(item));
         window.location.href = 'login.html?redirect=home&message=connectez-vous pour ajouter au panier';
-        return;
+        return false;
     }
-    
-    // Ajouter au panier (simulation)
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+    let cart = [];
+    try {
+        const raw = JSON.parse(localStorage.getItem('cart') || '[]');
+        cart = Array.isArray(raw) ? raw : [];
+    } catch (e) { cart = []; }
+
     cart.push(item);
     localStorage.setItem('cart', JSON.stringify(cart));
-    
-    // Afficher une notification
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #28a745;
-        color: white;
-        padding: 15px 25px;
-        border-radius: 8px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        z-index: 10000;
-        animation: slideIn 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    `;
-    
-    notification.innerHTML = `
-        <i class="fas fa-check-circle"></i> 
-        ${item.name} ajouté au panier!
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Mettre à jour le compteur du panier
-    updateCartCount();
-    
-    // Supprimer la notification après 3 secondes
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
+
+    if (typeof window.updateCartCount === 'function') {
+        try { window.updateCartCount(); } catch (e) {}
+    }
+
+    return true;
 }
 
-// Mettre à jour le compteur du panier
+// Mettre ÃƒÂ  jour le compteur du panier
 App.updateCartCount = function() {
-    const cartCount = window.$find(window.DOM_SELECTORS.cartCount) || document.getElementById('cartCount');
-    if (cartCount) {
-        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        const count = (Array.isArray(cart) ? cart : []).reduce((sum, it) => sum + (parseInt(it.quantity ?? 1, 10) || 1), 0);
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const count = (Array.isArray(cart) ? cart : []).reduce((sum, it) => sum + (parseInt(it.quantity ?? 1, 10) || 1), 0);
+
+    const counters = Array.from(document.querySelectorAll('[data-cart-count], #cartCount'));
+    counters.forEach((cartCount) => {
         cartCount.textContent = count;
-        cartCount.style.display = count > 0 ? 'flex' : 'none';
-    }
+        cartCount.style.display = count > 0 ? 'inline-flex' : 'none';
+    });
 };
 
 App.renderAuthProfile = function() {
@@ -341,7 +336,7 @@ App.renderAuthProfile = function() {
                     </span>
                 </a>
                 <a href="${dash}" class="btn-admin" id="tgtDashboardLink"><i class="fas fa-gauge"></i> Dashboard</a>
-                <a href="#" class="btn-register" id="tgtLogoutBtn"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+                <a href="#" class="btn-register" id="tgtLogoutBtn"><i class="fas fa-sign-out-alt"></i> DÃƒÂ©connexion</a>
             `;
             const logoutBtn = container.querySelector('#tgtLogoutBtn');
             if (logoutBtn) {
@@ -375,7 +370,7 @@ App.renderAuthProfile = function() {
                     <i class="fas fa-user"></i>
                     <span>${escapeHtml(display)} (${escapeHtml(roleRaw || 'client')})</span>
                 </a>
-                <a href="#" class="btn-register" id="tgtMobileLogout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+                <a href="#" class="btn-register" id="tgtMobileLogout"><i class="fas fa-sign-out-alt"></i> DÃƒÂ©connexion</a>
             `;
             const logoutBtn = container.querySelector('#tgtMobileLogout');
             if (logoutBtn) {
@@ -400,8 +395,10 @@ function escapeHtml(str) {
         .replaceAll("'", '&#039;');
 }
 
-// Créer l'icône du panier si elle n'existe pas
+// CrÃƒÂ©er l'icÃƒÂ´ne du panier si elle n'existe pas
 App.createCartIcon = function() {
+    // Prefer native header cart button when present
+    if (document.getElementById('cartToggleBtn')) return;
     // Idempotent: if already present do nothing
     const existing = window.$find([window.DOM_SELECTORS.cartIcon.replace('#','')]) || document.getElementById('cartIcon');
     if (existing) return;
@@ -410,7 +407,7 @@ App.createCartIcon = function() {
     if (!headerContainer) return; // nothing to do on pages without header
 
     const cartLink = document.createElement('a');
-    cartLink.href = 'dashboard.html#new-order';
+    cartLink.href = '#';
     cartLink.className = 'cart-icon';
     cartLink.id = 'cartIcon';
     cartLink.innerHTML = `
@@ -442,7 +439,8 @@ App.init = function() {
     // Header / cart
     App.createCartIcon();
     if (typeof App.updateCartCount === 'function') App.updateCartCount();
-    if (typeof App.renderAuthProfile === 'function') App.renderAuthProfile();
+    if (typeof window.initAuthProfile === 'function') window.initAuthProfile();
+    else if (typeof App.renderAuthProfile === 'function') App.renderAuthProfile();
 
     // Handle pending cart item after login redirect
     try {
@@ -452,7 +450,7 @@ App.init = function() {
             localStorage.removeItem('pending_cart_item');
             if (window.addToCart && typeof window.addToCart === 'function') {
                 if (window.addToCart(item)) {
-                    if (window.showNotification) window.showNotification('Article ajouté à votre panier!', 'success');
+                    if (window.showNotification) window.showNotification('Article ajoutÃƒÂ© ÃƒÂ  votre panier!', 'success');
                 }
             }
         }
@@ -501,7 +499,7 @@ App.init = function() {
 }
 
 // Expose a few legacy globals used by inline handlers for backward compatibility
-window.addToCartFromHome = function(item) { return App.addToCartFromHome(item); };
+window.addToCartFromHome = function(idOrItem, product) { return App.addToCartFromHome(idOrItem, product); };
 window.updateCartCount = function() { if (typeof App.updateCartCount === 'function') return App.updateCartCount(); };
 
 // Simple wizard navigation helpers used by inline buttons
@@ -527,9 +525,9 @@ window.nextStep = function(step) {
                 const name = (localStorage.getItem('user_data') ? (JSON.parse(localStorage.getItem('user_data')).first_name || '') : '') || document.getElementById('guestFirstName')?.value?.trim();
                 if (!name || !phone || !street || !city || !quarter) {
                     try {
-                        if (window.ToastSystem && typeof ToastSystem.show === 'function') ToastSystem.show('error', 'Informations manquantes', 'Veuillez remplir votre nom, téléphone et adresse pour la livraison');
-                        else alert('Veuillez remplir votre nom, téléphone et adresse pour la livraison');
-                    } catch(e){ alert('Veuillez remplir votre nom, téléphone et adresse pour la livraison'); }
+                        if (window.ToastSystem && typeof ToastSystem.show === 'function') ToastSystem.show('error', 'Informations manquantes', 'Veuillez remplir votre nom, tÃƒÂ©lÃƒÂ©phone et adresse pour la livraison');
+                        else alert('Veuillez remplir votre nom, tÃƒÂ©lÃƒÂ©phone et adresse pour la livraison');
+                    } catch(e){ alert('Veuillez remplir votre nom, tÃƒÂ©lÃƒÂ©phone et adresse pour la livraison'); }
                     return;
                 }
             }
@@ -669,13 +667,13 @@ App.updateOrderRecap = function() {
                     <div class="recap-row">
                         <div class="recap-main">
                             <div class="recap-title">${name}</div>
-                            <div class="recap-sub">Quantité: <strong>${qty}</strong> • Prix: ${App.formatMoney(unit)}</div>
+                            <div class="recap-sub">QuantitÃƒÂ©: <strong>${qty}</strong> Ã¢â‚¬Â¢ Prix: ${App.formatMoney(unit)}</div>
                         </div>
                         <div class="recap-amount">${App.formatMoney(lineTotal)}</div>
                     </div>
                 `;
             }).join('')
-            : '<div class="muted">Aucun article sélectionné</div>';
+            : '<div class="muted">Aucun article sÃƒÂ©lectionnÃƒÂ©</div>';
 
         const optionsBlock = optionLabels.length
             ? `<div class="recap-block">
@@ -711,15 +709,15 @@ App.updateOrderRecap = function() {
         `;
 
         const when = delivery.timeMode === 'later' && delivery.scheduled
-            ? `${escapeHtml(delivery.scheduled.date)} à ${escapeHtml(delivery.scheduled.hour)}`
-            : 'Dès que possible';
+            ? `${escapeHtml(delivery.scheduled.date)} ÃƒÂ  ${escapeHtml(delivery.scheduled.hour)}`
+            : 'DÃƒÂ¨s que possible';
 
         deliveryWrap.innerHTML = `
             <div class="recap-info">
                 <div class="info-line"><span class="info-label">Mode</span><span class="info-value">${delivery.method === 'pickup' ? 'Retrait sur place' : 'Livraison'}</span></div>
                 ${delivery.method === 'pickup'
-                    ? `<div class="info-line"><span class="info-label">Adresse</span><span class="info-value">Avenue de l'Indépendance, Badalabougou, Bamako</span></div>`
-                    : `<div class="info-line"><span class="info-label">Adresse</span><span class="info-value">${escapeHtml(delivery.address || '—')}</span></div>`
+                    ? `<div class="info-line"><span class="info-label">Adresse</span><span class="info-value">Avenue de l'IndÃƒÂ©pendance, Badalabougou, Bamako</span></div>`
+                    : `<div class="info-line"><span class="info-label">Adresse</span><span class="info-value">${escapeHtml(delivery.address || 'Ã¢â‚¬â€')}</span></div>`
                 }
                 <div class="info-line"><span class="info-label">Quand</span><span class="info-value">${when}</span></div>
                 ${delivery.notes ? `<div class="info-line"><span class="info-label">Note</span><span class="info-value">${escapeHtml(delivery.notes)}</span></div>` : ''}
@@ -958,7 +956,7 @@ App.updateCustomizationSummary = function() {
             const name = escapeHtml(it.name || it.item_name || 'Article');
             const qty = parseInt(it.qty ?? it.quantity ?? 1, 10) || 1;
             return `<div class="customize-pill"><span>${name}</span><span class="muted">x${qty}</span></div>`;
-        }).join('') || '<div class="muted">Aucun plat sélectionné</div>';
+        }).join('') || '<div class="muted">Aucun plat sÃƒÂ©lectionnÃƒÂ©</div>';
         itemsEl.innerHTML = lines;
 
         const sel = App.getSelectedCustomization();
@@ -987,11 +985,11 @@ App.updateCustomizationSummary = function() {
                 return `
                     <div class="customize-pill customize-pill-removable">
                         <span>${label}</span>
-                        <button type="button" class="pill-remove" aria-label="Retirer" data-kind="${o.kind}" data-id="${o.id}">×</button>
+                        <button type="button" class="pill-remove" aria-label="Retirer" data-kind="${o.kind}" data-id="${o.id}">Ãƒâ€”</button>
                     </div>
                 `;
             }).join('')
-            : '<div class="muted">Aucune option sélectionnée</div>';
+            : '<div class="muted">Aucune option sÃƒÂ©lectionnÃƒÂ©e</div>';
         optsEl.innerHTML = optHtml;
     } catch (e) {
         console.error('updateCustomizationSummary error', e);
@@ -1064,6 +1062,20 @@ document.addEventListener('DOMContentLoaded', function () {
             // If pending wizard for this path, resume
             if (!pending.path || pending.path === (window.location.pathname + window.location.search)) {
                 setTimeout(()=>{ try { nextStep(pending.step); localStorage.removeItem('tgt_pending_wizard'); } catch(e){} }, 300);
+            }
+        }
+
+        // Direct step opening requested by "Commander" buttons
+        const autoStepRaw = localStorage.getItem('tgt_order_autostep');
+        if (autoStepRaw) {
+            let autoStep = null;
+            try { autoStep = JSON.parse(autoStepRaw); } catch (e) { autoStep = null; }
+            const step = Number((autoStep && autoStep.step) || autoStepRaw || 0);
+            if (step > 0) {
+                setTimeout(() => {
+                    try { nextStep(step); } catch (e) {}
+                    try { localStorage.removeItem('tgt_order_autostep'); } catch (e) {}
+                }, 260);
             }
         }
     } catch (e) { console.error('resume wizard', e); }
@@ -1157,3 +1169,5 @@ document.addEventListener('DOMContentLoaded', function () {
         initOrderWizard();
     } catch (e) { console.error('init order wizard', e); }
 });
+
+

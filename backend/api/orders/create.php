@@ -7,8 +7,13 @@
 // Headers pour API REST
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+// Gérer les requêtes OPTIONS (CORS)
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
+}
 
 // Inclure la configuration de la base de données
 require_once '../../config/database.php';
@@ -48,12 +53,12 @@ function verify_token_payload($token) {
     $expected = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
     if (!hash_equals($expected, $s)) return false;
     $payload = json_decode(base64_decode($p), true);
-    if (!$payload) return false;
-    if (isset($payload['exp']) && time() > $payload['exp']) return false;
+    if (!isset($payload['exp']) || $payload['exp'] < time()) return false;
     return $payload;
 }
 
 try {
+    // Vérifier le token
     // Se connecter à la base de données
     $pdo = getDatabaseConnection();
 
@@ -104,8 +109,9 @@ try {
         $total += ($item['price'] * $qty);
     }
     
-    // Ajouter les frais de livraison
-    $deliveryFee = 1000; // Frais fixes pour ce projet
+    // Ajouter les frais de livraison en fonction du mode choisi
+    $deliveryType = strtolower((string)($data['delivery']['type'] ?? $data['delivery_type'] ?? 'delivery'));
+    $deliveryFee = ($deliveryType === 'pickup') ? 0 : 1000;
     $finalTotal = $total + $deliveryFee;
     
     // Commencer une transaction
